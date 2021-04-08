@@ -1,18 +1,22 @@
 <?php
 
-add_action( 'acf/init', 'mailocations_add_location_metabox' );
+add_action( 'acf/init', 'mailocations_add_field_groups' );
 /**
- * Add Location Info metabox.
+ * Add Location Info and Locations field groups.
  *
  * @since 0.1.0
  *
  * @return void
  */
-function mailocations_add_location_metabox() {
+function mailocations_add_field_groups() {
+	$plural   = mailocations_get_post_type_plural();
+	$singular = mailocations_get_post_type_singular();
+
+	// Location Info.
 	acf_add_local_field_group(
 		[
 			'key'      => 'group_6884dd5bdf8ed',
-			'title'    => 'Location Info',
+			'title'    => sprintf( '%s %s', $singular, __( 'Info', 'mai-locations' ) ),
 			'fields'   => mailocations_get_fields(),
 			'location' => [
 				[
@@ -20,6 +24,43 @@ function mailocations_add_location_metabox() {
 						'param'    => 'post_type',
 						'operator' => '==',
 						'value'    => 'mai_location',
+					],
+				],
+			],
+		]
+	);
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	// Locations.
+	acf_add_local_field_group(
+		[
+			'key'         => 'group_606f28b8452ba',
+			'title'       => $plural,
+			'description' => sprintf( '%s %s', $plural, __( 'Locations this user can manage' ) ),
+			'fields'      => [
+				[
+					'key'           => 'field_606f28c86abee',
+					'label'         => 'Locations',
+					'name'          => 'user_locations',
+					'type'          => 'post_object',
+					'post_type'     => [
+						'mai_location',
+					],
+					'allow_null'    => 1,
+					'multiple'      => 1,
+					'ui'            => 1,
+					'return_format' => 'object',
+				],
+			],
+			'location' => [
+				[
+					[
+						'param'    => 'user_form',
+						'operator' => '==',
+						'value'    => 'edit',
 					],
 				],
 			],
@@ -78,6 +119,37 @@ function mailocations_get_fields_raw() {
 	return $fields;
 }
 
+function mailocations_get_fields_defaults() {
+	static $fields = null;
+
+	if ( ! is_null( $fields ) && is_array( $fields ) ) {
+		return $fields;
+	}
+
+	$fields = mailocations_get_fields_raw();
+
+	if ( ! $fields ) {
+		return $fields;
+	}
+
+	foreach ( $fields as $name => $values ) {
+		// Remove tabs.
+		if ( 'tab' === $values['type'] ) {
+			unset( $fields[ $name ] );
+			continue;
+		}
+
+		// Add default.
+		if ( ! isset( $values['default_value'] ) ) {
+			$fields[ $name ]['default_value'] = '';
+		}
+	}
+
+	$fields = wp_list_pluck( $fields, 'default_value' );
+
+	return $fields;
+}
+
 /**
  * Gets general fields.
  *
@@ -98,17 +170,17 @@ function mailocations_get_general_fields() {
 			'label' => __( 'Website URL', 'mai-locations' ),
 			'type'  => 'url',
 		],
-		'phone' => [
+		'location_phone' => [
 			'key'   => 'field_5773cc5befcfe',
 			'label' => __( 'Phone', 'mai-locations' ),
 			'type'  => 'text',
 		],
-		'phone_2' => [
+		'location_phone_2' => [
 			'key'   => 'field_5773cc5befd0a',
 			'label' => __( 'Secondary Phone', 'mai-locations' ),
 			'type'  => 'text',
 		],
-		'email' => [
+		'location_email' => [
 			'key'   => 'field_5773cc5befd24',
 			'label' => __( 'Email', 'mai-locations' ),
 			'type'  => 'email',
@@ -198,9 +270,9 @@ function mailocations_get_address_fields() {
 				],
 			],
 		],
-		'address_province' => [
+		'address_state_int' => [
 			'key'     => 'field_6883dd6cfgd7f',
-			'label'   => __( 'Province', 'mai-locations' ),
+			'label'   => __( 'State/Province', 'mai-locations' ),
 			'type'    => 'text',
 			'wrapper' => [
 				'width' => 30,

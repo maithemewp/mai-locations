@@ -3,7 +3,7 @@
 /**
  * Plugin Name:     Mai Locations
  * Plugin URI:      https://bizbudding.com
- * Description:     A custom post type to manage locations.
+ * Description:     A custom post type with info/address/amp fields to manage locations.
  * Version:         0.1.0
  *
  * Author:          BizBudding, Mike Hemberger
@@ -200,9 +200,10 @@ final class Mai_Locations_Plugin {
 		 *  Custom Post Types  *
 		 ***********************/
 
-		$plural   = apply_filters( 'mailocations_post_type_plural', __( 'Locations', 'mai-locations' ) );
-		$singular = apply_filters( 'mailocations_post_type_singular', __( 'Location', 'mai-locations' ) );
-		$base     = apply_filters( 'mailocations_post_type_base', 'locations' );
+		// Labels have filters in /includes/functions.php.
+		$plural   = mailocations_get_post_type_plural();
+		$singular = mailocations_get_post_type_singular();
+		$base     = mailocations_get_post_type_base();
 
 		register_post_type( 'mai_location', apply_filters( 'mai_location_post_type_args',
 			[
@@ -248,7 +249,7 @@ final class Mai_Locations_Plugin {
 
 		register_taxonomy( 'mai_location_cat', [ 'mai_location' ], apply_filters( 'mai_location_cat_args',
 			[
-				'hierarchical' => false,
+				'hierarchical' => true,
 				'labels'       => [
 					'name'               => $cat_plural,
 					'singular_name'      => $cat_singular,
@@ -272,6 +273,7 @@ final class Mai_Locations_Plugin {
 				'public'                     => true,
 				'show_admin_column'          => true,
 				'show_in_nav_menus'          => true,
+				'show_in_rest'               => true,
 				'show_tagcloud'              => true,
 				'show_ui'                    => true,
 			]

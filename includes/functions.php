@@ -1,46 +1,87 @@
 <?php
 
+function mailocations_get_post_type_plural() {
+	$plural = apply_filters( 'mailocations_post_type_plural', __( 'Locations', 'mai-locations' ) );
+	return esc_html( $plural );
+}
+
+function mailocations_get_post_type_singular() {
+	$singular = apply_filters( 'mailocations_post_type_singular', __( 'Location', 'mai-locations' ) );
+	return esc_html( $singular );
+}
+
+function mailocations_get_post_type_base() {
+	$base = apply_filters( 'mailocations_post_type_base', 'locations' );
+	return esc_html( $base );
+}
+
+function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
+	$meta_defaults = mailocations_get_fields_defaults();
+	$meta_input    = wp_parse_args( $meta_args, $meta_defaults );
+	$post_args     = wp_parse_args( $post_args,
+		[
+			'post_status' => 'public',
+			'meta_input'  => $meta_input
+		]
+	);
+
+	$post_args = apply_filters( 'mailocations_post_args', $post_args, $user_id );
+
+	// Force post_type.
+	$post_args['post_type'] = 'mai_location';
+
+	$post_id = wp_insert_post( $post_args );
+
+	if ( $post_id && ! is_wp_error( $post_id ) ) {
+		// Update map with location data.
+		mailocations_update_location_from_google_maps( $post_id );
+
+		if ( $user_id ) {
+			$user = get_user_by( 'id', $user_id );
+
+			if ( $user ) {
+				$locations   = (array) get_user_meta( $user_id, 'user_locations', true );
+				$locations[] = $post_id;
+				$locations   = array_map( absint( $locations ) );
+
+				// TODO: This is not working.
+
+				update_user_meta( $user_id, 'user_locations', $locations );
+			}
+		}
+	}
+
+	return $post_id;
+}
+
+add_action( 'acf/save_post', 'mailocations_maybe_update_map_field', 20, 1 );
 /**
  * Update the google map field from address data after a location is saved.
  *
  * @since 0.1.0
  *
- * @param int          $post_id     Post ID.
- * @param WP_Post      $post        Post object.
- * @param bool         $update      Whether this is an existing post being updated.
- * @param null|WP_Post $post_before Null for new posts, the WP_Post object prior
- *                                  to the update for updated posts.
+ * @param int $post_id Post ID.
  *
  * @return void
  */
-// add_action( 'wp_after_insert_post', 'mailocations_maybe_update_map_field_og', 10, 4 );
-function mailocations_maybe_update_map_field_og( $post_id, $post, $update, $post_before ) {
-	if ( 'mai_location' !== $post->post_type ) {
+function mailocations_maybe_update_map_field( $post_id ) {
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 		return;
 	}
 
-	mailocations_update_map_field( $post_id );
-}
+	if ( wp_is_post_autosave( $post_id ) ) {
+		return;
+	}
 
-/**
- * Update the google map field from address data after a location is saved.
- *
- * @param int     $post_id Post ID.
- * @param WP_Post $post    Post object.
- * @param bool    $update  Whether this is an existing post being updated.
- */
-add_action( 'save_post_mai_location', 'mailocations_maybe_update_map_field_ogg', 10, 3 );
-function mailocations_maybe_update_map_field_ogg( $post_id, $post, $update ) {
-	mailocations_update_map_field( $post_id );
-}
+	if ( wp_is_post_revision( $post_id ) ) {
+		return;
+	}
 
-// add_action( 'acf/save_post', 'mailocations_maybe_update_map_field' );
-function mailocations_maybe_update_map_field( $post_id ) {
 	if ( 'mai_location' !== get_post_type( $post_id ) ) {
 		return;
 	}
 
-	mailocations_update_map_field( $post_id );
+	mailocations_update_location_from_google_maps( $post_id );
 }
 
 /**
@@ -52,7 +93,7 @@ function mailocations_maybe_update_map_field( $post_id ) {
  *
  * @return void
  */
-function mailocations_update_map_field( $post_id ) {
+function mailocations_update_location_from_google_maps( $post_id ) {
 	$api_key = mailocations_get_google_maps_api_key();
 
 	if ( ! $api_key ) {
@@ -67,7 +108,7 @@ function mailocations_update_map_field( $post_id ) {
 		'address_street',
 		'address_city',
 		'address_state',
-		'address_province',
+		'address_state_int',
 		'address_postcode',
 	];
 
@@ -98,14 +139,16 @@ function mailocations_update_map_field( $post_id ) {
 
 	$results = $output->results;
 
-	if ( ! is_array( $results ) && $results ) {
+	if ( ! ( is_array( $results ) && $results ) ) {
 		return;
 	}
 
 	$result     = reset( $results );
 	$formatted  = $result->formatted_address;
 	$components = $result->address_components;
+	$data       = [];
 
+	// Build location field data (ACF Google Maps field).
 	foreach ( $components as $component ) {
 		$types = array_flip( $component->types );
 
@@ -134,6 +177,18 @@ function mailocations_update_map_field( $post_id ) {
 		if ( isset( $types['country'] ) ) {
 			$data['country']       = $component->long_name;
 			$data['country_short'] = $component->short_name;
+
+			if ( 'US' === $data['country_short'] ) {
+				if ( ! in_array( 'address_state', $update ) ) {
+					$update[] = 'address_state';
+				}
+				$update = array_diff( $update, [ 'address_state_int' ] );
+			} else {
+				if ( ! in_array( 'address_state_int', $update ) ) {
+					$update[] = 'address_state_int';
+				}
+				$update = array_diff( $update, [ 'address_state' ] );
+			}
 		}
 
 		if ( isset( $types['postal_code'] ) ) {
@@ -152,8 +207,6 @@ function mailocations_update_map_field( $post_id ) {
 	if ( ! $location ) {
 		update_post_meta( $post_id, 'location', $data );
 	}
-
-	ray( $update );
 
 	if ( $update ) {
 		$international = isset( $data['country_short'] ) && 'US' !== $data['country_short'];
@@ -177,7 +230,7 @@ function mailocations_update_map_field( $post_id ) {
 						$value = $data['state_short'];
 					}
 				break;
-				case 'address_province':
+				case 'address_state_int':
 					if ( $international && isset( $data['state_short'] ) && $data['state_short'] ) {
 						$value = $data['state_short'];
 					}
@@ -228,15 +281,30 @@ function mailocations_get_google_maps_api_key() {
  *
  * @return string
  */
-function mailocations_get_address() {
-	$html     = '';
-	$post_id  = get_the_ID();
-	$street   = get_post_meta( $post_id, 'address_street', true );
-	$street_2 = get_post_meta( $post_id, 'address_street_2', true );
-	$city     = get_post_meta( $post_id, 'address_city', true );
-	$state    = get_post_meta( $post_id, 'address_state', true );
-	$postcode = get_post_meta( $post_id, 'address_postcode', true );
-	$country  = get_post_meta( $post_id, 'address_country', true );
+function mailocations_get_address( $args ) {
+	// Atts.
+	$args = shortcode_atts(
+		[
+			'hide' => '', // street, street2, city, state, postcode, country
+		],
+		$args,
+		'mai_location_address'
+	);
+
+	$html      = '';
+	$hide      = explode( ',', $args['hide'] );
+	$hide      = array_map( 'esc_html', $hide );
+	$hide      = array_map( 'trim', $hide );
+	$hide      = array_flip( $hide );
+	$post_id   = get_the_ID();
+	$street    = ! isset( $hide['street'] ) ? get_post_meta( $post_id, 'address_street', true ) : '';
+	$street_2  = ! isset( $hide['street2'] ) ? get_post_meta( $post_id, 'address_street_2', true ) : '';
+	$city      = ! isset( $hide['city'] ) ? get_post_meta( $post_id, 'address_city', true ) : '';
+	$state     = ! isset( $hide['state'] ) ? get_post_meta( $post_id, 'address_state', true ) : '';
+	$state_int = ! isset( $hide['state'] ) ? get_post_meta( $post_id, 'address_state_int', true ) : '';
+	$postcode  = ! isset( $hide['postcode'] ) ? get_post_meta( $post_id, 'address_postcode', true ) : '';
+	$country   = ! isset( $hide['country'] ) ? get_post_meta( $post_id, 'address_country', true ) : '';
+	$state     = $country && 'US' !== $country ? $state_int : $state; // Use state_int if non-US.
 
 	if ( ! ( $street || $street_2 || $city || $state || $postcode || $country ) ) {
 		return $html;
