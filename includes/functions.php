@@ -41,13 +41,17 @@ function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
 
 			if ( $user ) {
 				$locations   = (array) get_user_meta( $user_id, 'user_locations', true );
+				$locations   = array_map( 'absint', $locations );
+				$locations   = array_filter( $locations );
 				$locations[] = $post_id;
-				$locations   = array_map( absint( $locations ) );
-
-				// TODO: This is not working.
 
 				update_user_meta( $user_id, 'user_locations', $locations );
 			}
+		}
+
+		// Index FacetWP.
+		if ( function_exists( 'FWP' ) ) {
+			FWP()->indexer->index( $post_id );
 		}
 	}
 
@@ -253,6 +257,11 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 
 			update_post_meta( $post_id, $key, $value );
 		}
+	}
+
+	// Index FacetWP.
+	if ( function_exists( 'FWP' ) ) {
+		FWP()->indexer->index( $post_id );
 	}
 }
 
