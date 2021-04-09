@@ -9,8 +9,18 @@ add_action( 'acf/init', 'mailocations_add_field_groups' );
  * @return void
  */
 function mailocations_add_field_groups() {
-	$plural   = mailocations_get_post_type_plural();
-	$singular = mailocations_get_post_type_singular();
+	$plural   = mailocations_get_label_plural();
+	$singular = mailocations_get_label_singular();
+
+	// Settings.
+	acf_add_options_sub_page(
+		[
+			'title'      => __( 'Settings Page', 'mai-locations' ),
+			'parent'     => 'edit.php?post_type=mai_location',
+			'menu_slug'  => 'location_settings',
+			'capability' => 'manage_options'
+		]
+	);
 
 	// Location Info.
 	acf_add_local_field_group(
@@ -24,6 +34,13 @@ function mailocations_add_field_groups() {
 						'param'    => 'post_type',
 						'operator' => '==',
 						'value'    => 'mai_location',
+					],
+				],
+				[
+					[
+						'param'    => 'af_form',
+						'operator' => '==',
+						'value'    => 'form_606e20b2b5271',
 					],
 				],
 			],

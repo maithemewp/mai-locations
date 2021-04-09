@@ -201,9 +201,9 @@ final class Mai_Locations_Plugin {
 		 ***********************/
 
 		// Labels have filters in /includes/functions.php.
-		$plural   = mailocations_get_post_type_plural();
-		$singular = mailocations_get_post_type_singular();
-		$base     = mailocations_get_post_type_base();
+		$plural   = mailocations_get_label_plural();
+		$singular = mailocations_get_label_singular();
+		$base     = mailocations_get_label_base();
 
 		register_post_type( 'mai_location', apply_filters( 'mai_location_post_type_args',
 			[

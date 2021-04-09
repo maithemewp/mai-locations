@@ -1,30 +1,127 @@
 <?php
 
-function mailocations_get_post_type_plural() {
-	$plural = apply_filters( 'mailocations_post_type_plural', __( 'Locations', 'mai-locations' ) );
-	return esc_html( $plural );
+/**
+ * Gets the post type plural label.
+ *
+ * @since 0.1.0
+ *
+ * @return string
+ */
+function mailocations_get_label_plural() {
+	$label = null;
+	if ( ! is_null( $label ) ) {
+		return $label;
+	}
+	$label = get_field( 'location_label_plural', 'option' );
+	$label = apply_filters( 'mailocations_label_plural', $label );
+	return esc_html( $label );
 }
 
-function mailocations_get_post_type_singular() {
-	$singular = apply_filters( 'mailocations_post_type_singular', __( 'Location', 'mai-locations' ) );
-	return esc_html( $singular );
+/**
+ * Gets the post type singular label.
+ *
+ * @since 0.1.0
+ *
+ * @return string
+ */
+function mailocations_get_label_singular() {
+	$label = null;
+	if ( ! is_null( $label ) ) {
+		return $label;
+	}
+	$label = get_field( 'location_label_singular', 'option' );
+	$label = apply_filters( 'mailocations_label_singular', $label );
+	return esc_html( $label );
 }
 
-function mailocations_get_post_type_base() {
-	$base = apply_filters( 'mailocations_post_type_base', 'locations' );
-	return esc_html( $base );
+/**
+ * Gets the post type base for urls.
+ *
+ * @since 0.1.0
+ *
+ * @return string
+ */
+function mailocations_get_label_base() {
+	$base = null;
+	if ( ! is_null( $base ) ) {
+		return $base;
+	}
+	$base = get_field( 'location_base_url', 'option' );
+	$base = apply_filters( 'mailocations_base_url', $base );
+	return sanitize_html_class( $base );
 }
 
+/**
+ * Gets a user's locations.
+ * Checks if posts exist.
+ *
+ * @param int $user_id The user ID.
+ *
+ * @return array Array of post IDs.
+ */
+function mailocation_get_user_locations( $user_id = 0 ) {
+	$user_id = $user_id ?: get_current_user_id();
+
+	if ( ! $user_id ) {
+		return [];
+	}
+
+	static $all_locations = null;
+
+	if ( is_array( $all_locations ) && isset( $all_locations[ $user_id ] ) ) {
+		return $all_locations[ $user_id ];
+	}
+
+	if ( ! is_array( $all_locations ) ) {
+		$all_locations = [];
+	}
+
+	$locations = (array) get_user_meta( $user_id, 'user_locations', true );
+
+	foreach ( $locations as $index => $location_id ) {
+		if ( mailocations_post_exists( $location_id ) ) {
+			continue;
+		}
+		unset( $locations[ $index ] );
+	}
+
+	$all_locations[ $user_id ] = $locations;
+
+	return $all_locations[ $user_id ];
+}
+
+/**
+ * Determines if a post exists in the DB.
+ *
+ * @since 0.1.0
+ *
+ * @param int $post_id The post ID.
+ *
+ * @return bool True if the post exists; otherwise, false.
+ */
+function mailocations_post_exists( $post_id ) {
+	return is_string( get_post_status( $post_id ) );
+}
+
+/**
+ * Creates a location post.
+ *
+ * @param array $post_args The post array used in wp_insert_post().
+ * @param array $meta_args The args used for meta_input in wp_insert_post().
+ * @param int   $user_id   The user ID to create the
+ */
 function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
-	$meta_defaults = mailocations_get_fields_defaults();
-	$meta_input    = wp_parse_args( $meta_args, $meta_defaults );
-	$post_args     = wp_parse_args( $post_args,
+	$post_args = wp_parse_args( $post_args,
 		[
 			'post_status' => 'public',
-			'meta_input'  => $meta_input
 		]
 	);
 
+	$meta_defaults           = mailocations_get_fields_defaults();
+	$meta_input              = wp_parse_args( $meta_args, $meta_defaults );
+	$post_args['meta_input'] = isset( $post_args['meta_input'] ) ? array_merge( $post_args['meta_input'], $meta_input ) : $meta_input;
+
+	// Filter post args.
 	$post_args = apply_filters( 'mailocations_post_args', $post_args, $user_id );
 
 	// Force post_type.
@@ -36,18 +133,8 @@ function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
 		// Update map with location data.
 		mailocations_update_location_from_google_maps( $post_id );
 
-		if ( $user_id ) {
-			$user = get_user_by( 'id', $user_id );
-
-			if ( $user ) {
-				$locations   = (array) get_user_meta( $user_id, 'user_locations', true );
-				$locations   = array_map( 'absint', $locations );
-				$locations   = array_filter( $locations );
-				$locations[] = $post_id;
-
-				update_user_meta( $user_id, 'user_locations', $locations );
-			}
-		}
+		// Add location to user.
+		mailocations_add_location_to_user( $post_id, $user_id );
 
 		// Index FacetWP.
 		if ( function_exists( 'FWP' ) ) {
@@ -58,13 +145,38 @@ function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
 	return $post_id;
 }
 
+/**
+ * Adds location to user. This allows a user to manage the location.
+ *
+ * @since 0.1.1
+ *
+ * @param int $post_id The post ID.
+ * @param int $user_id The user ID.
+ *
+ * @return void
+ */
+function mailocations_add_location_to_user( $post_id, $user_id ) {
+	$user = get_user_by( 'id', $user_id );
+
+	if ( ! $user ) {
+		return;
+	}
+
+	$locations   = (array) get_user_meta( $user_id, 'user_locations', true );
+	$locations   = array_map( 'absint', $locations );
+	$locations   = array_filter( $locations );
+	$locations[] = $post_id;
+
+	update_user_meta( $user_id, 'user_locations', $locations );
+}
+
 add_action( 'acf/save_post', 'mailocations_maybe_update_map_field', 20, 1 );
 /**
  * Update the google map field from address data after a location is saved.
  *
  * @since 0.1.0
  *
- * @param int $post_id Post ID.
+ * @param int $post_id The post ID.
  *
  * @return void
  */
@@ -283,14 +395,83 @@ function mailocations_get_google_maps_api_key() {
 	return $key;
 }
 
+function mailocations_get_locations_table( $user_id = 0 ) {
+	$user_id = $user_id ?: get_current_user_id();
+
+	if ( ! $user_id ) {
+		return;
+	}
+
+	$locations = mailocation_get_user_locations( $user_id );
+
+	$html = '';
+
+	if ( ! $locations ) {
+		return $html;
+	}
+
+	$html .= '<table class="mai-locations-table">';
+
+		$html .= '<thead>';
+			$html .= '<tr>';
+				$html .= sprintf( '<th colspan="2">%s %s</th>', __( 'My', 'mai-locations' ), mailocations_get_label_plural() );
+			$html .= '</tr>';
+		$html .= '</thead>';
+
+		$html .= '<tbody>';
+
+			foreach ( $locations as $location_id ) {
+				$classes = 'button button-secondary button-small';
+
+				$html .= '<tr>';
+					$html .= '<th>';
+						$html .= sprintf( '<a href="%s">%s</a>',
+							get_permalink( $location_id ),
+							get_the_title( $location_id )
+						);
+						$html .= mailocations_get_address(
+							[
+								'hide' => 'street2, postcode, country',
+							],
+							$location_id
+						);
+					$html .= '</th>';
+
+					$edit_url = add_query_arg(
+						[
+							'location_id' => $location_id,
+						],
+						get_permalink()
+					);
+
+					$html .= sprintf( '<th style="text-align:right;"><a style="margin-right:6px;" class="%s" href="%s">%s</a><a class="%s" href="%s">%s</a></th>',
+						$classes,
+						esc_url( $edit_url ),
+						__( 'Edit', 'mai-locations' ),
+						$classes,
+						get_permalink( $location_id ),
+						__( 'View', 'mai-locations' )
+					);
+				$html .= '</tr>';
+			}
+
+		$html .= '</tbody>';
+	$html .= '</table> ';
+
+	return $html;
+}
+
 /**
  * Gets a formatted address from current post in the loop.
  *
  * @since 0.1.0
  *
+ * @param array $args    The address args.
+ * @param int   $post_id The post ID.
+ *
  * @return string
  */
-function mailocations_get_address( $args ) {
+function mailocations_get_address( $args, $post_id = 0 ) {
 	// Atts.
 	$args = shortcode_atts(
 		[
@@ -305,7 +486,7 @@ function mailocations_get_address( $args ) {
 	$hide      = array_map( 'esc_html', $hide );
 	$hide      = array_map( 'trim', $hide );
 	$hide      = array_flip( $hide );
-	$post_id   = get_the_ID();
+	$post_id   = (int) $post_id ?: get_the_ID();
 	$street    = ! isset( $hide['street'] ) ? get_post_meta( $post_id, 'address_street', true ) : '';
 	$street_2  = ! isset( $hide['street2'] ) ? get_post_meta( $post_id, 'address_street_2', true ) : '';
 	$city      = ! isset( $hide['city'] ) ? get_post_meta( $post_id, 'address_city', true ) : '';
@@ -319,14 +500,14 @@ function mailocations_get_address( $args ) {
 		return $html;
 	}
 
-	$html .= '<div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress" class="mai-address-wrapper">';
+	$html .= '<div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress" class="mai-address">';
 
 		if ( $street ) {
-			$html .= '<div class="mai-address-item"><span class="street-address" itemprop="streetAddress">' . esc_html( $street ) .'</span></div>';
+			$html .= sprintf( '<div class="mai-address-item"><span class="street-address" itemprop="streetAddress">%s</span></div>', esc_html( $street ) );
 		}
 
 		if ( $street_2 ) {
-			$html .= '<div class="mai-address-item"><span class="street-address-2">' . esc_html( $street_2 ) .'</span></div>';
+			$html .= sprintf( '<div class="mai-address-item"><span class="street-address-2">%s</span></div>', esc_html( $street_2 ) );
 		}
 
 		if ( $city || $state || $postcode || $country ) {
@@ -350,7 +531,7 @@ function mailocations_get_address( $args ) {
 		if ( $country ) {
 			$countries = mailocations_get_country_choices();
 			$country   = isset( $countries[ $country ] ) ? $countries[ $country ] : $country;
-			$html     .= '<div class="mai-address-item" itemprop="addressCountry">' . esc_html( $country ) . '</div>';
+			$html     .= sprintf( '<div class="mai-address-item" itemprop="addressCountry">%s</div>', esc_html( $country ) );
 		}
 
 	$html .= '</div>';
