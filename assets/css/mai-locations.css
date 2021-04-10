@@ -25,6 +25,12 @@
 	padding: var(--input-padding, 0.9em);
 }
 
+#mai-location-edit [id^="mceu_"],
+#mai-location-edit [id^="mceu_"]:hover,
+#mai-location-edit [id^="mceu_"]:focus {
+	background: none;
+}
+
 #mai-location-edit .acf-input-prepend,
 #mai-location-edit .acf-input-append {
 	height: 100%;

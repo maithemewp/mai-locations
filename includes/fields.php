@@ -22,13 +22,62 @@ function mailocations_add_field_groups() {
 		]
 	);
 
+		acf_add_local_field_group(
+			[
+				'key'    => 'group_6070b71fdaf26',
+				'title'  => __( 'Mai Locations Settings', 'mai-locations' ),
+				'fields' => [
+					[
+						'key'           => 'field_6070b73a79adf',
+						'label'         => __( 'Plural Label', 'mai-locations' ),
+						'name'          => 'location_label_plural',
+						'type'          => 'text',
+						'required'      => 1,
+						'default_value' => __( 'Locations', 'mai-locations' ),
+						'placeholder'   => __( 'Locations', 'mai-locations' ),
+					],
+					[
+						'key'           => 'field_6070b75c79ae0',
+						'label'         => __( 'Singular Label', 'mai-locations' ),
+						'name'          => 'location_label_singular',
+						'type'          => 'text',
+						'required'      => 1,
+						'default_value' => __( 'Location', 'mai-locations' ),
+						'placeholder'   => __( 'Location', 'mai-locations' ),
+					],
+					[
+						'key'           => 'field_6070b7a379ae1',
+						'label'         => __( 'Base URL', 'mai-locations' ),
+						'name'          => 'location_base_url',
+						'type'          => 'text',
+						'instructions'  => 'Visit Dashboard > Settings > Permalinks and hit "Save" if updating this setting.',
+						'required'      => 1,
+						'default_value' => 'locations',
+						'placeholder'   => 'locations',
+					],
+				],
+				'location' => [
+					[
+						[
+							'param'    => 'options_page',
+							'operator' => '==',
+							'value'    => 'location_settings',
+						],
+					],
+				],
+				'menu_order'  => 10,
+				'description' => '',
+			]
+		);
+
 	// Location Info.
 	acf_add_local_field_group(
 		[
-			'key'      => 'group_6884dd5bdf8ed',
-			'title'    => sprintf( '%s %s', $singular, __( 'Info', 'mai-locations' ) ),
-			'fields'   => mailocations_get_fields(),
-			'location' => [
+			'key'        => 'group_6884dd5bdf8ed',
+			'title'      => sprintf( '%s %s', $singular, __( 'Info', 'mai-locations' ) ),
+			'fields'     => mailocations_get_fields(),
+			'menu_order' => 10, // Allow other field groups before or after by setting menu_order.
+			'location'   => [
 				[
 					[
 						'param'    => 'post_type',
@@ -36,11 +85,59 @@ function mailocations_add_field_groups() {
 						'value'    => 'mai_location',
 					],
 				],
+			],
+		]
+	);
+
+	// Locations Table block.
+	acf_add_local_field_group(
+		[
+			'key'    => 'group_6071bfd60bf2b',
+			'title'  => sprintf( '%s %s', $plural, __( 'Table', 'mai-locations' ) ),
+			'fields' => [
+				[
+					'key'         => 'field_6071bfebbfdab',
+					'label'       => __( 'Title', 'mai-locations' ),
+					'name'        => 'locations_table_title',
+					'type'        => 'text',
+					'placeholder' => sprintf( '%s %s', __( 'My', 'mai-locations' ), $plural ),
+				],
+				[
+					'key'         => 'field_6071c00cbfdac',
+					'label'       => __( 'Table Header', 'mai-location' ),
+					'name'        => 'locations_table_header',
+					'type'        => 'text',
+					'placeholder' => $plural,
+				],
+				[
+					'key'   => 'field_6071d22cdrdbd',
+					'label' => __( 'No Results Message', 'mai-location' ),
+					'name'  => 'locations_no_results',
+					'type'  => 'textarea',
+					'rows'  => 2,
+				],
+				[
+					'key'          => 'field_6071c076bfdae',
+					'label'        => sprintf( '%s %s', $singular, __( 'Edit Form', 'mai-locations' ) ),
+					'instructions' => __( 'Allow editing of the following fields in addition to all custom fields', 'mai-locations' ),
+					'name'         => 'location_edit_fields',
+					'type'         => 'checkbox',
+					'choices'      => [
+						'title'   => 'Edit title',
+						'content' => 'Edit content',
+					],
+					'default_value' => [
+						'title',
+						'content',
+					],
+				],
+			],
+			'location' => [
 				[
 					[
-						'param'    => 'af_form',
+						'param'    => 'block',
 						'operator' => '==',
-						'value'    => 'form_606e20b2b5271',
+						'value'    => 'acf/mai-locations-table',
 					],
 				],
 			],
@@ -163,10 +260,18 @@ function mailocations_get_fields_raw() {
 	$location = mailocations_get_address_fields();
 	$social   = mailocations_get_social_fields();
 	$fields   = array_merge( $general, $location, $social );
+	$fields   = apply_filters( 'mailocations_fields', $fields );
 
 	return $fields;
 }
 
+/**
+ * Gets field defaults.
+ *
+ * @since 0.1.0
+ *
+ * @return array
+ */
 function mailocations_get_fields_defaults() {
 	static $fields = null;
 

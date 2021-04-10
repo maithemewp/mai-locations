@@ -55,7 +55,8 @@ function mailocations_get_label_base() {
  * Gets a user's locations.
  * Checks if posts exist.
  *
- * @param int $user_id The user ID.
+ * @param int  $user_id The user ID.
+ * @param bool $admin   If displaying table in admin.
  *
  * @return array Array of post IDs.
  */
@@ -78,11 +79,13 @@ function mailocation_get_user_locations( $user_id = 0 ) {
 
 	$locations = (array) get_user_meta( $user_id, 'user_locations', true );
 
-	foreach ( $locations as $index => $location_id ) {
-		if ( mailocations_post_exists( $location_id ) ) {
-			continue;
+	if ( $locations ) {
+		foreach ( $locations as $index => $location_id ) {
+			if ( mailocations_post_exists( $location_id ) ) {
+				continue;
+			}
+			unset( $locations[ $index ] );
 		}
-		unset( $locations[ $index ] );
 	}
 
 	$all_locations[ $user_id ] = $locations;
@@ -395,155 +398,23 @@ function mailocations_get_google_maps_api_key() {
 	return $key;
 }
 
-function mailocations_get_locations_table( $user_id = 0, $title = '' ) {
-	$user_id = $user_id ?: get_current_user_id();
-
-	if ( ! $user_id ) {
+/**
+ * If user can edit a location by ID.
+ *
+ * @param int $location_id The post ID.
+ *
+ * @return bool
+ */
+function mailocations_user_can_edit( $location_id ) {
+	if ( ! is_user_logged_in() ) {
 		return;
 	}
 
-	$locations = mailocation_get_user_locations( $user_id );
-
-	$html = '';
+	$locations = mailocation_get_user_locations();
 
 	if ( ! $locations ) {
-		return $html;
+		return;
 	}
 
-	$edit_id = get_field( 'location_edit_page', 'option' );
-
-	$html .= '<table class="mai-locations-table">';
-
-		$html .= $title ? sprintf( '<h2>%s</h2>', $title ) : '';
-
-		$html .= '<thead>';
-			$html .= '<tr>';
-				$html .= sprintf( '<th colspan="2">%s</th>', mailocations_get_label_plural() );
-			$html .= '</tr>';
-		$html .= '</thead>';
-
-		$html .= '<tbody>';
-
-			foreach ( $locations as $location_id ) {
-				$classes = 'button button-secondary button-small';
-
-				$html .= '<tr>';
-					$html .= '<td>';
-						$html .= sprintf( '<span class="has-md-font-size"><a href="%s">%s</a></span>',
-							get_permalink( $location_id ),
-							get_the_title( $location_id )
-						);
-						$html .= mailocations_get_address(
-							[
-								'hide' => 'street2, postcode, country',
-							],
-							$location_id
-						);
-					$html .= '</td>';
-
-					$edit_url = add_query_arg(
-						[
-							'location_id' => $location_id,
-							'redirect'    => get_permalink(),
-						],
-						get_permalink( $edit_id )
-					);
-
-					$html .= '<td style="text-align:right;">';
-						$html .= sprintf( '<a class="%s" href="%s">%s</a>',
-							$classes,
-							get_permalink( $location_id ),
-							__( 'View', 'mai-locations' )
-						);
-						$html .= sprintf( '<a style="margin-left:6px;" class="%s" href="%s">%s</a>',
-							$classes,
-							esc_url( $edit_url ),
-							__( 'Edit', 'mai-locations' )
-						);
-					$html .= '</td>';
-				$html .= '</tr>';
-			}
-
-		$html .= '</tbody>';
-	$html .= '</table> ';
-
-	return $html;
-}
-
-/**
- * Gets a formatted address from current post in the loop.
- *
- * @since 0.1.0
- *
- * @param array $args    The address args.
- * @param int   $post_id The post ID.
- *
- * @return string
- */
-function mailocations_get_address( $args, $post_id = 0 ) {
-	// Atts.
-	$args = shortcode_atts(
-		[
-			'hide' => '', // street, street2, city, state, postcode, country
-		],
-		$args,
-		'mai_location_address'
-	);
-
-	$html      = '';
-	$hide      = explode( ',', $args['hide'] );
-	$hide      = array_map( 'esc_html', $hide );
-	$hide      = array_map( 'trim', $hide );
-	$hide      = array_flip( $hide );
-	$post_id   = (int) $post_id ?: get_the_ID();
-	$street    = ! isset( $hide['street'] ) ? get_post_meta( $post_id, 'address_street', true ) : '';
-	$street_2  = ! isset( $hide['street2'] ) ? get_post_meta( $post_id, 'address_street_2', true ) : '';
-	$city      = ! isset( $hide['city'] ) ? get_post_meta( $post_id, 'address_city', true ) : '';
-	$state     = ! isset( $hide['state'] ) ? get_post_meta( $post_id, 'address_state', true ) : '';
-	$state_int = ! isset( $hide['state'] ) ? get_post_meta( $post_id, 'address_state_int', true ) : '';
-	$postcode  = ! isset( $hide['postcode'] ) ? get_post_meta( $post_id, 'address_postcode', true ) : '';
-	$country   = ! isset( $hide['country'] ) ? get_post_meta( $post_id, 'address_country', true ) : '';
-	$state     = $country && 'US' !== $country ? $state_int : $state; // Use state_int if non-US.
-
-	if ( ! ( $street || $street_2 || $city || $state || $postcode || $country ) ) {
-		return $html;
-	}
-
-	$html .= '<div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress" class="mai-address">';
-
-		if ( $street ) {
-			$html .= sprintf( '<div class="mai-address-item"><span class="street-address" itemprop="streetAddress">%s</span></div>', esc_html( $street ) );
-		}
-
-		if ( $street_2 ) {
-			$html .= sprintf( '<div class="mai-address-item"><span class="street-address-2">%s</span></div>', esc_html( $street_2 ) );
-		}
-
-		if ( $city || $state || $postcode || $country ) {
-			$html .= '<div class="mai-address-item">';
-
-				if ( $city ) {
-					$html .= '<span class="locality" itemprop="addressLocality">' . esc_html( $city ) . '</span>';
-				}
-
-				if ( $state ) {
-					$html .= '<span class="region" itemprop="addressRegion">&nbsp;' . esc_html( $state ) . '</span>';
-				}
-
-				if ( $postcode ) {
-					$html .= '<span class="postal-code" itemprop="postalCode">,&nbsp;' . esc_html( $postcode ) . '</span>';
-				}
-
-			$html .= '</div>';
-		}
-
-		if ( $country ) {
-			$countries = mailocations_get_country_choices();
-			$country   = isset( $countries[ $country ] ) ? $countries[ $country ] : $country;
-			$html     .= sprintf( '<div class="mai-address-item" itemprop="addressCountry">%s</div>', esc_html( $country ) );
-		}
-
-	$html .= '</div>';
-
-	return $html;
+	return in_array( $location_id, $locations );
 }
