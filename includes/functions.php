@@ -395,7 +395,7 @@ function mailocations_get_google_maps_api_key() {
 	return $key;
 }
 
-function mailocations_get_locations_table( $user_id = 0 ) {
+function mailocations_get_locations_table( $user_id = 0, $title = '' ) {
 	$user_id = $user_id ?: get_current_user_id();
 
 	if ( ! $user_id ) {
@@ -410,11 +410,15 @@ function mailocations_get_locations_table( $user_id = 0 ) {
 		return $html;
 	}
 
+	$edit_id = get_field( 'location_edit_page', 'option' );
+
 	$html .= '<table class="mai-locations-table">';
+
+		$html .= $title ? sprintf( '<h2>%s</h2>', $title ) : '';
 
 		$html .= '<thead>';
 			$html .= '<tr>';
-				$html .= sprintf( '<th colspan="2">%s %s</th>', __( 'My', 'mai-locations' ), mailocations_get_label_plural() );
+				$html .= sprintf( '<th colspan="2">%s</th>', mailocations_get_label_plural() );
 			$html .= '</tr>';
 		$html .= '</thead>';
 
@@ -424,8 +428,8 @@ function mailocations_get_locations_table( $user_id = 0 ) {
 				$classes = 'button button-secondary button-small';
 
 				$html .= '<tr>';
-					$html .= '<th>';
-						$html .= sprintf( '<a href="%s">%s</a>',
+					$html .= '<td>';
+						$html .= sprintf( '<span class="has-md-font-size"><a href="%s">%s</a></span>',
 							get_permalink( $location_id ),
 							get_the_title( $location_id )
 						);
@@ -435,23 +439,28 @@ function mailocations_get_locations_table( $user_id = 0 ) {
 							],
 							$location_id
 						);
-					$html .= '</th>';
+					$html .= '</td>';
 
 					$edit_url = add_query_arg(
 						[
 							'location_id' => $location_id,
+							'redirect'    => get_permalink(),
 						],
-						get_permalink()
+						get_permalink( $edit_id )
 					);
 
-					$html .= sprintf( '<th style="text-align:right;"><a style="margin-right:6px;" class="%s" href="%s">%s</a><a class="%s" href="%s">%s</a></th>',
-						$classes,
-						esc_url( $edit_url ),
-						__( 'Edit', 'mai-locations' ),
-						$classes,
-						get_permalink( $location_id ),
-						__( 'View', 'mai-locations' )
-					);
+					$html .= '<td style="text-align:right;">';
+						$html .= sprintf( '<a class="%s" href="%s">%s</a>',
+							$classes,
+							get_permalink( $location_id ),
+							__( 'View', 'mai-locations' )
+						);
+						$html .= sprintf( '<a style="margin-left:6px;" class="%s" href="%s">%s</a>',
+							$classes,
+							esc_url( $edit_url ),
+							__( 'Edit', 'mai-locations' )
+						);
+					$html .= '</td>';
 				$html .= '</tr>';
 			}
 

@@ -115,6 +115,37 @@ function mailocations_get_fields() {
 }
 
 /**
+ * Gets all tab fields.
+ *
+ * @since 0.1.0
+ *
+ * @return array
+ */
+function mailocations_get_fields_tabs() {
+	static $tabs = null;
+
+	if ( ! is_null( $tabs ) && is_array( $tabs ) ) {
+		return $tabs;
+	}
+
+	$tabs   = [];
+	$fields = mailocations_get_fields_raw();
+
+	if ( ! $fields ) {
+		return $tabs;
+	}
+
+	foreach ( $fields as $name => $values ) {
+		if ( 'tab' !== $values['type'] ) {
+			continue;
+		}
+		$tabs[ $name ] = $values;
+	}
+
+	return $tabs;
+}
+
+/**
  * Gets all fields before setup for ACF metabox.
  *
  * @since 0.1.0

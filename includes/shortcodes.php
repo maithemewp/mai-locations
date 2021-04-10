@@ -18,13 +18,6 @@ function mailocation_location_address_shortcode( $atts ) {
 
 add_shortcode( 'mai_locations_table', 'mailocation_location_table_shortcode' );
 function mailocation_location_table_shortcode( $atts ) {
-	if ( ! is_user_logged_in() ) {
-		return;
-	}
-
-	if ( ! function_exists( 'mailocation_get_user_locations' ) ) {
-		return;
-	}
-
-
+	$title = sprintf( '%s %s', __( 'My', 'mai-locations' ), mailocations_get_label_plural() );
+	return mailocations_get_locations_table( 0, $title );
 }
