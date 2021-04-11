@@ -200,11 +200,15 @@ final class Mai_Locations_Plugin {
 		 *  Custom Post Types  *
 		 ***********************/
 
-		// Labels have filters in /includes/functions.php.
-		$plural   = mailocations_get_label_plural();
-		$singular = mailocations_get_label_singular();
-		$base     = mailocations_get_label_base();
+		$plural   = mailocations_get_plural();
+		$singular = mailocations_get_singular();
+		$base     = mailocations_get_base();
 
+		/**
+		 * Registers custom post type.
+		 *
+		 * @return void
+		 */
 		register_post_type( 'mai_location', apply_filters( 'mai_location_post_type_args',
 			[
 				'exclude_from_search' => false,
@@ -247,27 +251,18 @@ final class Mai_Locations_Plugin {
 		$cat_singular = apply_filters( 'mailocations_taxonomy_singular', __( 'Location Category', 'mai-locations' ) );
 		$cat_base     = apply_filters( 'mailocations_taxonomy_base', 'location-category' );
 
+		/**
+		 * Registers custom taxonomy.
+		 *
+		 * @return void
+		 */
 		register_taxonomy( 'mai_location_cat', [ 'mai_location' ], apply_filters( 'mai_location_cat_args',
 			[
 				'hierarchical' => true,
 				'labels'       => [
-					'name'               => $cat_plural,
-					'singular_name'      => $cat_singular,
-					'menu_name'          => $cat_plural,
-					// 'all_items'                  => __( 'All Items',                            'mai-locations' ),
-					// 'parent_item'                => __( 'Parent Item',                          'mai-locations' ),
-					// 'parent_item_colon'          => __( 'Parent Item:',                         'mai-locations' ),
-					// 'new_item_name'              => __( 'New Item Name',                        'mai-locations' ),
-					// 'add_new_item'               => __( 'Add New Item',                         'mai-locations' ),
-					// 'edit_item'                  => __( 'Edit Item',                            'mai-locations' ),
-					// 'update_item'                => __( 'Update Item',                          'mai-locations' ),
-					// 'view_item'                  => __( 'View Item',                            'mai-locations' ),
-					// 'separate_items_with_commas' => __( 'Separate items with commas',           'mai-locations' ),
-					// 'add_or_remove_items'        => __( 'Add or remove items',                  'mai-locations' ),
-					// 'choose_from_most_used'      => __( 'Choose from the most used',            'mai-locations' ),
-					// 'popular_items'              => __( 'Popular Items',                        'mai-locations' ),
-					// 'search_items'               => __( 'Search Items',                         'mai-locations' ),
-					// 'not_found'                  => __( 'Not Found',                            'mai-locations' ),
+					'name'          => $cat_plural,
+					'singular_name' => $cat_singular,
+					'menu_name'     => $cat_plural,
 				],
 				'meta_box_cb'                => false,
 				'public'                     => true,
@@ -283,7 +278,7 @@ final class Mai_Locations_Plugin {
 	/**
 	 * Plugin activation.
 	 *
-	 * @return  void
+	 * @return void
 	 */
 	public function activate() {
 		$this->register_content_types();

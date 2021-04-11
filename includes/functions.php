@@ -7,13 +7,13 @@
  *
  * @return string
  */
-function mailocations_get_label_plural() {
+function mailocations_get_plural() {
 	$label = null;
 	if ( ! is_null( $label ) ) {
 		return $label;
 	}
-	$label = get_field( 'location_label_plural', 'option' );
-	$label = apply_filters( 'mailocations_label_plural', $label );
+	$label = get_option( 'options_location_label_plural', __( 'Locations', 'mai-location' ) );
+	$label = apply_filters( 'mailocations_plural', $label );
 	return esc_html( $label );
 }
 
@@ -24,13 +24,13 @@ function mailocations_get_label_plural() {
  *
  * @return string
  */
-function mailocations_get_label_singular() {
+function mailocations_get_singular() {
 	$label = null;
 	if ( ! is_null( $label ) ) {
 		return $label;
 	}
-	$label = get_field( 'location_label_singular', 'option' );
-	$label = apply_filters( 'mailocations_label_singular', $label );
+	$label = get_option( 'options_location_label_singular', __( 'Location', 'mai-location' ) );
+	$label = apply_filters( 'mailocations_singular', $label );
 	return esc_html( $label );
 }
 
@@ -41,13 +41,13 @@ function mailocations_get_label_singular() {
  *
  * @return string
  */
-function mailocations_get_label_base() {
+function mailocations_get_base() {
 	$base = null;
 	if ( ! is_null( $base ) ) {
 		return $base;
 	}
-	$base = get_field( 'location_base_url', 'option' );
-	$base = apply_filters( 'mailocations_base_url', $base );
+	$base = get_option( 'options_location_base', __( 'locations' ) );
+	$base = apply_filters( 'mailocations_base', $base );
 	return sanitize_html_class( $base );
 }
 

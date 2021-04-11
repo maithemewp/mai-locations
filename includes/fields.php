@@ -9,66 +9,8 @@ add_action( 'acf/init', 'mailocations_add_field_groups' );
  * @return void
  */
 function mailocations_add_field_groups() {
-	$plural   = mailocations_get_label_plural();
-	$singular = mailocations_get_label_singular();
-
-	// Settings.
-	acf_add_options_sub_page(
-		[
-			'title'      => __( 'Settings Page', 'mai-locations' ),
-			'parent'     => 'edit.php?post_type=mai_location',
-			'menu_slug'  => 'location_settings',
-			'capability' => 'manage_options'
-		]
-	);
-
-		acf_add_local_field_group(
-			[
-				'key'    => 'group_6070b71fdaf26',
-				'title'  => __( 'Mai Locations Settings', 'mai-locations' ),
-				'fields' => [
-					[
-						'key'           => 'field_6070b73a79adf',
-						'label'         => __( 'Plural Label', 'mai-locations' ),
-						'name'          => 'location_label_plural',
-						'type'          => 'text',
-						'required'      => 1,
-						'default_value' => __( 'Locations', 'mai-locations' ),
-						'placeholder'   => __( 'Locations', 'mai-locations' ),
-					],
-					[
-						'key'           => 'field_6070b75c79ae0',
-						'label'         => __( 'Singular Label', 'mai-locations' ),
-						'name'          => 'location_label_singular',
-						'type'          => 'text',
-						'required'      => 1,
-						'default_value' => __( 'Location', 'mai-locations' ),
-						'placeholder'   => __( 'Location', 'mai-locations' ),
-					],
-					[
-						'key'           => 'field_6070b7a379ae1',
-						'label'         => __( 'Base URL', 'mai-locations' ),
-						'name'          => 'location_base_url',
-						'type'          => 'text',
-						'instructions'  => 'Visit Dashboard > Settings > Permalinks and hit "Save" if updating this setting.',
-						'required'      => 1,
-						'default_value' => 'locations',
-						'placeholder'   => 'locations',
-					],
-				],
-				'location' => [
-					[
-						[
-							'param'    => 'options_page',
-							'operator' => '==',
-							'value'    => 'location_settings',
-						],
-					],
-				],
-				'menu_order'  => 10,
-				'description' => '',
-			]
-		);
+	$plural   = mailocations_get_plural();
+	$singular = mailocations_get_singular();
 
 	// Location Info.
 	acf_add_local_field_group(
@@ -83,61 +25,6 @@ function mailocations_add_field_groups() {
 						'param'    => 'post_type',
 						'operator' => '==',
 						'value'    => 'mai_location',
-					],
-				],
-			],
-		]
-	);
-
-	// Locations Table block.
-	acf_add_local_field_group(
-		[
-			'key'    => 'group_6071bfd60bf2b',
-			'title'  => sprintf( '%s %s', $plural, __( 'Table', 'mai-locations' ) ),
-			'fields' => [
-				[
-					'key'         => 'field_6071bfebbfdab',
-					'label'       => __( 'Title', 'mai-locations' ),
-					'name'        => 'locations_table_title',
-					'type'        => 'text',
-					'placeholder' => sprintf( '%s %s', __( 'My', 'mai-locations' ), $plural ),
-				],
-				[
-					'key'         => 'field_6071c00cbfdac',
-					'label'       => __( 'Table Header', 'mai-location' ),
-					'name'        => 'locations_table_header',
-					'type'        => 'text',
-					'placeholder' => $plural,
-				],
-				[
-					'key'   => 'field_6071d22cdrdbd',
-					'label' => __( 'No Results Message', 'mai-location' ),
-					'name'  => 'locations_no_results',
-					'type'  => 'textarea',
-					'rows'  => 2,
-				],
-				[
-					'key'          => 'field_6071c076bfdae',
-					'label'        => sprintf( '%s %s', $singular, __( 'Edit Form', 'mai-locations' ) ),
-					'instructions' => __( 'Allow editing of the following fields in addition to all custom fields', 'mai-locations' ),
-					'name'         => 'location_edit_fields',
-					'type'         => 'checkbox',
-					'choices'      => [
-						'title'   => 'Edit title',
-						'content' => 'Edit content',
-					],
-					'default_value' => [
-						'title',
-						'content',
-					],
-				],
-			],
-			'location' => [
-				[
-					[
-						'param'    => 'block',
-						'operator' => '==',
-						'value'    => 'acf/mai-locations-table',
 					],
 				],
 			],

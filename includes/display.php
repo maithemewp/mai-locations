@@ -1,13 +1,26 @@
 <?php
 
-// Enqueue CSS files.
 add_action( 'wp_enqueue_scripts', 'mailocations_register_scripts' );
+/**
+ * Enqueues CSS files.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
 function mailocations_register_scripts() {
 	wp_register_style( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . 'assets/css/mai-locations.css', [], MAI_LOCATIONS_VERSION );
 }
 
-add_action( 'get_header', 'mailocations_maybe_show_locations_table', 0 );
-function mailocations_maybe_show_locations_table() {
+add_action( 'get_header', 'mailocations_location_edit_listener', 0 );
+/**
+ * Adds acf_form_head().
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function mailocations_location_edit_listener() {
 	if ( ! ( is_user_logged_in() && is_singular() ) ) {
 		return;
 	}
@@ -18,8 +31,9 @@ function mailocations_maybe_show_locations_table() {
 
 	$has_block     = has_blocks() && has_block( 'acf/mai-locations-table' );
 	$has_shortcode = has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'mai_locations_table' );
+	$is_account    = class_exists( 'WooCommerce' ) && is_account_page();
 
-	if ( ! ( $has_block || $has_shortcode ) ) {
+	if ( ! ( $has_block || $has_shortcode || $is_account ) ) {
 		return;
 	}
 
@@ -31,7 +45,6 @@ function mailocations_maybe_show_locations_table() {
 
 	acf_form_head();
 }
-
 
 /**
  * Gets a locations table.
@@ -46,7 +59,7 @@ function mailocations_maybe_show_locations_table() {
  *
  * @return string
  */
-function mailocations_get_locations_table( $user_id = 0, $args ) {
+function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 	$is_admin = is_admin();
 	$user_id  = $user_id ?: get_current_user_id();
 
@@ -72,7 +85,7 @@ function mailocations_get_locations_table( $user_id = 0, $args ) {
 		wp_reset_postdata();
 
 		if ( ! $locations ) {
-			$plural  = strtolower( mailocations_get_label_plural() );
+			$plural  = strtolower( mailocations_get_plural() );
 			$message = sprintf( __( 'No %s exist. Add new %s to display them here.', 'mai-locations' ), $plural, $plural );
 			$message = sprintf( '<table><tr><th><em>%s</em></th></tr></table>', $message );
 			$args['no_results'] = $message;
@@ -86,11 +99,12 @@ function mailocations_get_locations_table( $user_id = 0, $args ) {
 	// Atts.
 	$args = shortcode_atts(
 		[
-			'title'        => sprintf( '%s %s', __( 'My', 'mai-locations' ), mailocations_get_label_plural() ),
-			'header'       => mailocations_get_label_plural(),
+			'title'        => sprintf( '%s %s', __( 'My', 'mai-locations' ), mailocations_get_plural() ),
+			'header'       => mailocations_get_plural(),
+			'no_results'   => '',
 			'edit_fields'  => [ 'title', 'content' ],
-			'edit_title'   => true, // Allow editing the location title.
-			'edit_content' => true, // Allow editing the location content.
+			'class'        => '',
+			'align'        => '',
 		],
 		$args,
 		'mai_locations_table'
@@ -100,20 +114,25 @@ function mailocations_get_locations_table( $user_id = 0, $args ) {
 	$args = [
 		'title'        => esc_html( $args['title'] ),
 		'header'       => esc_html( $args['header'] ),
+		'no_results'   => sanitize_text_field( $args['no_results'] ),
 		'edit_fields'  => array_map( 'esc_html', $args['edit_fields'] ),
-		'edit_title'   => (bool) $args['edit_title'],
-		'edit_content' => (bool) $args['edit_content'],
+		'class'        => esc_attr( $args['class'] ),
+		'align'        => esc_html( $args['align'] ),
 	];
 
-	$html = '';
-
-	$location_id = filter_input( INPUT_GET, 'location_id', FILTER_SANITIZE_NUMBER_INT );
+	$html         = '';
+	$location_id  = filter_input( INPUT_GET, 'location_id', FILTER_SANITIZE_NUMBER_INT );
 
 	if ( ! $is_admin && ( $location_id && mailocations_user_can_edit( $location_id ) ) ) {
 
 		wp_enqueue_style( 'mai-locations' );
 
-		$html .= mailocations_get_location_edit_form( $location_id, $args );
+		$html .= mailocations_get_location_edit_form( $location_id,
+			[
+				'edit_title'   => in_array( 'title', $args['edit_fields'] ),
+				'edit_content' => in_array( 'content', $args['edit_fields'] ),
+			]
+		);
 
 	} else {
 
@@ -138,10 +157,13 @@ function mailocations_get_locations_table( $user_id = 0, $args ) {
 
 					$html .= '<tr>';
 						$html .= '<td>';
+							// Title.
 							$html .= sprintf( '<span class="has-md-font-size"><a href="%s">%s</a></span>',
 								get_permalink( $location_id ),
 								get_the_title( $location_id )
 							);
+
+							// Address.
 							$html .= mailocations_get_address(
 								[
 									'hide' => 'street2, postcode, country',
@@ -153,17 +175,20 @@ function mailocations_get_locations_table( $user_id = 0, $args ) {
 						$edit_url = add_query_arg(
 							[
 								'location_id' => $location_id,
-								'redirect'    => get_permalink(),
+								// 'redirect'    => get_permalink(),
 							],
-							get_permalink()
+							home_url( add_query_arg( null, null ) )
 						);
 
 						$html .= '<td style="text-align:right;">';
+							// View.
 							$html .= sprintf( '<a class="%s" href="%s">%s</a>',
 								$classes,
 								get_permalink( $location_id ),
 								__( 'View', 'mai-locations' )
 							);
+
+							// Edit.
 							$html .= sprintf( '<a style="margin-left:6px;" class="%s" href="%s">%s</a>',
 								$classes,
 								esc_url( $edit_url ),
@@ -181,10 +206,8 @@ function mailocations_get_locations_table( $user_id = 0, $args ) {
 }
 
 function mailocations_get_location_edit_form( $location_id, $args ) {
-	$singular = mailocations_get_label_singular();
-	$redirect = esc_url( get_permalink() );
-	$fields   = [];
-	$groups   = acf_get_field_groups( [ 'post_id' => $location_id ] );
+	$fields = [];
+	$groups = acf_get_field_groups( [ 'post_id' => $location_id ] );
 
 	foreach ( $groups as $group ) {
 		$group_fields = acf_get_fields( $group['key'] );
@@ -208,31 +231,29 @@ function mailocations_get_location_edit_form( $location_id, $args ) {
 	};
 	add_filter( 'acf/get_valid_field', $filter );
 
-	$html = sprintf( '<p><a href="%s">← %s</a></p>', $redirect, __( 'Back', 'mai-engine' ) );
+	$singular = mailocations_get_singular();
 
 	ob_start();
 	acf_form(
 		[
 			'id'                 => 'mai-location-edit',
 			'post_id'            => $location_id,
-			// 'field_groups'    => array( 'group_5d519ec8bcdb7' ),
 			'fields'             => $fields,
 			'post_title'         => $args['edit_title'],
 			'post_content'       => $args['edit_content'],
 			'submit_value'       => sprintf( '%s %s', __( 'Update', 'mai-locations' ), $singular ),
-			'return'             => $redirect,
-			'updated_message'    => sprintf( __( 'Your %s has been successfully updated.', 'mai-locations' ), strtolower( $singular ) ),
+			'updated_message'    => sprintf( __( '%s successfully updated.', 'mai-locations' ), $singular ),
 			'uploader'           => 'basic',
 			'echo'               => 'false',
 			'html_submit_button' => '<input type="submit" class="acf-button button" value="%s" />',
 		]
 	);
 
-	$html .= ob_get_clean();
+	$form = ob_get_clean();
 
 	remove_filter( 'acf/get_valid_field', $filter );
 
-	return $html;
+	return $form;
 }
 
 
