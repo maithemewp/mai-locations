@@ -172,12 +172,13 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 							);
 						$html .= '</td>';
 
+						$edit_url = home_url( add_query_arg( null, null ) );
 						$edit_url = add_query_arg(
 							[
 								'location_id' => $location_id,
-								// 'redirect'    => get_permalink(),
+								'referrer'    => $edit_url,
 							],
-							home_url( add_query_arg( null, null ) )
+							$edit_url
 						);
 
 						$html .= '<td style="text-align:right;">';
@@ -231,7 +232,14 @@ function mailocations_get_location_edit_form( $location_id, $args ) {
 	};
 	add_filter( 'acf/get_valid_field', $filter );
 
+
+	$html     = '';
 	$singular = mailocations_get_singular();
+	$referrer = filter_input( INPUT_GET, 'referrer', FILTER_SANITIZE_STRING );
+
+	if ( $referrer ) {
+		$html .= sprintf( '<p><a href="%s">← %s</a></p>', esc_url( $referrer ), __( 'Back', 'mai-locations' ) );
+	}
 
 	ob_start();
 	acf_form(
@@ -248,12 +256,11 @@ function mailocations_get_location_edit_form( $location_id, $args ) {
 			'html_submit_button' => '<input type="submit" class="acf-button button" value="%s" />',
 		]
 	);
-
-	$form = ob_get_clean();
+	$html .= ob_get_clean();
 
 	remove_filter( 'acf/get_valid_field', $filter );
 
-	return $form;
+	return $html;
 }
 
 
