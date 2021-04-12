@@ -206,7 +206,33 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 	return $html;
 }
 
+/**
+ * Gets location edit form.
+ *
+ * @since 0.1.0
+ *
+ * @param int   $location_id The post ID.
+ * @param array $args        The required args.
+ *
+ * @return string
+ */
 function mailocations_get_location_edit_form( $location_id, $args ) {
+	// Atts.
+	$args = shortcode_atts(
+		[
+			'edit_title'   => true,
+			'edit_content' => true,
+		],
+		$args,
+		'mai_location_edit_form'
+	);
+
+	// Sanitize.
+	$args = [
+		'edit_title'   => (bool) $args['edit_title'],
+		'edit_content' => (bool) $args['edit_content'],
+	];
+
 	$fields = [];
 	$groups = acf_get_field_groups( [ 'post_id' => $location_id ] );
 
