@@ -79,6 +79,7 @@ function mailocation_get_user_locations( $user_id = 0 ) {
 
 	$locations = (array) get_user_meta( $user_id, 'user_locations', true );
 	$locations = array_unique( $locations );
+	$locations = array_filter( $locations );
 
 	if ( $locations ) {
 		foreach ( $locations as $index => $location_id ) {
