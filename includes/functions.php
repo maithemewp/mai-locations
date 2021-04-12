@@ -61,7 +61,7 @@ function mailocations_get_base() {
  * @return array Array of post IDs.
  */
 function mailocation_get_user_locations( $user_id = 0 ) {
-	$user_id = $user_id ?: get_current_user_id();
+	$user_id = (int) $user_id ?: get_current_user_id();
 
 	if ( ! $user_id ) {
 		return [];
@@ -78,6 +78,7 @@ function mailocation_get_user_locations( $user_id = 0 ) {
 	}
 
 	$locations = (array) get_user_meta( $user_id, 'user_locations', true );
+	$locations = array_filter( $locations );
 
 	if ( $locations ) {
 		foreach ( $locations as $index => $location_id ) {
@@ -249,8 +250,24 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 		return;
 	}
 
-	$geocode = file_get_contents( 'https://maps.google.com/maps/api/geocode/json?address=' . esc_url( $address ) . '&sensor=false&key=' . $api_key );
-	$output  = json_decode( $geocode );
+	$url = 'https://maps.google.com/maps/api/geocode/json';
+	$url = add_query_arg(
+		[
+
+			'address' => urlencode( $address ),
+			'sensor'  => 'false',
+			'key'     => $api_key,
+		],
+		$url
+	);
+
+	$geocode = file_get_contents( $url );
+
+	if ( ! $geocode ) {
+		return;
+	}
+
+	$output = json_decode( $geocode );
 
 	if ( 'OK' !== $output->status ) {
 		return;
