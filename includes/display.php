@@ -60,8 +60,9 @@ function mailocations_location_edit_listener() {
  * @return string
  */
 function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
-	$is_admin = is_admin();
-	$user_id  = (int) $user_id ?: get_current_user_id();
+	$user_id     = (int) $user_id ?: get_current_user_id();
+	$is_admin    = is_admin();
+	$is_viewable = is_post_type_viewable( 'mai_location' );
 
 	if ( ! $user_id ) {
 		return;
@@ -158,10 +159,15 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 					$html .= '<tr>';
 						$html .= '<td>';
 							// Title.
-							$html .= sprintf( '<span class="has-md-font-size"><a href="%s">%s</a></span>',
-								get_permalink( $location_id ),
-								get_the_title( $location_id )
-							);
+							$html .= '<span class="has-md-font-size">';
+								if ( $is_viewable ) {
+									$html .= sprintf( '<a href="%s">', get_permalink( $location_id ) );
+								}
+								$html .= get_the_title( $location_id );
+								if ( $is_viewable ) {
+									$html .= '</a>';
+								}
+							$html .= '</span>';
 
 							// Address.
 							$html .= mailocations_get_address(
@@ -183,11 +189,13 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 
 						$html .= '<td style="text-align:right;">';
 							// View.
-							$html .= sprintf( '<a class="%s" href="%s">%s</a>',
-								$classes,
-								get_permalink( $location_id ),
-								__( 'View', 'mai-locations' )
-							);
+							if ( $is_viewable ) {
+								$html .= sprintf( '<a class="%s" href="%s">%s</a>',
+									$classes,
+									get_permalink( $location_id ),
+									__( 'View', 'mai-locations' )
+								);
+							}
 
 							// Edit.
 							$html .= sprintf( '<a style="margin-left:6px;" class="%s" href="%s">%s</a>',
