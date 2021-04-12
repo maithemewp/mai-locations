@@ -61,11 +61,35 @@ function mailocations_location_edit_listener() {
  */
 function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 	$is_admin = is_admin();
-	$user_id  = $user_id ?: get_current_user_id();
+	$user_id  = (int) $user_id ?: get_current_user_id();
 
 	if ( ! $user_id ) {
 		return;
 	}
+
+	// Atts.
+	$args = shortcode_atts(
+		[
+			'title'        => sprintf( '%s %s', __( 'My', 'mai-locations' ), mailocations_get_plural() ),
+			'header'       => mailocations_get_plural(),
+			'no_results'   => '',
+			'edit_fields'  => [ 'title', 'content' ],
+			'class'        => '',
+			'align'        => '',
+		],
+		$args,
+		'mai_locations_table'
+	);
+
+	// Sanitize.
+	$args = [
+		'title'        => esc_html( $args['title'] ),
+		'header'       => esc_html( $args['header'] ),
+		'no_results'   => sanitize_text_field( $args['no_results'] ),
+		'edit_fields'  => array_map( 'esc_html', $args['edit_fields'] ),
+		'class'        => esc_attr( $args['class'] ),
+		'align'        => esc_html( $args['align'] ),
+	];
 
 	if ( ! $is_admin ) {
 		$locations = mailocation_get_user_locations( $user_id );
@@ -95,30 +119,6 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 	if ( ! $locations ) {
 		return wpautop( $args['no_results'] );
 	}
-
-	// Atts.
-	$args = shortcode_atts(
-		[
-			'title'        => sprintf( '%s %s', __( 'My', 'mai-locations' ), mailocations_get_plural() ),
-			'header'       => mailocations_get_plural(),
-			'no_results'   => '',
-			'edit_fields'  => [ 'title', 'content' ],
-			'class'        => '',
-			'align'        => '',
-		],
-		$args,
-		'mai_locations_table'
-	);
-
-	// Sanitize.
-	$args = [
-		'title'        => esc_html( $args['title'] ),
-		'header'       => esc_html( $args['header'] ),
-		'no_results'   => sanitize_text_field( $args['no_results'] ),
-		'edit_fields'  => array_map( 'esc_html', $args['edit_fields'] ),
-		'class'        => esc_attr( $args['class'] ),
-		'align'        => esc_html( $args['align'] ),
-	];
 
 	$html         = '';
 	$location_id  = filter_input( INPUT_GET, 'location_id', FILTER_SANITIZE_NUMBER_INT );
