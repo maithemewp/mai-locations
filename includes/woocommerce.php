@@ -99,7 +99,8 @@ class Mai_Locations_WooCommerce_Account_Tab {
 	 * @return array
 	 */
 	function add_menu_item( $items ) {
-		if ( ! mailocation_get_user_locations() ) {
+		$locations = mailocation_get_user_locations();
+		if ( ! $locations ) {
 			return $items;
 		}
 		$logout = false;
