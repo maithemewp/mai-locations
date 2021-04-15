@@ -263,6 +263,7 @@ function mailocations_maybe_update_map_field( $post_id ) {
 
 /**
  * Updates map field from address data.
+ * TODO: Return WP_Error if things don't work/run.
  *
  * @since 0.1.0
  *
