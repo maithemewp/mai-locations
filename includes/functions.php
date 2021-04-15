@@ -114,6 +114,8 @@ function mailocations_post_exists( $post_id ) {
  * @param array $post_args The post array used in wp_insert_post().
  * @param array $meta_args The args used for meta_input in wp_insert_post().
  * @param int   $user_id   The user ID to create the
+ *
+ * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
  */
 function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
 	$post_args = wp_parse_args( $post_args,
@@ -164,7 +166,8 @@ function mailocations_add_location_to_user( $post_id, $user_id ) {
 	$user = get_user_by( 'id', $user_id );
 
 	if ( ! $user ) {
-		return;
+		$message = sprintf( __( 'No user with the ID of %s', 'mai-locations' ), $user_id );
+		return new WP_Error( 'no user', $message );
 	}
 
 	$locations   = (array) get_user_meta( $user_id, 'user_locations', true );
@@ -173,6 +176,59 @@ function mailocations_add_location_to_user( $post_id, $user_id ) {
 	$locations[] = $post_id;
 
 	update_user_meta( $user_id, 'user_locations', $locations );
+
+	return true;
+}
+
+/**
+ * Creates a location from a user,
+ * with WooCommerce field data as the location data,
+ * including using Company field as the post title.
+ *
+ * @param int $user_id
+ *
+ * @return void
+ *
+ * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
+ */
+function mailocations_create_location_from_woocommerce_user( $user_id ) {
+	$user = get_user_by( 'id', $user_id );
+
+	if ( ! $user ) {
+		$message = sprintf( __( 'No user with the ID of %s', 'mai-locations' ), $user_id );
+		return new WP_Error( 'no user', $message );
+	}
+
+	$company    = get_user_meta( $user_id, 'billing_company', true );
+	$post_title = $company ?: $user->display_name;
+	$post_args  = [
+		'post_title'  => $post_title,
+		'post_status' => 'publish',
+	];
+
+	$meta_args = [
+		'billing_first_name' => $user->first_name,
+		'billing_last_name'  => $user->last_name,
+	];
+
+	$meta_keys = [
+		'address_street'   => 'billing_address_1',
+		'address_street_2' => 'billing_address_2',
+		'address_city'     => 'billing_city',
+		'address_state'    => 'billing_state',
+		'address_postcode' => 'billing_postcode',
+		'address_country'  => 'billing_country',
+		'location_phone'   => 'billing_phone',
+		'location_email'   => 'billing_email',
+	];
+
+	foreach ( $meta_keys as $location_key => $user_key ) {
+		$meta_args[ $location_key ] = get_user_meta( $user_id, $user_key, true );
+	}
+
+	$meta_args['location_url'] = $user->user_url;
+
+	return mailocations_create_location( $post_args, $meta_args, $user_id );
 }
 
 add_action( 'acf/save_post', 'mailocations_maybe_update_map_field', 20, 1 );
