@@ -271,6 +271,7 @@ final class Mai_Locations_Plugin {
 				'show_in_rest'               => true,
 				'show_tagcloud'              => true,
 				'show_ui'                    => true,
+				'rewrite'                    => [ 'slug' => 'location-categories', 'with_front' => false ],
 			]
 		) );
 	}
