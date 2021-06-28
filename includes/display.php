@@ -308,7 +308,7 @@ function mailocations_get_location_edit_form( $location_id, $args ) {
  *
  * @return string
  */
-function mailocations_get_address( $args, $post_id = 0 ) {
+function mailocations_get_address( $args = [], $post_id = 0 ) {
 	// Atts.
 	$args = shortcode_atts(
 		[
