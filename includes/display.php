@@ -43,6 +43,24 @@ function mailocations_location_edit_listener() {
 		return;
 	}
 
+	/**
+	 * Force location to public when saving, if it's not already.
+	 *
+	 * @return void
+	 */
+	add_action( 'acf/save_post', function( $post_id ) {
+		if ( ! is_numeric( $post_id ) || 'mai_location' !== get_post_type( $post_id ) || 'publish' === get_post_status( $post_id ) ) {
+			return;
+		}
+
+		wp_update_post(
+			[
+				'ID'          => $post_id,
+				'post_status' => 'publish' ,
+			]
+		);
+	});
+
 	acf_form_head();
 }
 
@@ -154,7 +172,7 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 			$html .= '<tbody>';
 
 				foreach ( $locations as $location_id ) {
-					$public  = 'public' === get_post_status( $location_id );
+					$public  = 'publish' === get_post_status( $location_id );
 					$classes = 'button button-secondary button-small';
 
 					$html .= '<tr>';
@@ -297,7 +315,6 @@ function mailocations_get_location_edit_form( $location_id, $args ) {
 
 	return $html;
 }
-
 
 /**
  * Gets a formatted address from current post in the loop.
