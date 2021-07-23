@@ -4,9 +4,9 @@
  * Plugin Name:     Mai Locations
  * Plugin URI:      https://bizbudding.com
  * Description:     A custom post type with info/address/amp fields to manage locations.
- * Version:         0.2.1
+ * Version:         0.3.0
  *
- * Author:          BizBudding, Mike Hemberger
+ * Author:          BizBudding
  * Author URI:      https://bizbudding.com
  */
 
@@ -90,7 +90,7 @@ final class Mai_Locations_Plugin {
 
 		// Plugin version.
 		if ( ! defined( 'MAI_LOCATIONS_VERSION' ) ) {
-			define( 'MAI_LOCATIONS_VERSION', '0.2.1' );
+			define( 'MAI_LOCATIONS_VERSION', '0.3.0' );
 		}
 
 		// Plugin Folder Path.

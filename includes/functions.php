@@ -185,13 +185,14 @@ function mailocations_add_location_to_user( $post_id, $user_id ) {
  * with WooCommerce field data as the location data,
  * including using Company field as the post title.
  *
- * @param int $user_id
+ * @param int   $user_id The user ID.
+ * @param array $args    The post args.
  *
  * @return void
  *
  * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
  */
-function mailocations_create_location_from_woocommerce_user( $user_id ) {
+function mailocations_create_location_from_woocommerce_user( $user_id, $args = [] ) {
 	$user = get_user_by( 'id', $user_id );
 
 	if ( ! $user ) {
@@ -201,10 +202,15 @@ function mailocations_create_location_from_woocommerce_user( $user_id ) {
 
 	$company    = get_user_meta( $user_id, 'billing_company', true );
 	$post_title = $company ?: $user->display_name;
-	$post_args  = [
-		'post_title'  => $post_title,
-		'post_status' => 'publish',
-	];
+	$post_args  = wp_parse_args( $args,
+		[
+			'post_title'  => $post_title,
+			'post_status' => 'publish',
+		]
+	);
+
+	// Force post_type.
+	$post_args['post_type'] = 'mai_location';
 
 	$meta_args = [
 		'billing_first_name' => $user->first_name,
