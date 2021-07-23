@@ -73,7 +73,7 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 		[
 			'title'        => sprintf( '%s %s', __( 'My', 'mai-locations' ), mailocations_get_plural() ),
 			'header'       => mailocations_get_plural(),
-			'no_results'   => '',
+			'no_results'   => __( 'Sorry, no locations available.', 'mai-locations' ),
 			'edit_fields'  => [ 'title', 'content' ],
 			'class'        => '',
 			'align'        => '',
@@ -154,17 +154,18 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 			$html .= '<tbody>';
 
 				foreach ( $locations as $location_id ) {
+					$public  = 'public' === get_post_status( $location_id );
 					$classes = 'button button-secondary button-small';
 
 					$html .= '<tr>';
 						$html .= '<td>';
 							// Title.
 							$html .= '<span class="has-md-font-size">';
-								if ( $is_viewable ) {
+								if ( $is_viewable && $public ) {
 									$html .= sprintf( '<a href="%s">', get_permalink( $location_id ) );
 								}
 								$html .= get_the_title( $location_id );
-								if ( $is_viewable ) {
+								if ( $is_viewable && $public ) {
 									$html .= '</a>';
 								}
 							$html .= '</span>';
@@ -189,7 +190,7 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 
 						$html .= '<td style="text-align:right;">';
 							// View.
-							if ( $is_viewable ) {
+							if ( $is_viewable && $public ) {
 								$html .= sprintf( '<a class="%s" href="%s">%s</a>',
 									$classes,
 									get_permalink( $location_id ),
@@ -375,4 +376,3 @@ function mailocations_get_address( $args = [], $post_id = 0 ) {
 
 	return $html;
 }
-
