@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0 (7/23/21)
+* Added: Default text if no results are available for a user's location table.
+* Changed: Post status now forces to `publish` when saving the location edit form on the front end.
+* Changed: Helper function `mailocations_create_location_from_woocommerce_user()` function now accepts post args.
+
 ## 0.2.1 (6/28/21)
 * Fixed: Location category slug wasn't using readable name.
 * Fixed: Don’t require args in address helper function.
