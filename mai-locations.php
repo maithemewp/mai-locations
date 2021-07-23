@@ -6,7 +6,7 @@
  * Description:     A custom post type with info/address/amp fields to manage locations.
  * Version:         0.2.1
  *
- * Author:          BizBudding, Mike Hemberger
+ * Author:          BizBudding
  * Author URI:      https://bizbudding.com
  */
 
