@@ -79,7 +79,8 @@ function mailocations_location_edit_listener() {
 				'post_status' => 'publish' ,
 			]
 		);
-	});
+
+	}, 4 );
 
 	acf_form_head();
 }
@@ -324,7 +325,7 @@ function mailocations_get_location_edit_form( $location_id, $args ) {
 			'post_content'       => $args['edit_content'],
 			'submit_value'       => sprintf( '%s %s', __( 'Update', 'mai-locations' ), $singular ),
 			'updated_message'    => sprintf( __( '%s successfully updated.', 'mai-locations' ), $singular ),
-			'uploader'           => 'basic',
+			'uploader'           => 'wp',
 			'echo'               => 'false',
 			'html_submit_button' => '<input type="submit" class="acf-button button" value="%s" />',
 		]

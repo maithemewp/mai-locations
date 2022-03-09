@@ -103,11 +103,6 @@ add_filter( 'acf/prepare_field/key=mai_location_image', 'mailocations_prepare_lo
  */
 function mailocations_prepare_location_image_field( $field ) {
 	return ! is_admin() ? $field : false;
-	if ( is_admin() ) {
-		$field['disabled'] = true;
-	}
-
-	return $field;
 }
 
 /**
@@ -243,10 +238,11 @@ function mailocations_get_general_fields() {
 		'location_image' => [
 			'key'           => 'mai_location_image',
 			'label'         => __( 'Featured Image', 'mai-locations' ),
+			'instructions'  => __( 'Only jpeg, jpg, png allowed. 5 MB max.', 'mai-location' ),
 			'type'          => 'image',
 			'return_format' => 'id',
 			'preview_size'  => 'medium',
-			'library'       => 'all',
+			'library'       => 'uploadedTo', // 'all' or 'uploadedTo'. Make sure to check acf_form() for 'uploader' as 'wp' or 'basic'.
 		],
 		'location_general_tab' => [
 			'key'       => 'mai_location_general_tab',
