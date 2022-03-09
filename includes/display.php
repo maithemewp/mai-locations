@@ -1,5 +1,8 @@
 <?php
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 add_action( 'wp_enqueue_scripts', 'mailocations_register_scripts' );
 /**
  * Enqueues CSS files.
@@ -14,6 +17,7 @@ function mailocations_register_scripts() {
 
 add_action( 'get_header', 'mailocations_location_edit_listener', 0 );
 /**
+ * Processes form submission.
  * Adds acf_form_head().
  *
  * @since 0.1.0
@@ -44,12 +48,28 @@ function mailocations_location_edit_listener() {
 	}
 
 	/**
-	 * Force location to public when saving, if it's not already.
+	 * Saves featured image.
+	 * Forces location to public when saving, if it's not already.
 	 *
 	 * @return void
 	 */
 	add_action( 'acf/save_post', function( $post_id ) {
-		if ( ! is_numeric( $post_id ) || 'mai_location' !== get_post_type( $post_id ) || 'publish' === get_post_status( $post_id ) ) {
+		if ( ! is_numeric( $post_id ) || 'mai_location' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		if ( isset( $_POST['acf']['mai_location_image'] ) ) {
+			$image_id = absint( $_POST['acf']['mai_location_image'] );
+
+			if ( $image_id ) {
+				set_post_thumbnail( $post_id, $image_id );
+			}
+
+			// Remove this field from saving to the db.
+			unset( $_POST['acf']['mai_location_image'] );
+		}
+
+		if ( 'publish' === get_post_status( $post_id ) ) {
 			return;
 		}
 

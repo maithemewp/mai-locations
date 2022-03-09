@@ -1,5 +1,7 @@
 <?php
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_action( 'acf/init', 'mailocations_add_settings' );
 /**

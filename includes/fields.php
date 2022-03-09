@@ -1,5 +1,8 @@
 <?php
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 add_action( 'acf/init', 'mailocations_add_field_groups' );
 /**
  * Add Location Info and Locations field groups.
@@ -15,7 +18,7 @@ function mailocations_add_field_groups() {
 	// Location Info.
 	acf_add_local_field_group(
 		[
-			'key'        => 'group_6884dd5bdf8ed',
+			'key'        => 'mai_locatios_location_info_field_group',
 			'title'      => sprintf( '%s %s', $singular, __( 'Info', 'mai-locations' ) ),
 			'fields'     => mailocations_get_fields(),
 			'menu_order' => 10, // Allow other field groups before or after by setting menu_order.
@@ -31,14 +34,10 @@ function mailocations_add_field_groups() {
 		]
 	);
 
-	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
-	}
-
 	// Locations.
 	acf_add_local_field_group(
 		[
-			'key'         => 'group_606f28b8452ba',
+			'key'         => 'mai_locations_user_locations_field_group',
 			'title'       => $plural,
 			'description' => sprintf( '%s %s', $plural, __( 'Locations this user can manage' ) ),
 			'fields'      => [
@@ -63,10 +62,52 @@ function mailocations_add_field_groups() {
 						'operator' => '==',
 						'value'    => 'edit',
 					],
+					[
+						'param'    => 'current_user_role',
+						'operator' => '==',
+						'value'    => 'administrator',
+					],
 				],
 			],
 		]
 	);
+}
+
+add_filter( 'acf/load_value/key=mai_location_image', 'mailocations_load_location_image_value', 10, 3 );
+/**
+ * Loads featured image as the image field value.
+ *
+ * @since 0.4.0
+ *
+ * @param int   $value   The existing field value.
+ * @param int   $post_id The post ID.
+ * @param array $field   The existing field array.
+ *
+ * @return int
+ */
+function mailocations_load_location_image_value( $value, $post_id, $field ) {
+	return get_post_thumbnail_id( $post_id );
+}
+
+add_filter( 'acf/prepare_field/key=mai_location_image', 'mailocations_prepare_location_image_field');
+/**
+ * Disables featured image field in the backend
+ * since this will use the standard Featured Image metabox.
+ * We only need the field on the front end for `acf_form()`.
+ *
+ * @since 0.4.0
+ *
+ * @param $field array The field array containing all settings.
+ *
+ * @return array|false
+ */
+function mailocations_prepare_location_image_field( $field ) {
+	return ! is_admin() ? $field : false;
+	if ( is_admin() ) {
+		$field['disabled'] = true;
+	}
+
+	return $field;
 }
 
 /**
@@ -199,29 +240,37 @@ function mailocations_get_fields_defaults() {
  */
 function mailocations_get_general_fields() {
 	$fields = [
+		'location_image' => [
+			'key'           => 'mai_location_image',
+			'label'         => __( 'Featured Image', 'mai-locations' ),
+			'type'          => 'image',
+			'return_format' => 'id',
+			'preview_size'  => 'medium',
+			'library'       => 'all',
+		],
 		'location_general_tab' => [
-			'key'       => 'field_5773cc5befcc0',
+			'key'       => 'mai_location_general_tab',
 			'label'     => __( 'General Info', 'mai-locations' ),
 			'type'      => 'tab',
 			'placement' => 'left',
 		],
 		'location_url' => [
-			'key'   => 'field_5776a2650c6c7',
+			'key'   => 'mai_location_url',
 			'label' => __( 'Website URL', 'mai-locations' ),
 			'type'  => 'url',
 		],
 		'location_phone' => [
-			'key'   => 'field_5773cc5befcfe',
+			'key'   => 'mai_location_phone',
 			'label' => __( 'Phone', 'mai-locations' ),
 			'type'  => 'text',
 		],
 		'location_phone_2' => [
-			'key'   => 'field_5773cc5befd0a',
+			'key'   => 'mai_location_phone_2',
 			'label' => __( 'Secondary Phone', 'mai-locations' ),
 			'type'  => 'text',
 		],
 		'location_email' => [
-			'key'   => 'field_5773cc5befd24',
+			'key'   => 'mai_location_email',
 			'label' => __( 'Email', 'mai-locations' ),
 			'type'  => 'email',
 		],
@@ -242,42 +291,42 @@ function mailocations_get_general_fields() {
 function mailocations_get_address_fields() {
 	$fields = [
 		'location_address_tab' => [
-			'key'       => 'field_5773cc5befd31',
+			'key'       => 'mai_location_address_tab',
 			'label'     => __( 'Address & Map', 'mai-locations' ),
 			'type'      => 'tab',
 			'placement' => 'left',
 		],
 		'address_country' => [
-			'key'           => 'field_5773cc5befd87',
+			'key'           => 'mai_location_address_country',
 			'label'         => __( 'Country', 'mai-locations' ),
 			'type'          => 'select',
 			'default_value' => 'US',
 			'choices'       => mailocations_get_country_choices(),
 		],
 		'address_street' => [
-			'key'               => 'field_5773cc5befd4a',
+			'key'               => 'mai_location_address_street',
 			'label'             => __( 'Street', 'mai-locations' ),
 			'type'              => 'text',
 			'conditional_logic' => [
 				[
-					'field'    => 'field_5773cc5befd87',
+					'field'    => 'mai_location_address_country',
 					'operator' => '!=empty',
 				],
 			],
 		],
 		'address_street_2' => [
-			'key'               => 'field_5773cc5befd56',
+			'key'               => 'mai_location_address_street_2',
 			'label'             => __( 'Street (2nd line)', 'mai-locations' ),
 			'type'              => 'text',
 			'conditional_logic' => [
 				[
-					'field'    => 'field_5773cc5befd87',
+					'field'    => 'mai_location_address_country',
 					'operator' => '!=empty',
 				],
 			],
 		],
 		'address_city' => [
-			'key'     => 'field_5773cc5befd62',
+			'key'     => 'mai_location_address_city',
 			'label'   => __( 'City', 'mai-locations' ),
 			'type'    => 'text',
 			'wrapper' => [
@@ -285,13 +334,13 @@ function mailocations_get_address_fields() {
 			],
 			'conditional_logic' => [
 				[
-					'field'    => 'field_5773cc5befd87',
+					'field'    => 'mai_location_address_country',
 					'operator' => '!=empty',
 				],
 			],
 		],
 		'address_state' => [
-			'key'     => 'field_5773cc5befd6f',
+			'key'     => 'mai_location_address_state',
 			'label'   => __( 'State', 'mai-locations' ),
 			'type'    => 'select',
 			'wrapper' => [
@@ -300,18 +349,18 @@ function mailocations_get_address_fields() {
 			'choices'           => mailocations_get_state_choices(),
 			'conditional_logic' => [
 				[
-					'field'    => 'field_5773cc5befd87',
+					'field'    => 'mai_location_address_country',
 					'operator' => '!=empty',
 				],
 				[
-					'field'    => 'field_5773cc5befd87',
+					'field'    => 'mai_location_address_country',
 					'operator' => '==',
 					'value'    => 'US',
 				],
 			],
 		],
 		'address_state_int' => [
-			'key'     => 'field_6883dd6cfgd7f',
+			'key'     => 'mai_location_address_state_int',
 			'label'   => __( 'State/Province', 'mai-locations' ),
 			'type'    => 'text',
 			'wrapper' => [
@@ -319,18 +368,18 @@ function mailocations_get_address_fields() {
 			],
 			'conditional_logic' => [
 				[
-					'field'    => 'field_5773cc5befd87',
+					'field'    => 'mai_location_address_country',
 					'operator' => '!=empty',
 				],
 				[
-					'field'    => 'field_5773cc5befd87',
+					'field'    => 'mai_location_address_country',
 					'operator' => '!=',
 					'value'    => 'US',
 				],
 			],
 		],
 		'address_postcode' => [
-			'key'     => 'field_5773cc5befd7b',
+			'key'     => 'mai_location_address_postcode',
 			'label'   => __( 'Zipcode', 'mai-locations' ),
 			'type'    => 'text',
 			'wrapper' => [
@@ -338,13 +387,13 @@ function mailocations_get_address_fields() {
 			],
 			'conditional_logic' => [
 				[
-					'field'    => 'field_5773cc5befd87',
+					'field'    => 'mai_location_address_country',
 					'operator' => '!=empty',
 				],
 			],
 		],
 		'location' => [
-			'key'        => 'field_5773cc5befd93',
+			'key'        => 'mai_location_location',
 			'label'      => __( 'Location', 'mai-locations' ),
 			'type'       => 'google_map',
 			'center_lat' => '38.500000',
@@ -372,31 +421,31 @@ function mailocations_get_social_fields() {
 
 	$fields = [
 		'location_social_tab' => [
-			'key'       => 'field_5773cc5befda0',
+			'key'       => 'mai_location_social_tab',
 			'label'     => __( 'Social Media', 'mai-locations' ),
 			'type'      => 'tab',
 			'placement' => 'left',
 		],
 		'facebook' => [
-			'key'          => 'field_5773cc5befdac',
+			'key'          => 'mai_location_facebook',
 			'label'        => 'Facebook',
 			'type'         => 'url',
 			'instructions' => __( 'Enter URL', 'mai-locations' ),
 		],
 		'twitter' => [
-			'key'          => 'field_5773cc5befdb8',
+			'key'          => 'mai_location_twitter',
 			'label'        => 'Twitter',
 			'type'         => 'text',
 			'instructions' => __( 'Enter username without the @ symbol', 'mai-locations' ),
 		],
 		'youtube' => [
-			'key'          => 'field_5773cc5befdd0',
+			'key'          => 'mai_location_youtube',
 			'label'        => 'YouTube',
 			'type'         => 'url',
 			'instructions' => __( 'Enter URL', 'mai-locations' ),
 		],
 		'linkedin' => [
-			'key'          => 'field_5773cc5befddc',
+			'key'          => 'mai_location_linkedin',
 			'label'        => 'LinkedIn',
 			'type'         => 'url',
 			'instructions' => __( 'Enter URL', 'mai-locations' ),
@@ -408,7 +457,7 @@ function mailocations_get_social_fields() {
 			'instructions' => __( 'Enter username only', 'mai-locations' ),
 		],
 		'pinterest' => [
-			'key'          => 'field_5773cc5befder',
+			'key'          => 'mai_location_pinterest',
 			'label'        => 'Pinterest',
 			'type'         => 'url',
 			'instructions' => __( 'Enter URL', 'mai-locations' ),

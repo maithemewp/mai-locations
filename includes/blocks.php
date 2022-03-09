@@ -1,5 +1,8 @@
 <?php
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 add_action( 'acf/init', 'mai_register_locations_table_block' );
 /**
  * Register Mai Location Table block.

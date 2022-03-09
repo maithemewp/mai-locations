@@ -1,5 +1,8 @@
 <?php
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 add_shortcode( 'mai_location_address', 'mailocation_location_address_shortcode' );
 /**
  * Gets formatted address.

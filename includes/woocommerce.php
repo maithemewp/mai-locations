@@ -1,5 +1,8 @@
 <?php
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 add_action( 'plugins_loaded', 'mailocations_woocommerce_account_tab' );
 /**
  * Adds locations table to WooCommerce account menu.
