@@ -44,3 +44,7 @@
 #mai-location-edit .acf-form-submit {
 	margin-top: 16px;
 }
+
+.media-modal-content {
+	--button-color: currentColor;
+}

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 (3/9/22)
+* Added: Support for adding a featured image via the front end location edit form.
+* Changed: Field names are now humnan readable instead of auto-generated key.
+
 ## 0.3.0 (7/23/21)
 * Added: Default text if no results are available for a user's location table.
 * Changed: Post status now forces to `publish` when saving the location edit form on the front end.
