@@ -29,10 +29,11 @@ class MaiLocations_Location_Import {
 	 * @return void
 	 */
 	function hooks() {
-		add_action( 'acf/init',                                           [ $this, 'register_page' ] );
+		add_action( 'acf/init',                                           [ $this, 'register_page' ], 12 );
 		add_action( 'acf/init',                                           [ $this, 'register_fields' ] );
 		add_filter( 'acf/load_field/key=mailocations_location_user_role', [ $this, 'load_roles' ] );
 		add_filter( 'acf/load_field/key=mailocations_location_status',    [ $this, 'load_statuses' ] );
+		add_action( 'mai_location_page_location-import',                  [ $this, 'confirmation' ], 10 );
 		add_action( 'acf/save_post',                                      [ $this, 'maybe_import_locations' ], 4 );
 	}
 
@@ -54,7 +55,6 @@ class MaiLocations_Location_Import {
 				'parent'          => 'edit.php?post_type=mai_location',
 				'menu_slug'       => 'location-import',
 				'capability'      => 'manage_options',
-				'position'        => 80,
 				'update_button'   => __( 'Import Now', 'mai-locations' ),
 				'updated_message' => __( 'Imported', 'mai-locations' ),
 			]
@@ -204,6 +204,28 @@ class MaiLocations_Location_Import {
 		return $field;
 	}
 
+	function confirmation() {
+		if ( ! filter_input( INPUT_GET, 'confirmation', FILTER_VALIDATE_INT ) ) {
+			return;
+		}
+
+		$results = [
+			esc_html__( 'Locations imported', 'mai-location' ) => filter_input( INPUT_GET, 'imported', FILTER_VALIDATE_INT ),
+			esc_html__( 'Locations skipped', 'mai-location' )  => filter_input( INPUT_GET, 'skipped', FILTER_VALIDATE_INT ),
+			esc_html__( 'Locations failed', 'mai-location' )   => filter_input( INPUT_GET, 'failed', FILTER_VALIDATE_INT ),
+			esc_html__( 'Users imported', 'mai-location' )     => filter_input( INPUT_GET, 'users_imported', FILTER_VALIDATE_INT ),
+			esc_html__( 'Users updated', 'mai-location' )      => filter_input( INPUT_GET, 'users_updated', FILTER_VALIDATE_INT ),
+			esc_html__( 'Users skipped', 'mai-location' )      => filter_input( INPUT_GET, 'users_skipped', FILTER_VALIDATE_INT ),
+			esc_html__( 'Users failed', 'mai-location' )       => filter_input( INPUT_GET, 'users_failed', FILTER_VALIDATE_INT ),
+		];
+
+		echo '<div class="notice notice-info is-dismissible">';
+			foreach ( $results as $text => $count ) {
+				printf( '<p>%s: %s</p>', $text, $count );
+			}
+		echo '</div>';
+	}
+
 	/**
 	 * Maybe imports locations and creates associtated users.
 	 *
@@ -279,9 +301,14 @@ class MaiLocations_Location_Import {
 	 * @return void
 	 */
 	function import() {
-		$imported = [];
-		$failed   = [];
-		$fields   = $this->get_fields();
+		$imported       = [];
+		$skipped        = [];
+		$failed         = [];
+		$users_imported = [];
+		$users_updated  = [];
+		$users_skipped  = [];
+		$users_failed   = [];
+		$fields         = $this->get_fields();
 
 		foreach ( $this->csv as $location ) {
 			$first_name = $last_name = $email = '';
@@ -385,19 +412,28 @@ class MaiLocations_Location_Import {
 				if ( $existing ) {
 					// Set existing location ID.
 					$location_id = $existing->ID;
+
+					// Skipped, existing.
+					$skipped[] = $existing->ID;
 				} else {
 					// Create Location.
 					$location_id = wp_insert_post( $location_args );
-				}
-			}
 
-			// Bail if failed.
-			if ( ! $location_id || is_wp_error( $location_id ) ) {
-				$failed[] = $location_args;
-			}
-			// Imported.
-			else {
-				$imported[] = $location_args;
+					// Bail if failed.
+					if ( ! $location_id || is_wp_error( $location_id ) ) {
+						if ( is_wp_error( $location_id ) ) {
+							$failed[] = $location_id->get_error_message();
+						}
+					}
+					// Imported.
+					else {
+						$imported[] = $location_args;
+					}
+				}
+
+			} else {
+				// Skipped, no post title.
+				$skipped[] = $location_id;
 			}
 
 			// If creating users.
@@ -414,6 +450,8 @@ class MaiLocations_Location_Import {
 
 						// Update user locations.
 						update_user_meta( $user_id, 'user_locations', array_unique( $existing_locations ) );
+
+						$users_updated[] = $user_id;
 					}
 				}
 				// New user.
@@ -436,13 +474,36 @@ class MaiLocations_Location_Import {
 
 							// Update user locations.
 							update_user_meta( $user_id, 'user_locations', [ $location_id ] );
+
+							$users_imported[] = $user_id;
+						} else {
+							$users_skipped[] = $user_id;
 						}
+
+					} elseif ( is_wp_error( $user_id ) ) {
+						$users_failed[] = $user_id->get_error_message();
 					}
 				}
 			}
 		}
 
-		// TODO: Handle imported and failed.
+		// Handle Confimration and redirect.
+		$redirect = add_query_arg(
+			[
+				'confirmation'   => 1,
+				'imported'       => count( $imported ),
+				'skipped'        => count( $skipped ),
+				'failed'         => count( $failed ),
+				'users_imported' => count( $users_imported ),
+				'users_updated'  => count( $users_updated ),
+				'users_skipped'  => count( $users_skipped ),
+				'users_failed'   => count( $users_failed ),
+			],
+			admin_url( 'edit.php?post_type=mai_location&page=location-import' )
+		);
+
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 
 	/**
