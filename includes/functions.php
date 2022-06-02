@@ -116,7 +116,7 @@ function mailocations_post_exists( $post_id ) {
  *
  * @param array $post_args The post array used in wp_insert_post().
  * @param array $meta_args The args used for meta_input in wp_insert_post().
- * @param int   $user_id   The user ID to create the
+ * @param int   $user_id   The user ID to add the location to.
  *
  * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
  */

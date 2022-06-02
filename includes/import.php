@@ -204,6 +204,13 @@ class MaiLocations_Location_Import {
 		return $field;
 	}
 
+	/**
+	 * Displays confirmation notice.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
 	function confirmation() {
 		if ( ! filter_input( INPUT_GET, 'confirmation', FILTER_VALIDATE_INT ) ) {
 			return;
@@ -214,7 +221,6 @@ class MaiLocations_Location_Import {
 			esc_html__( 'Locations skipped', 'mai-location' )  => filter_input( INPUT_GET, 'skipped', FILTER_VALIDATE_INT ),
 			esc_html__( 'Locations failed', 'mai-location' )   => filter_input( INPUT_GET, 'failed', FILTER_VALIDATE_INT ),
 			esc_html__( 'Users imported', 'mai-location' )     => filter_input( INPUT_GET, 'users_imported', FILTER_VALIDATE_INT ),
-			esc_html__( 'Users updated', 'mai-location' )      => filter_input( INPUT_GET, 'users_updated', FILTER_VALIDATE_INT ),
 			esc_html__( 'Users skipped', 'mai-location' )      => filter_input( INPUT_GET, 'users_skipped', FILTER_VALIDATE_INT ),
 			esc_html__( 'Users failed', 'mai-location' )       => filter_input( INPUT_GET, 'users_failed', FILTER_VALIDATE_INT ),
 		];
@@ -301,19 +307,19 @@ class MaiLocations_Location_Import {
 	 * @return void
 	 */
 	function import() {
+		$users_imported = [];
+		$users_skipped  = [];
+		$users_failed   = [];
 		$imported       = [];
 		$skipped        = [];
 		$failed         = [];
-		$users_imported = [];
-		$users_updated  = [];
-		$users_skipped  = [];
-		$users_failed   = [];
 		$fields         = $this->get_fields();
 
-		foreach ( $this->csv as $location ) {
+		foreach ( $this->csv as $index => $location ) {
+			$user_id    = 0;
 			$first_name = $last_name = $email = '';
 
-			// Set user data.
+			// If creating users.
 			if ( $this->create_users ) {
 				if ( isset( $location['user_first_name'] ) ) {
 					$first_name = $location['user_first_name'];
@@ -326,7 +332,45 @@ class MaiLocations_Location_Import {
 				if ( isset( $location['user_email'] ) ) {
 					$email = $location['user_email'];
 				}
-			}
+
+				// If email.
+				if ( $email ) {
+					// Check for existing.
+					$existing = get_user_by( 'email', $email );
+					$existing = $existing ?: get_user_by( 'login', $email );
+					$user_id  = $existing ? $existing->ID : false;
+
+					// If no existing user.
+					if ( ! $user_id ) {
+						// Create user.
+						$user_id = wp_insert_user(
+							[
+								'user_login'   => $email,
+								'user_email'   => $email,
+								'display_name' => trim( $first_name . ' ' . $last_name ),
+								'nickname'     => trim( $first_name . ' ' . $last_name ),
+								'first_name'   => $first_name,
+								'last_name'    => $last_name,
+								'role'         => $this->user_role,
+							]
+						);
+
+						// Failed.
+						if ( is_wp_error( $user_id ) ) {
+							$users_failed[] = $user_id->get_error_message();
+							$user_id        = 0;
+						}
+						// Imported.
+						else {
+							$users_imported[] = $user_id;
+						}
+					}
+					// Skipped.
+					else {
+						$users_skipped[] = $user_id;
+					}
+				} // If email.
+			} // If creating users.
 
 			// Remove user data.
 			unset( $location['user_first_name'] );
@@ -359,7 +403,7 @@ class MaiLocations_Location_Import {
 				$location_cats = [];
 			}
 
-			// Set base args.
+			// Set post args.
 			$location_args = [
 				'post_type'    => 'mai_location',
 				'post_status'  => $this->post_status,
@@ -381,13 +425,13 @@ class MaiLocations_Location_Import {
 
 				if ( $term_ids ) {
 					$location_args['tax_input'] = [
-						'mai_location_cat' =>$term_ids,
+						'mai_location_cat' => $term_ids,
 					];
 				}
 			}
 
 			// Set meta.
-			$meta = [];
+			$meta_args = [];
 
 			foreach ( $location as $key => $value ) {
 				// Skip meta that is not registered in ACF via Mai Locations PHP filters.
@@ -396,94 +440,39 @@ class MaiLocations_Location_Import {
 				}
 
 				$esc          = isset( $allowed[ $key ] ) && is_callable( $allowed[ $key ] ) ? $allowed[ $key ] : 'esc_html';
-				$meta[ $key ] = $esc( $value );
+				$meta_args[ $key ] = $esc( $value );
 			}
-
-			if ( $meta ) {
-				$location_args['meta_input'] = $meta;
-			}
-
-			$location_id = false;
 
 			// If we have a post title.
 			if ( $post_title ) {
 				$existing = get_page_by_title( $post_title, OBJECT, 'mai_location' );
 
 				if ( $existing ) {
-					// Set existing location ID.
-					$location_id = $existing->ID;
+					// Add location to user.
+					if ( $user_id ) {
+						mailocations_add_location_to_user( $existing->ID, $user_id );
+					}
 
 					// Skipped, existing.
 					$skipped[] = $existing->ID;
+
 				} else {
-					// Create Location.
-					$location_id = wp_insert_post( $location_args );
+					// Create location, add to user.
+					$location_id = mailocations_create_location( $location_args, $meta_args, $user_id );
 
 					// Bail if failed.
-					if ( ! $location_id || is_wp_error( $location_id ) ) {
-						if ( is_wp_error( $location_id ) ) {
-							$failed[] = $location_id->get_error_message();
-						}
+					if ( is_wp_error( $location_id ) ) {
+						$failed[] = $location_id->get_error_message();
 					}
 					// Imported.
 					else {
 						$imported[] = $location_args;
 					}
 				}
-
-			} else {
-				// Skipped, no post title.
-				$skipped[] = $location_id;
 			}
-
-			// If creating users.
-			if ( $this->create_users && $email ) {
-				$existing = get_user_by( 'email', $email );
-				$existing = $existing ?: get_user_by( 'login', $email );
-				$user_id  = $existing ? $existing->ID : false;
-
-				// If existing user.
-				if ( $user_id ) {
-					if ( $location_id && ! is_wp_error( $location_id ) ) {
-						$existing_locations   = (array) get_user_meta( $user_id, 'user_locations', true );
-						$existing_locations[] = $location_id;
-
-						// Update user locations.
-						update_user_meta( $user_id, 'user_locations', array_unique( $existing_locations ) );
-
-						$users_updated[] = $user_id;
-					}
-				}
-				// New user.
-				else {
-					// Create user.
-					$user_id = wp_insert_user(
-						[
-							'user_login'   => $email,
-							'user_email'   => $email,
-							'display_name' => trim( $first_name . ' ' . $last_name ),
-							'nickname'     => trim( $first_name . ' ' . $last_name ),
-							'first_name'   => $first_name,
-							'last_name'    => $last_name,
-							'role'         => $this->user_role,
-						]
-					);
-
-					if ( $user_id && ! is_wp_error( $user_id ) ) {
-						if ( $location_id && ! is_wp_error( $location_id ) ) {
-
-							// Update user locations.
-							update_user_meta( $user_id, 'user_locations', [ $location_id ] );
-
-							$users_imported[] = $user_id;
-						} else {
-							$users_skipped[] = $user_id;
-						}
-
-					} elseif ( is_wp_error( $user_id ) ) {
-						$users_failed[] = $user_id->get_error_message();
-					}
-				}
+			// Skipped, no post title.
+			else {
+				$skipped[] = $index + 1; // Row number, I think.
 			}
 		}
 
@@ -495,7 +484,6 @@ class MaiLocations_Location_Import {
 				'skipped'        => count( $skipped ),
 				'failed'         => count( $failed ),
 				'users_imported' => count( $users_imported ),
-				'users_updated'  => count( $users_updated ),
 				'users_skipped'  => count( $users_skipped ),
 				'users_failed'   => count( $users_failed ),
 			],
