@@ -1,0 +1,2 @@
+user_first_name,user_last_name,user_email,location_name,address_street,address_street,address_city,address_state,address_state_int,address_postcode,address_country,location_url,location_phone,location_phone_2,location_email,location_cat
+John,Doe,name@example.com,Example Location,123 Main St.,Suite 2,Hackettstown,NJ,,07840,US,https://bizbudding.com,(555) 555-1234,(555) 5555-4321,team@examplelocation.com,"Example Category, Must Exist in WP"

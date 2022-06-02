@@ -73,11 +73,21 @@ class MaiLocations_Location_Import {
 			return;
 		}
 
+		$download_link = sprintf( '<a href="%sassets/csv/mai-locations-import-template.csv" target="_blank" download">%s</a>', MAI_LOCATIONS_PLUGIN_URL, __( 'Download example CSV file', 'mai-locations' ) );
+
 		acf_add_local_field_group(
 			[
 				'key'    => 'mailocations_location_import_field_group',
 				'title'  => 'Location Import',
 				'fields' => [
+					[
+						'key'       => 'mailocations_import_description',
+						'label'     => '',
+						'message'   => sprintf( '<p>%s</p><p>%s.</p>', __( 'Import locations and optionally create users. Locations with an identical name (case-sensitive post title) will be skipped, all others will be imported. Add additional simple (text, number, etc.) post_meta data can be added to the CSV with the header as the meta key. Additional meta must have an ACF field registered in PHP via the filters available in Mai Locations.', 'mai-locations' ), $download_link ),
+						'type'      => 'message',
+						'new_lines' => '',
+						'esc_html'  => 0,
+					],
 					[
 						'key'           => 'mailocations_import_file',
 						'label'         => __( 'File (.csv]', 'mai-locations' ),
@@ -298,7 +308,7 @@ class MaiLocations_Location_Import {
 
 			// Set title and remove from data.
 			if ( isset( $location['location_name'] ) ) {
-				$post_title = $location['location_name'];
+				$post_title = trim( $location['location_name'] );
 				unset( $location['location_name'] );
 			} else {
 				$post_title = '';
@@ -306,7 +316,7 @@ class MaiLocations_Location_Import {
 
 			// Set content and remove from data.
 			if ( isset( $location['location_description'] ) ) {
-				$post_content = $location['location_description'];
+				$post_content = trim( $location['location_description'] );
 				unset( $location['location_description'] );
 			} else {
 				$post_content = '';
