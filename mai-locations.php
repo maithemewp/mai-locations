@@ -256,7 +256,8 @@ final class Mai_Locations_Plugin {
 		 *
 		 * @return void
 		 */
-		register_taxonomy( 'mai_location_cat', [ 'mai_location' ], apply_filters( 'mai_location_cat_args',
+		register_taxonomy(
+			'mai_location_cat', [ 'mai_location' ], apply_filters( 'mai_location_cat_args',
 			[
 				'hierarchical' => true,
 				'labels'       => [
@@ -264,14 +265,14 @@ final class Mai_Locations_Plugin {
 					'singular_name' => $cat_singular,
 					'menu_name'     => $cat_plural,
 				],
-				'meta_box_cb'                => false,
-				'public'                     => true,
-				'show_admin_column'          => true,
-				'show_in_nav_menus'          => true,
-				'show_in_rest'               => true,
-				'show_tagcloud'              => true,
-				'show_ui'                    => true,
-				'rewrite'                    => [ 'slug' => 'location-categories', 'with_front' => false ],
+				'meta_box_cb'       => false,
+				'public'            => true,
+				'show_admin_column' => true,
+				'show_in_nav_menus' => true,
+				'show_in_rest'      => true,
+				'show_tagcloud'     => true,
+				'show_ui'           => true,
+				'rewrite'           => [ 'slug' => 'location-categories', 'with_front' => false ],
 			]
 		) );
 	}

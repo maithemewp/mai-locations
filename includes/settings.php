@@ -12,10 +12,10 @@ add_action( 'acf/init', 'mailocations_add_settings' );
  * @return void
  */
 function mailocations_add_settings() {
-	// Settings Page.
+	// Add page.
 	acf_add_options_sub_page(
 		[
-			'title'      => __( 'Settings Page', 'mai-locations' ),
+			'title'      => __( 'Settings', 'mai-locations' ),
 			'parent'     => 'edit.php?post_type=mai_location',
 			'menu_slug'  => 'location-settings',
 			'capability' => 'manage_options'
