@@ -141,8 +141,9 @@ final class Mai_Locations_Plugin {
 	 * @return  void
 	 */
 	public function hooks() {
-		add_action( 'admin_init', [ $this, 'updater' ] );
-		add_action( 'init',       [ $this, 'register_content_types' ] );
+		add_action( 'admin_init',    [ $this, 'updater' ] );
+		add_action( 'init',          [ $this, 'register_content_types' ] );
+		add_action( 'pre_get_posts', [ $this, 'locations_order' ] );
 
 		register_activation_hook( __FILE__, [ $this, 'activate' ] );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
@@ -275,6 +276,28 @@ final class Mai_Locations_Plugin {
 				'rewrite'           => [ 'slug' => 'location-categories', 'with_front' => false ],
 			]
 		) );
+	}
+
+	/**
+	 * Changes default location archives to order alphabetically by title.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function locations_order( $query ) {
+		// Bail if not the main query.
+		if ( ! $query->is_main_query() ) {
+			return;
+		}
+
+		// Bail if not a location archive.
+		if ( ! ( is_post_type_archive( 'mai_location' ) || is_tax( 'mai_location_cat' ) ) ) {
+			return;
+		}
+
+		$query->set( 'orderby', 'title' );
+		$query->set( 'order', 'ASC' );
 	}
 
 	/**
