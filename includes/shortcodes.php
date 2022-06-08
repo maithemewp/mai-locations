@@ -114,10 +114,10 @@ function mailocation_location_url_shortcode( $atts ) {
 	$html = sprintf( '<div class="mai-location-url"%s>', $atts['style'] ? sprintf( ' style="%s"', $atts['style'] ) : '' );
 		$html .= $atts['before'];
 
-		$parsed = wp_parse_url( $url );
+		$parsed = wp_parse_url( $url, PHP_URL_HOST );
 
-		if ( $parsed && isset( $parsed['host'] ) && $parsed['host'] ) {
-			$formatted = $parsed['host'];
+		if ( $parsed ) {
+			$formatted = ltrim( $parsed, 'www.' );
 		} else {
 			$formatted = $url;
 		}
