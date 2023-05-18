@@ -287,10 +287,12 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 		return;
 	}
 
-	$location = get_post_meta( $post_id, 'location', true );
-	$address  = [];
-	$update   = [];
-	$keys     = [
+	$location  = get_post_meta( $post_id, 'location', true );
+	$countries = mailocations_get_country_choices();
+	$states    = mailocations_get_state_choices();
+	$address   = [];
+	$update    = [];
+	$keys      = [
 		'address_country',
 		'address_street',
 		'address_city',
@@ -301,6 +303,15 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 
 	foreach ( $keys as $key ) {
 		$value = get_post_meta( $post_id, $key, true );
+
+		switch ( $key ) {
+			case 'address_country':
+				$value = isset( $countries[ $key ] ) ? $value : '';
+				break;
+			case 'address_state':
+				$value = isset( $states[ $key ] ) ? $value : '';
+			break;
+		}
 
 		if ( $value ) {
 			$address[] = $value;
