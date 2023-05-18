@@ -112,7 +112,23 @@ function mailocations_post_exists( $post_id ) {
 }
 
 /**
+ * Gets the distance from the queried location.
+ *
+ * @since TBD
+ *
+ * @param  WP_Post   $post_obj
+ * @param  int|false $round    The amount of decimal places to round the value to.
+ *
+ * @return void
+ */
+function mailocations_get_the_distance( $post_obj = null, $round = false ) {
+	return Mai_Geo_Query::get_the_distance( $post_obj, $round );
+}
+
+/**
  * Creates a location post.
+ *
+ * @since 0.1.0
  *
  * @param array $post_args The post array used in wp_insert_post().
  * @param array $meta_args The args used for meta_input in wp_insert_post().

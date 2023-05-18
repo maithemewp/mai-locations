@@ -178,6 +178,52 @@ function mailocation_location_email_shortcode( $atts ) {
 	return $html;
 }
 
+add_shortcode( 'mai_locations_distance', function( $atts ) {
+	// Atts.
+	$atts = shortcode_atts(
+		[
+			'before' => '',
+			'after'  => '',
+			'round'  => 2,
+		],
+		$atts,
+		'mai_locations_distance'
+	);
+
+	// Sanitize.
+	$atts = [
+		'before' => esc_html( $atts['before'] ),
+		'after'  => esc_html( $atts['after'] ),
+		'round'  => absint( $atts['round'] ),
+	];
+
+	// Get the distance.
+	$post     = get_post( get_the_ID() );
+	$distance = $post ? mailocations_get_the_distance( $post, $round = false ) : '';
+
+	// Bail if no distance.
+	if ( ! $distance ) {
+		return;
+	}
+
+	// Rounding.
+	if ( $atts['round'] ) {
+		$distance = round( $distance, $atts['round'] );
+	}
+
+	// Add content before.
+	if ( $atts['before'] ) {
+		$distance = $atts['before'] . $distance;
+	}
+
+	// Add content after.
+	if ( $atts['after'] ) {
+		$distance .= $atts['after'];
+	}
+
+	return $distance;
+});
+
 add_shortcode( 'mai_locations_table', 'mailocation_location_table_shortcode' );
 /**
  * Gets a locations table with edit location links/form.
