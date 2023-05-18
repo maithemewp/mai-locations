@@ -413,8 +413,6 @@ function mailocations_get_address_fields() {
  * @return array
  */
 function mailocations_get_social_fields() {
-	return [];
-
 	$fields = [
 		'location_social_tab' => [
 			'key'       => 'mai_location_social_tab',
@@ -447,7 +445,7 @@ function mailocations_get_social_fields() {
 			'instructions' => __( 'Enter URL', 'mai-locations' ),
 		],
 		'instagram' => [
-			'key'          => 'field_5773cc5befde8',
+			'key'          => 'mai_location_instagram',
 			'label'        => 'Instagram',
 			'type'         => 'text',
 			'instructions' => __( 'Enter username only', 'mai-locations' ),
@@ -457,6 +455,12 @@ function mailocations_get_social_fields() {
 			'label'        => 'Pinterest',
 			'type'         => 'url',
 			'instructions' => __( 'Enter URL', 'mai-locations' ),
+		],
+		'tiktok' => [
+			'key'          => 'mai_location_tiktok',
+			'label'        => 'TikTok',
+			'type'         => 'text',
+			'instructions' => __( 'Enter username only', 'mai-locations' ),
 		],
 	];
 
