@@ -12,6 +12,10 @@ add_action( 'acf/init', 'mailocations_add_settings' );
  * @return void
  */
 function mailocations_add_settings() {
+	if ( ! function_exists( 'acf_add_options_sub_page' ) ) {
+		return;
+	}
+
 	// Add page.
 	acf_add_options_sub_page(
 		[
