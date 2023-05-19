@@ -1,0 +1,16 @@
+{
+	"name": "acf/mai-location-filter",
+	"title": "Mai Location Filter",
+	"description": "Filter locations. Companion block for Mai Location Proximity Search.",
+	"category": "widgets",
+	"keywords": [ "location", "filter", "taxonomy" ],
+	"icon": "category",
+	"textdomain": "mai-locations",
+	"acf": {
+		"mode": "preview",
+		"renderCallback": "mailocations_do_location_filter_block"
+	},
+	"supports": {
+		"align": false
+	}
+  }

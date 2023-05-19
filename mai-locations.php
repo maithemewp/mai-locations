@@ -98,11 +98,6 @@ final class Mai_Locations_Plugin {
 			define( 'MAI_LOCATIONS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		}
 
-		// Plugin Includes Path.
-		if ( ! defined( 'MAI_LOCATIONS_INCLUDES_DIR' ) ) {
-			define( 'MAI_LOCATIONS_INCLUDES_DIR', MAI_LOCATIONS_PLUGIN_DIR . 'includes/' );
-		}
-
 		// Plugin Folder URL.
 		if ( ! defined( 'MAI_LOCATIONS_PLUGIN_URL' ) ) {
 			define( 'MAI_LOCATIONS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -117,7 +112,6 @@ final class Mai_Locations_Plugin {
 		if ( ! defined( 'MAI_LOCATIONS_BASENAME' ) ) {
 			define( 'MAI_LOCATIONS_BASENAME', dirname( plugin_basename( __FILE__ ) ) );
 		}
-
 	}
 
 	/**
@@ -131,7 +125,11 @@ final class Mai_Locations_Plugin {
 		// Include vendor libraries.
 		require_once __DIR__ . '/vendor/autoload.php';
 		// Includes.
-		foreach ( glob( MAI_LOCATIONS_INCLUDES_DIR . '*.php' ) as $file ) { include $file; }
+		foreach ( glob( MAI_LOCATIONS_PLUGIN_DIR . 'includes/' . '*.php' ) as $file ) { include $file; }
+		// Classes.
+		foreach ( glob( MAI_LOCATIONS_PLUGIN_DIR . 'classes/' . '*.php' ) as $file ) { include $file; }
+		// Blocks.
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/location-filter/block.php';
 	}
 
 	/**
@@ -141,9 +139,9 @@ final class Mai_Locations_Plugin {
 	 * @return  void
 	 */
 	public function hooks() {
-		add_action( 'admin_init',    [ $this, 'updater' ] );
-		add_action( 'init',          [ $this, 'register_content_types' ] );
-		add_action( 'pre_get_posts', [ $this, 'locations_order' ] );
+		add_action( 'plugins_loaded', [ $this, 'updater' ] );
+		add_action( 'init',           [ $this, 'register_content_types' ] );
+		add_action( 'pre_get_posts',  [ $this, 'locations_order' ], 8 );
 
 		register_activation_hook( __FILE__, [ $this, 'activate' ] );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
