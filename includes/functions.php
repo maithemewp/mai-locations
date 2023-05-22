@@ -257,59 +257,37 @@ function mailocations_create_location_from_woocommerce_user( $user_id, $args = [
 	return mailocations_create_location( $post_args, $meta_args, $user_id );
 }
 
-add_action( 'acf/update_value/key=mai_location_location', 'mailocations_save_lat_lng', 10, 4 );
 /**
- * Saves separate latitude and longitude values from map field.
+ * Gets all taxonomies registered to locations.
  *
- * @param array $value
- * @param mixed $post_id
- * @param array $field
- * @param JSON  $original I think it's JSON?
+ * @since TBD
  *
  * @return array
  */
-function mailocations_save_lat_lng( $value, $post_id, $field, $original ) {
-	if ( is_array( $value ) ) {
-		if ( isset( $value['lat'] ) ) {
-			update_field( 'location_lat', $value, $post_id );
+function mailocations_get_location_taxonomies() {
+	static $taxonomies = null;
+
+	if ( ! is_null( $taxonomies ) ) {
+		return $taxonomies;
+	}
+
+	if ( ! is_array( $taxonomies ) ) {
+		$ttaxonomies = [];
+	}
+
+	$objects = get_object_taxonomies( 'mai_location' );
+
+	if ( $objects ) {
+		foreach ( $objects as $name ) {
+			$taxonomy = get_taxonomy( $name );
+
+			if ( $taxonomy ) {
+				$taxonomies[ $name ] = $taxonomy->label;
+			}
 		}
-
-		if ( isset( $value['lng'] ) ) {
-			update_field( 'location_lng', $value, $post_id );
-		}
 	}
 
-	return $value;
-}
-
-add_action( 'acf/save_post', 'mailocations_maybe_update_map_field', 20, 1 );
-/**
- * Update the google map field from address data after a location is saved.
- *
- * @since 0.1.0
- *
- * @param int $post_id The post ID.
- *
- * @return void
- */
-function mailocations_maybe_update_map_field( $post_id ) {
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-		return;
-	}
-
-	if ( wp_is_post_autosave( $post_id ) ) {
-		return;
-	}
-
-	if ( wp_is_post_revision( $post_id ) ) {
-		return;
-	}
-
-	if ( 'mai_location' !== get_post_type( $post_id ) ) {
-		return;
-	}
-
-	mailocations_update_location_from_google_maps( $post_id );
+	return $taxonomies;
 }
 
 /**

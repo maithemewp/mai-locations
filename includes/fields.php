@@ -121,6 +121,62 @@ function mailocations_prepare_location_coordinates_fields( $field ) {
 	return $field;
 }
 
+
+add_action( 'acf/update_value/key=mai_location_location', 'mailocations_save_lat_lng', 10, 4 );
+/**
+ * Saves separate latitude and longitude values from map field.
+ *
+ * @param array $value
+ * @param mixed $post_id
+ * @param array $field
+ * @param JSON  $original I think it's JSON?
+ *
+ * @return array
+ */
+function mailocations_save_lat_lng( $value, $post_id, $field, $original ) {
+	if ( is_array( $value ) ) {
+		if ( isset( $value['lat'] ) ) {
+			update_field( 'location_lat', $value, $post_id );
+		}
+
+		if ( isset( $value['lng'] ) ) {
+			update_field( 'location_lng', $value, $post_id );
+		}
+	}
+
+	return $value;
+}
+
+add_action( 'acf/save_post', 'mailocations_maybe_update_map_field', 20, 1 );
+/**
+ * Update the google map field from address data after a location is saved.
+ *
+ * @since 0.1.0
+ *
+ * @param int $post_id The post ID.
+ *
+ * @return void
+ */
+function mailocations_maybe_update_map_field( $post_id ) {
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	if ( wp_is_post_autosave( $post_id ) ) {
+		return;
+	}
+
+	if ( wp_is_post_revision( $post_id ) ) {
+		return;
+	}
+
+	if ( 'mai_location' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	mailocations_update_location_from_google_maps( $post_id );
+}
+
 /**
  * Gets all fields for metabox.
  *

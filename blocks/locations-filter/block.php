@@ -3,7 +3,7 @@
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-add_action( 'acf/init', 'mailocations_register_location_filter_block' );
+add_action( 'acf/init', 'mailocations_register_locations_filter_block' );
 /**
  * Register Mai Location Filter block.
  *
@@ -11,7 +11,7 @@ add_action( 'acf/init', 'mailocations_register_location_filter_block' );
  *
  * @return void
  */
-function mailocations_register_location_filter_block() {
+function mailocations_register_locations_filter_block() {
 	register_block_type( __DIR__ . '/block.json' );
 }
 
@@ -29,7 +29,7 @@ function mailocations_register_location_filter_block() {
  *
  * @return void
  */
-function mailocations_do_location_filter_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
+function mailocations_do_locations_filter_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
 
 	// TODO: Show note in preview/editor so it's not blank when no filter is chosen.
 
@@ -57,12 +57,19 @@ function mailocations_do_location_filter_block( $attributes, $content, $is_previ
 		return;
 	}
 
+	// Get any selected items.
+	$selected = isset( $_GET[ $taxonomy ] ) && ! empty( $_GET[ $taxonomy ] ) ? $_GET[ $taxonomy ] : [];
+	$selected = $selected ? array_flip( array_filter( explode( '-', $selected ) ) ) : $selected;
+
 	echo '<ul class="mailocations-filter-list">';
 	foreach ( $terms as $term ) {
-		printf( '<li><label><input type="checkbox" class="mailocations-filter" name="%s[]" data-filter="%s" value="%s"> %s</label></li>',
+		$checked = $selected && isset( $selected[ $term->slug ] ) ? ' checked' : '';
+
+		printf( '<li><label><input type="checkbox" class="mailocations-filter" name="%s[]" data-filter="%s" value="%s"%s> %s</label></li>',
 			$taxonomy,
 			$taxonomy,
 			$term->slug,
+			$checked,
 			$term->name
 		);
 	}
@@ -84,11 +91,11 @@ function mailocations_register_location_filter_field_group() {
 
 	acf_add_local_field_group(
 		[
-			'key'    => 'mailocations_location_filter_field_group',
+			'key'    => 'mailocations_locations_filter_field_group',
 			'title'  => __( 'Mai URL Parameter Content', 'mai-locations' ),
 			'fields' => [
 				[
-					'key'           => 'mailocations_location_filter',
+					'key'           => 'mailocations_locations_filter',
 					'label'         => __( 'Filter by', 'mai-locations' ),
 					'name'          => 'filter',
 					'type'          => 'select',
@@ -102,7 +109,7 @@ function mailocations_register_location_filter_field_group() {
 					'placeholder'   => '',
 				],
 				[
-					'key'           => 'mailocations_location_filter_type',
+					'key'           => 'mailocations_locations_filter_type',
 					'label'         => __( 'Field type', 'mai-locations' ),
 					'name'          => 'type',
 					'type'          => 'radio',
@@ -116,24 +123,24 @@ function mailocations_register_location_filter_field_group() {
 					'allow_null'    => 0,
 					'ui'            => 0,
 				],
-				[
-					'key'           => 'mailocations_location_filter_autorefresh',
-					'message'         => __( 'Auto refresh', 'mai-locations' ),
-					'name'          => 'autorefresh',
-					'type'          => 'true_false',
-					'instructions'  => __( 'If unchecked, at least one Mai Location Filter Submit button must exist on the page.', 'mai-locations' ),
-					'default_value' => 1,
-					'ui_on_text'    => __( 'Hide', 'mai-locations' ),
-					'ui_off_text'   => __( 'Show', 'mai-locations' ),
-					'ui'            => 0,
-				],
+				// [
+				// 	'key'           => 'mailocations_locations_filter_autorefresh',
+				// 	'message'         => __( 'Auto refresh', 'mai-locations' ),
+				// 	'name'          => 'autorefresh',
+				// 	'type'          => 'true_false',
+				// 	'instructions'  => __( 'If unchecked, at least one Mai Location Filter Submit button must exist on the page.', 'mai-locations' ),
+				// 	'default_value' => 1,
+				// 	'ui_on_text'    => __( 'Hide', 'mai-locations' ),
+				// 	'ui_off_text'   => __( 'Show', 'mai-locations' ),
+				// 	'ui'            => 0,
+				// ],
 			],
 			'location' => [
 				[
 					[
 						'param'    => 'block',
 						'operator' => '==',
-						'value'    => 'acf/mai-location-filter',
+						'value'    => 'acf/mai-locations-filter',
 					],
 				],
 			],
@@ -141,7 +148,7 @@ function mailocations_register_location_filter_field_group() {
 	);
 }
 
-add_filter( 'acf/load_field/key=mailocations_location_filter', 'mailocations_load_location_filter_field' );
+add_filter( 'acf/load_field/key=mailocations_locations_filter', 'mailocations_load_locations_filter_field' );
 /**
  * Load the taxonomy filter with all taxonomies registered to locations.
  *
@@ -149,19 +156,8 @@ add_filter( 'acf/load_field/key=mailocations_location_filter', 'mailocations_loa
  *
  * @return array
  */
-function mailocations_load_location_filter_field( $field ) {
-	$field['choices'] = [];
-	$taxonomies       = get_object_taxonomies( 'mai_location' );
-
-	if ( $taxonomies ) {
-		foreach ( $taxonomies as $name ) {
-			$taxonomy = get_taxonomy( $name );
-
-			if ( $taxonomy ) {
-				$field['choices'][ $name ] = $taxonomy->label;
-			}
-		}
-	}
+function mailocations_load_locations_filter_field( $field ) {
+	$field['choices'] = mailocations_get_location_taxonomies();
 
 	return $field;
 }

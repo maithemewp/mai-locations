@@ -1,16 +1,21 @@
 window.initMap = function() {
-	const parser  = new URL( window.location );
+	const url     = new URL( window.location.href );
 	const search  = document.getElementById( 'mailocations-autocomplete' );
 	const filters = document.querySelectorAll( '.mailocations-filter' )
 	const submits = document.querySelectorAll( '.mailocations-filter-submit' )
 	let   params  = {};
 
-	// Set empty properties to the params object.
-	// TODO: Check url for existing?
-	filters.forEach( filter => {
-		params[ filter.dataset.filter ] = [];
+	/**
+	 * Set properties to the params object.
+	 */
+	maiLocationsVars.taxonomies.forEach( taxonomy => {
+		var terms          = url.searchParams.get( taxonomy );
+		params[ taxonomy ] = terms ? terms.split( ',' ) : [];
 	});
 
+	/**
+	 * If we have a search field.
+	 */
 	if ( search ) {
 		const center        = { lat: 50.064192, lng: -130.605469 };
 		const defaultBounds = {
@@ -30,50 +35,74 @@ window.initMap = function() {
 			}
 		);
 
+		search.addEventListener( 'focusout', function() {
+			console.log( 'empty' );
+			if ( search.value.length ) {
+
+				console.log( search.value.length );
+
+				setTimeout( function() {
+					params[ 'address' ] = [];
+					params[ 'lat' ]     = [];
+					params[ 'lng' ]     = [];
+
+					console.log( 'clear' );
+				}, 100 );
+			}
+		});
+
 		/**
 		 * Update url query parameters and refresh the page
 		 * when and address is searched.
 		 */
-		autocomplete.addListener( 'place_changed', function () {
-			const place  = autocomplete.getPlace();
-			const name   = place.name;
-			const lat    = place.geometry.location.lat();
-			const lng    = place.geometry.location.lng();
+		autocomplete.addListener( 'place_changed', function() {
+			const place = autocomplete.getPlace();
+			const lat   = place.geometry.location.lat();
+			const lng   = place.geometry.location.lng();
 
 			// Set query params.
-			addSearchParams(
-				{
-					'address': search.value,
-					'lat': lat,
-					'lng': lng,
-				}
-			);
+			params[ 'address' ] = [ search ];
+			params[ 'lat' ]     = [ lat ];
+			params[ 'lng' ]     = [ lng ];
+
+			console.log( 'place' );
 		});
 	}
 
-
+	/**
+	 * Handle location filter changes.
+	 */
 	filters.forEach( filter => {
 		filter.addEventListener( 'click', function() {
+			// If choosing.
 			if ( this.checked ) {
 				params[ this.dataset.filter ].push( this.value );
-			} else {
-				params[ this.dataset.filter ].splice( params[ this.dataset.filter ].indexOf( this.value ), 1)
+			}
+			// Remove.
+			else {
+				params[ this.dataset.filter ].splice( params[ this.dataset.filter ].indexOf( this.value ), 1 );
 			}
 		});
 	});
 
+	/**
+	 * Handle filter submit buttons.
+	 */
 	submits.forEach( submit => {
 		submit.addEventListener( 'click', function() {
 			Object.keys( params ).forEach( key => {
+				// Add param.
 				if ( params[key].length ) {
-					parser.searchParams.set( key, params[key].join( ',' ) );
-				} else {
-					parser.searchParams.delete( key );
+					url.searchParams.set( key, params[key].join( ',' ) );
+				}
+				// Remove.
+				else {
+					url.searchParams.delete( key );
 				}
 			});
 
 			// Refresh page.
-			window.location = parser.href;
+			window.location = url.href;
 		});
 	});
 };

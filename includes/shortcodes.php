@@ -270,6 +270,7 @@ function mailocation_locations_search_shortcode( $atts ) {
 			$version = MAI_LOCATIONS_VERSION . '.' . date( 'njYHi', filemtime( $file_path ) );
 			// wp_enqueue_script( 'pfl-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&libraries=places', pfl_get_googlemaps_api_key() ) );
 			wp_enqueue_script( 'mailocations-autocomplete', $file_url, [], $version, true );
+			wp_localize_script( 'mailocations-autocomplete', 'maiLocationsVars', [ 'taxonomies' => array_keys( mailocations_get_location_taxonomies() ) ] );
 			wp_enqueue_script( 'mailocations-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&v=quarterly&libraries=places&callback=initMap', pfl_get_googlemaps_api_key() ), [], $version, true );
 			$enqueued = true;
 		}
