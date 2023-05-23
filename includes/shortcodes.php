@@ -250,7 +250,7 @@ function mailocation_locations_search_shortcode( $atts ) {
 	// Atts.
 	$atts = shortcode_atts(
 		[
-			'text' => __( 'Enter your address', 'mai-locations' ),
+			'placeholder' => __( 'Enter your address', 'mai-locations' ),
 		],
 		$atts,
 		'mai_locations_search'
@@ -258,9 +258,10 @@ function mailocation_locations_search_shortcode( $atts ) {
 
 	// Sanitize.
 	$atts = [
-		'text' => esc_html( $atts['text'] ),
+		'placeholder' => esc_html( $atts['placeholder'] ),
 	];
 
+	// Maybe enqueue scripts.
 	if ( ! $enqueued ) {
 		$file      = '/assets/js/mai-locations.js';
 		$file_path = MAI_LOCATIONS_PLUGIN_DIR . $file;
@@ -268,7 +269,6 @@ function mailocation_locations_search_shortcode( $atts ) {
 
 		if ( file_exists( $file_path ) ) {
 			$version = MAI_LOCATIONS_VERSION . '.' . date( 'njYHi', filemtime( $file_path ) );
-			// wp_enqueue_script( 'pfl-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&libraries=places', pfl_get_googlemaps_api_key() ) );
 			wp_enqueue_script( 'mailocations-autocomplete', $file_url, [], $version, true );
 			wp_localize_script( 'mailocations-autocomplete', 'maiLocationsVars', [ 'taxonomies' => array_keys( mailocations_get_location_taxonomies() ) ] );
 			wp_enqueue_script( 'mailocations-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&v=quarterly&libraries=places&callback=initMap', pfl_get_googlemaps_api_key() ), [], $version, true );
@@ -276,11 +276,10 @@ function mailocation_locations_search_shortcode( $atts ) {
 		}
 	}
 
-	$value = isset( $_GET['address'] ) && ! empty( $_GET['address'] ) ? esc_html( $_GET['address'] ) : '';
-	$lat   = isset( $_GET['lat'] ) && ! empty( $_GET['lat'] ) ? esc_html( $_GET['lat'] ) : '';
-	$lng   = isset( $_GET['lng'] ) && ! empty( $_GET['lng'] ) ? esc_html( $_GET['lng'] ) : '';
-
-	return sprintf( '<input type="text" id="mailocations-autocomplete" placeholder="%s" value="%s" />', $atts['text'], $value );
+	return sprintf( '<input type="text" id="mailocations-autocomplete" placeholder="%s" value="%s" />',
+		$atts['placeholder'],
+		isset( $_GET['address'] ) && ! empty( $_GET['address'] ) ? esc_html( $_GET['address'] ) : ''
+	);
 }
 
 add_shortcode( 'mai_locations_filter_submit', 'mailocation_locations_filter_submit_shortcode' );

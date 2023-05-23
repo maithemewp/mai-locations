@@ -1,0 +1,16 @@
+{
+	"name": "acf/mai-locations-address-search",
+	"title": "Mai Locations Address Search",
+	"description": "Filter locations by address/location. Uses Google Maps Autocomplete.",
+	"category": "widgets",
+	"keywords": [ "location", "address", "search" ],
+	"icon": "location",
+	"textdomain": "mai-locations",
+	"acf": {
+		"mode": "preview",
+		"renderCallback": "mailocations_do_locations_address_search_block"
+	},
+	"supports": {
+		"align": false
+	}
+  }

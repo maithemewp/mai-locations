@@ -129,7 +129,9 @@ final class Mai_Locations_Plugin {
 		// Classes.
 		foreach ( glob( MAI_LOCATIONS_PLUGIN_DIR . 'classes/' . '*.php' ) as $file ) { include $file; }
 		// Blocks.
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-address-search/block.php';
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter/block.php';
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter-submit/block.php';
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-table/block.php';
 	}
 

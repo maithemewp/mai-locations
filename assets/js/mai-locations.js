@@ -35,21 +35,21 @@ window.initMap = function() {
 			}
 		);
 
-		search.addEventListener( 'focusout', function() {
-			console.log( 'empty' );
-			if ( search.value.length ) {
+		// search.addEventListener( 'focusout', function() {
+		// 	console.log( 'empty' );
+		// 	if ( search.value.length ) {
 
-				console.log( search.value.length );
+		// 		console.log( search.value.length );
 
-				setTimeout( function() {
-					params[ 'address' ] = [];
-					params[ 'lat' ]     = [];
-					params[ 'lng' ]     = [];
+		// 		setTimeout( function() {
+		// 			params[ 'address' ] = [];
+		// 			params[ 'lat' ]     = [];
+		// 			params[ 'lng' ]     = [];
 
-					console.log( 'clear' );
-				}, 100 );
-			}
-		});
+		// 			console.log( 'clear' );
+		// 		}, 100 );
+		// 	}
+		// });
 
 		/**
 		 * Update url query parameters and refresh the page
@@ -61,11 +61,9 @@ window.initMap = function() {
 			const lng   = place.geometry.location.lng();
 
 			// Set query params.
-			params[ 'address' ] = [ search ];
+			params[ 'address' ] = [ search.value ];
 			params[ 'lat' ]     = [ lat ];
 			params[ 'lng' ]     = [ lng ];
-
-			console.log( 'place' );
 		});
 	}
 

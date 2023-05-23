@@ -76,7 +76,7 @@ function mailocations_do_locations_filter_block( $attributes, $content, $is_prev
 	echo '</ul>';
 }
 
-add_action( 'acf/init', 'mailocations_register_location_filter_field_group' );
+add_action( 'acf/init', 'mailocations_register_locations_filter_field_group' );
 /**
  * Register field group.
  *
@@ -84,7 +84,7 @@ add_action( 'acf/init', 'mailocations_register_location_filter_field_group' );
  *
  * @return void
  */
-function mailocations_register_location_filter_field_group() {
+function mailocations_register_locations_filter_field_group() {
 	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
 		return;
 	}
@@ -92,7 +92,7 @@ function mailocations_register_location_filter_field_group() {
 	acf_add_local_field_group(
 		[
 			'key'    => 'mailocations_locations_filter_field_group',
-			'title'  => __( 'Mai URL Parameter Content', 'mai-locations' ),
+			'title'  => __( 'Mai Locations Filter', 'mai-locations' ),
 			'fields' => [
 				[
 					'key'           => 'mailocations_locations_filter',
@@ -123,17 +123,6 @@ function mailocations_register_location_filter_field_group() {
 					'allow_null'    => 0,
 					'ui'            => 0,
 				],
-				// [
-				// 	'key'           => 'mailocations_locations_filter_autorefresh',
-				// 	'message'         => __( 'Auto refresh', 'mai-locations' ),
-				// 	'name'          => 'autorefresh',
-				// 	'type'          => 'true_false',
-				// 	'instructions'  => __( 'If unchecked, at least one Mai Location Filter Submit button must exist on the page.', 'mai-locations' ),
-				// 	'default_value' => 1,
-				// 	'ui_on_text'    => __( 'Hide', 'mai-locations' ),
-				// 	'ui_off_text'   => __( 'Show', 'mai-locations' ),
-				// 	'ui'            => 0,
-				// ],
 			],
 			'location' => [
 				[
