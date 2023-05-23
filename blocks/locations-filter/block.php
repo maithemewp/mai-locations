@@ -59,21 +59,84 @@ function mailocations_do_locations_filter_block( $attributes, $content, $is_prev
 
 	// Get any selected items.
 	$selected = isset( $_GET[ $taxonomy ] ) && ! empty( $_GET[ $taxonomy ] ) ? $_GET[ $taxonomy ] : [];
-	$selected = $selected ? array_flip( array_filter( explode( '-', $selected ) ) ) : $selected;
+	$selected = $selected ? array_flip( array_filter( explode( ',', $selected ) ) ) : $selected;
 
-	echo '<ul class="mailocations-filter-list">';
+	switch ( $type ) {
+		case 'checkbox':
+			echo mailocations_get_choice_filter( $taxonomy, $terms, $selected, $type );
+		break;
+		case 'radio':
+			echo mailocations_get_choice_filter( $taxonomy, $terms, $selected, $type );
+		break;
+		case 'select':
+			echo mailocations_get_select_filter( $taxonomy, $terms, $selected );
+		break;
+	}
+}
+
+/**
+ * Gets checkbox and radio filter markup.
+ *
+ * @access private
+ *
+ * @since TBD
+ *
+ * @param  string    $taxonomy
+ * @param  WP_Term[] $terms
+ * @param  array     $selected
+ * @param  string    $type
+ *
+ * @return string
+ */
+function mailocations_get_choice_filter( $taxonomy, $terms, $selected, $type ) {
+	$html = '<ul class="mailocations-filter-list">';
+
 	foreach ( $terms as $term ) {
-		$checked = $selected && isset( $selected[ $term->slug ] ) ? ' checked' : '';
-
-		printf( '<li><label><input type="checkbox" class="mailocations-filter" name="%s[]" data-filter="%s" value="%s"%s> %s</label></li>',
+		$html .= sprintf( '<li><label><input type="%s" class="mailocations-filter" name="%s[]" data-filter="%s" value="%s"%s> %s</label></li>',
+			$type,
 			$taxonomy,
 			$taxonomy,
 			$term->slug,
-			$checked,
+			$selected && isset( $selected[ $term->slug ] ) ? ' checked' : '',
 			$term->name
 		);
 	}
-	echo '</ul>';
+
+	$html .= '</ul>';
+
+	return $html;
+}
+
+/**
+ * Gets choice filter markup.
+ *
+ * @access private
+ *
+ * @since TBD
+ *
+ * @param  string    $taxonomy
+ * @param  WP_Term[] $terms
+ * @param  array     $selected
+ * @param  string    $type
+ *
+ * @return string
+ */
+function mailocations_get_select_filter( $taxonomy, $terms, $selected ) {
+	$html = sprintf( '<select class="mailocations-filter" data-filter="%s" name="%s[]">', $taxonomy, $taxonomy );
+
+		$html .= sprintf( '<option value="">%s</option>', __( 'Choose one', 'mai-locations' ) );
+
+		foreach ( $terms as $term ) {
+			$html .= sprintf( '<option value="%s"%s>%s</option>',
+				$term->slug,
+				$selected && isset( $selected[ $term->slug ] ) ? ' selected' : '',
+				$term->name
+			);
+		}
+
+	$html .= '</select>';
+
+	return $html;
 }
 
 add_action( 'acf/init', 'mailocations_register_locations_filter_field_group' );

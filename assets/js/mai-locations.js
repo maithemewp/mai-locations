@@ -17,17 +17,17 @@ window.initMap = function() {
 	 * If we have a search field.
 	 */
 	if ( search ) {
-		const center        = { lat: 50.064192, lng: -130.605469 };
-		const defaultBounds = {
-			north: center.lat + 0.1,
-			south: center.lat - 0.1,
-			east: center.lng + 0.1,
-			west: center.lng - 0.1,
-		};
+		// const center        = { lat: 50.064192, lng: -130.605469 };
+		// const defaultBounds = {
+		// 	north: center.lat + 0.1,
+		// 	south: center.lat - 0.1,
+		// 	east: center.lng + 0.1,
+		// 	west: center.lng - 0.1,
+		// };
 		const autocomplete = new google.maps.places.Autocomplete(
 			search,
 			{
-				bounds: defaultBounds,
+				// bounds: defaultBounds,
 				componentRestrictions: { country: "us" },
 				fields: [ 'geometry', 'name' ],
 				strictBounds: false,
@@ -71,15 +71,18 @@ window.initMap = function() {
 	 * Handle location filter changes.
 	 */
 	filters.forEach( filter => {
-		filter.addEventListener( 'click', function() {
+		filter.addEventListener( 'change', function() {
+			console.log( this.tagName.toLowerCase() );
 			// If choosing.
-			if ( this.checked ) {
+			if ( this.checked || 'select' === this.tagName.toLowerCase() ) {
 				params[ this.dataset.filter ].push( this.value );
 			}
 			// Remove.
 			else {
 				params[ this.dataset.filter ].splice( params[ this.dataset.filter ].indexOf( this.value ), 1 );
 			}
+
+			console.log( params );
 		});
 	});
 

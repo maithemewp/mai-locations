@@ -121,9 +121,9 @@ function mailocations_post_exists( $post_id ) {
  *
  * @return void
  */
-function mailocations_get_distance( $post_obj = null, $round = false ) {
-	return get_the_distance( $post_obj, $round );
-	// return Mai_Geo_Query::get_distance( $post_obj, $round );
+function mailocations_get_distance( $post_obj = null, $round = 1 ) {
+	// return get_the_distance( $post_obj, $round );
+	return Mai_Geo_Query::get_distance( $post_obj, $round );
 }
 
 /**

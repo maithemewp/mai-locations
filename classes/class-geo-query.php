@@ -1,6 +1,11 @@
 <?php
 
-// Originally taken from GJSGeoQuery.
+/**
+ * Originally taken from GJSGeoQuery.
+ *
+ * @link https://gist.github.com/akshuvo/4c37df4bd128eb801b7739748ee3cd65
+ * @link https://gschoppe.com/wordpress/geo-searches/
+ */
 
 // $query = new WP_Query(
 // 	[
@@ -118,8 +123,8 @@ class Mai_Geo_Query {
 			return $sql;
 		}
 
-		$orderby = $query->get('orderby');
-		$order   = $query->get('order');
+		$orderby = $query->get( 'orderby' );
+		$order   = $query->get( 'order' );
 
 		if ( 'distance' === $orderby ) {
 			$sql = 'geo_query_distance ' . $order ?: 'ASC';
@@ -140,8 +145,7 @@ class Mai_Geo_Query {
 		$distance = $post_obj->geo_query_distance;
 
 		if ( false !== $round ) {
-			// TODO: typecast int or float?
-			$distance = round( $distance, $round );
+			$distance = round( $distance, (int) $round );
 		}
 
 		return $distance;
