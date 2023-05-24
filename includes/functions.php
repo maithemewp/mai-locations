@@ -122,7 +122,6 @@ function mailocations_post_exists( $post_id ) {
  * @return void
  */
 function mailocations_get_distance( $post_obj = null, $round = 1 ) {
-	// return get_the_distance( $post_obj, $round );
 	return Mai_Geo_Query::get_distance( $post_obj, $round );
 }
 
@@ -516,6 +515,8 @@ function mailocations_get_google_maps_api_key() {
 /**
  * If user can edit a location by ID.
  *
+ * @since 0.1.0
+ *
  * @param int $location_id The post ID.
  *
  * @return bool
@@ -532,4 +533,41 @@ function mailocations_user_can_edit( $location_id ) {
 	}
 
 	return in_array( $location_id, $locations );
+}
+
+/**
+ * If current page has any active location filters.
+ *
+ * @access private
+ *
+ * @since TBD
+ *
+ * @return bool
+ */
+function mailocations_is_filtered_locations() {
+	static $filtered = null;
+
+	if ( ! is_null( $filtered ) ) {
+		return $filtered;
+	}
+
+	$filtered = false;
+
+	if ( ! $_GET ) {
+		return $filtered;
+	}
+
+	$keys = array_keys( mailocations_get_location_taxonomies() );
+	$keys = array_merge( $keys, [ 'lat', 'lng' ] );
+
+	foreach ( $keys as $key ) {
+		if ( ! isset( $_GET[ $key ] ) ) {
+			continue;
+		}
+
+		$filtered = true;
+		break;
+	}
+
+	return $filtered;
 }

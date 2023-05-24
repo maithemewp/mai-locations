@@ -6,9 +6,6 @@
  * @return  void
  */
 add_action( 'pre_get_posts', function( $query ) {
-	// STOP.
-	// return;
-
 	// Bail if in the Dashboard.
 	if ( is_admin() ) {
 		return;
@@ -19,6 +16,10 @@ add_action( 'pre_get_posts', function( $query ) {
 	}
 
 	if ( ! $query->is_post_type_archive( 'mai_location' ) ) {
+		return;
+	}
+
+	if ( ! mailocations_is_filtered_locations() ) {
 		return;
 	}
 
@@ -36,9 +37,10 @@ add_action( 'pre_get_posts', function( $query ) {
 
 	// Bail if no coordinates or taxonomies.
 	if ( ! ( $lat && $lng ) && ! $taxos ) {
-		return $query_args;
+		return;
 	}
 
+	// TODO: Set/get distance somewhere.
 	$dist = 1000;
 
 	// Show all results.

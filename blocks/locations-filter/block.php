@@ -124,7 +124,7 @@ function mailocations_get_choice_filter( $taxonomy, $terms, $selected, $type ) {
 function mailocations_get_select_filter( $taxonomy, $terms, $selected ) {
 	$html = sprintf( '<select class="mailocations-filter" data-filter="%s" name="%s[]">', $taxonomy, $taxonomy );
 
-		$html .= sprintf( '<option value="">%s</option>', __( 'Choose one', 'mai-locations' ) );
+		$html .= sprintf( '<option value="">%s %s</option>', __( 'All', 'mai-locations' ), get_taxonomy( $taxonomy )->labels->name );
 
 		foreach ( $terms as $term ) {
 			$html .= sprintf( '<option value="%s"%s>%s</option>',

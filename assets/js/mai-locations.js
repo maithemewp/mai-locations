@@ -1,9 +1,25 @@
 window.initMap = function() {
-	const url     = new URL( window.location.href );
-	const search  = document.getElementById( 'mailocations-autocomplete' );
-	const filters = document.querySelectorAll( '.mailocations-filter' )
-	const submits = document.querySelectorAll( '.mailocations-filter-submit' )
-	let   params  = {};
+	const url         = new URL( window.location.href );
+	const searches    = document.querySelectorAll( '.mailocations-autocomplete' );
+	const filters     = document.querySelectorAll( '.mailocations-filter' );
+	const submits     = document.querySelectorAll( '.mailocations-filter-submit' );
+	const clears      = document.querySelectorAll( '.mailocations-filter-clear' );
+	let   params      = {};
+	var   refreshPage = function() {
+		Object.keys( params ).forEach( key => {
+			// Add param.
+			if ( params[key].length ) {
+				url.searchParams.set( key, params[key].join( ',' ) );
+			}
+			// Remove.
+			else {
+				url.searchParams.delete( key );
+			}
+		});
+
+		// Refresh page.
+		window.location = url.href;
+	};
 
 	/**
 	 * Set properties to the params object.
@@ -14,9 +30,9 @@ window.initMap = function() {
 	});
 
 	/**
-	 * If we have a search field.
+	 * Handle autocomplete fields.
 	 */
-	if ( search ) {
+	searches.forEach( input => {
 		// const center        = { lat: 50.064192, lng: -130.605469 };
 		// const defaultBounds = {
 		// 	north: center.lat + 0.1,
@@ -24,8 +40,9 @@ window.initMap = function() {
 		// 	east: center.lng + 0.1,
 		// 	west: center.lng - 0.1,
 		// };
+		const clear        = input.parentElement.querySelectorAll( '.mailocations-autocomplete-clear' )[0];
 		const autocomplete = new google.maps.places.Autocomplete(
-			search,
+			input,
 			{
 				// bounds: defaultBounds,
 				componentRestrictions: { country: "us" },
@@ -34,22 +51,6 @@ window.initMap = function() {
 				// types: ["establishment"],
 			}
 		);
-
-		// search.addEventListener( 'focusout', function() {
-		// 	console.log( 'empty' );
-		// 	if ( search.value.length ) {
-
-		// 		console.log( search.value.length );
-
-		// 		setTimeout( function() {
-		// 			params[ 'address' ] = [];
-		// 			params[ 'lat' ]     = [];
-		// 			params[ 'lng' ]     = [];
-
-		// 			console.log( 'clear' );
-		// 		}, 100 );
-		// 	}
-		// });
 
 		/**
 		 * Update url query parameters and refresh the page
@@ -61,28 +62,53 @@ window.initMap = function() {
 			const lng   = place.geometry.location.lng();
 
 			// Set query params.
-			params[ 'address' ] = [ search.value ];
+			params[ 'address' ] = [ input.value ];
 			params[ 'lat' ]     = [ lat ];
 			params[ 'lng' ]     = [ lng ];
+
+			refreshPage();
 		});
-	}
+
+		/**
+		 * Clear the autocomplete field when clicking clear button.
+		 */
+		clear.addEventListener( 'click', function() {
+			var value = input.value;
+
+			// Clear input value and params.
+			input.setAttribute( 'value', '' );
+			params[ 'address' ] = [];
+			params[ 'lat' ]     = [];
+			params[ 'lng' ]     = [];
+
+			// If there is a stored value.
+			if ( value ) {
+				refreshPage();
+			}
+		});
+	});
 
 	/**
 	 * Handle location filter changes.
 	 */
 	filters.forEach( filter => {
 		filter.addEventListener( 'change', function() {
-			console.log( this.tagName.toLowerCase() );
+			var select = 'select' === this.tagName.toLowerCase();
+
 			// If choosing.
-			if ( this.checked || 'select' === this.tagName.toLowerCase() ) {
-				params[ this.dataset.filter ].push( this.value );
+			if ( this.checked || select ) {
+				if ( select && ! this.value ) {
+					params[ this.dataset.filter ] = [];
+				} else {
+					params[ this.dataset.filter ].push( this.value );
+				}
 			}
 			// Remove.
 			else {
 				params[ this.dataset.filter ].splice( params[ this.dataset.filter ].indexOf( this.value ), 1 );
 			}
 
-			console.log( params );
+			refreshPage();
 		});
 	});
 
@@ -91,19 +117,24 @@ window.initMap = function() {
 	 */
 	submits.forEach( submit => {
 		submit.addEventListener( 'click', function() {
+			refreshPage();
+		});
+	});
+
+	/**
+	 * Handle filter clear buttons.
+	 */
+	clears.forEach( clear => {
+		clear.addEventListener( 'click', function() {
 			Object.keys( params ).forEach( key => {
-				// Add param.
-				if ( params[key].length ) {
-					url.searchParams.set( key, params[key].join( ',' ) );
-				}
-				// Remove.
-				else {
-					url.searchParams.delete( key );
-				}
+				params[key] = [];
 			});
 
-			// Refresh page.
-			window.location = url.href;
+			searches.forEach( input => {
+				input.setAttribute( 'value', '' );
+			});
+
+			refreshPage();
 		});
 	});
 };

@@ -131,7 +131,7 @@ final class Mai_Locations_Plugin {
 		// Blocks.
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-address-search/block.php';
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter/block.php';
-		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter-submit/block.php';
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter-buttons/block.php';
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-table/block.php';
 	}
 

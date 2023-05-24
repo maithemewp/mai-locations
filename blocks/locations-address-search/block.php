@@ -51,7 +51,9 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 		}
 	}
 
-	printf( '<input type="text" id="mailocations-autocomplete" placeholder="%s" value="%s" />', $placeholder, $address );
+	$clear = sprintf( '<button class="mailocations-autocomplete-clear mailocations-clear">%s</button>', __( 'Clear', 'mai-locations' ) );
+
+	printf( '<div class="mailocations-autocomplete-container"><input type="text" class="mailocations-autocomplete" placeholder="%s" value="%s" />%s</div>', $placeholder, $address, $clear );
 }
 
 

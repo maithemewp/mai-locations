@@ -18,9 +18,16 @@ function mailocations_render_filter_submit_button_variation( $args, $block_type 
 	$args['variations']                = [
 		[
 			'name'       => 'mailocations-filter-submit',
-			'title'      => 'Mai Locations Filter Submit',
+			'title'      => __( 'Mai Locations Filter Submit', 'mai-locations' ),
 			'attributes' => [
 				'variantType' => 'mailocations-filter-submit'
+			],
+		],
+		[
+			'name'       => 'mailocations-filter-clear',
+			'title'      => __( 'Mai Locations Filter Clear', 'mai-locations' ),
+			'attributes' => [
+				'variantType' => 'mailocations-filter-clear'
 			],
 		]
 	];
@@ -30,7 +37,7 @@ function mailocations_render_filter_submit_button_variation( $args, $block_type 
 
 add_filter( 'render_block_core/buttons', 'mailocations_render_filter_submit_button_block', 10, 3 );
 /**
- * Convert the <a> tag to <button> and our custom attributes.
+ * Convert the <a> tag to <button> and modify attributes.
  *
  * @since TBD
  *
@@ -41,21 +48,34 @@ add_filter( 'render_block_core/buttons', 'mailocations_render_filter_submit_butt
  * @return string
  */
 function mailocations_render_filter_submit_button_block( $block_content, $parsed_block, $wp_block ) {
-	if ( ! isset( $parsed_block['attrs']['variantType'] ) || 'mailocations-filter-submit' !== $parsed_block['attrs']['variantType'] ) {
+	if ( ! isset( $parsed_block['attrs']['variantType'] ) || ! in_array( $parsed_block['attrs']['variantType'], [ 'mailocations-filter-submit', 'mailocations-filter-clear' ] ) ) {
 		return $block_content;
 	}
 
-	// Swap tag.
+	// Check if submit, and convert tag.
+	$clear = 'mailocations-filter-clear' === $parsed_block['attrs']['variantType'];
+
+	// Return empty if it's a clear button without active filters.
+	if ( $clear && ! mailocations_is_filtered_locations() ) {
+		return '';
+	}
+
 	$block_content = str_replace( '<a ', '<button ', $block_content );
 	$block_content = str_replace( '</a>', '</button>', $block_content );
 
 	// Setup the tag processor.
 	$tags = new WP_HTML_Tag_Processor( $block_content );
 
-	// Remove href tags.
+	// If button, modify markup.
 	while ( $tags->next_tag( 'button' ) ) {
+		// Remove href.
 		$tags->remove_attribute( 'href' );
-		$tags->add_class( 'mailocations-filter-submit' );
+		// Add class.
+		if ( $clear ) {
+			$tags->add_class( 'mailocations-filter-clear' );
+		} else {
+			$tags->add_class( 'mailocations-filter-submit' );
+		}
 	}
 
 	return $tags->get_updated_html();
