@@ -13,6 +13,9 @@
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// Must be at the top of the file.
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
 /**
  * Main Mai_Locations_Plugin Class.
  *
@@ -87,7 +90,6 @@ final class Mai_Locations_Plugin {
 	 * @return  void
 	 */
 	private function setup_constants() {
-
 		// Plugin version.
 		if ( ! defined( 'MAI_LOCATIONS_VERSION' ) ) {
 			define( 'MAI_LOCATIONS_VERSION', '0.4.0' );
@@ -131,7 +133,7 @@ final class Mai_Locations_Plugin {
 		// Blocks.
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-address-search/block.php';
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter/block.php';
-		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter-buttons/block.php';
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter-clear/block.php';
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-table/block.php';
 	}
 
@@ -144,7 +146,6 @@ final class Mai_Locations_Plugin {
 	public function hooks() {
 		add_action( 'plugins_loaded', [ $this, 'updater' ] );
 		add_action( 'init',           [ $this, 'register_content_types' ] );
-		add_action( 'pre_get_posts',  [ $this, 'locations_order' ], 8 );
 
 		register_activation_hook( __FILE__, [ $this, 'activate' ] );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
@@ -162,18 +163,13 @@ final class Mai_Locations_Plugin {
 	 * @return void
 	 */
 	public function updater() {
-		// Bail if current user cannot manage plugins.
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			return;
-		}
-
 		// Bail if plugin updater is not loaded.
-		if ( ! class_exists( 'Puc_v4_Factory' ) ) {
+		if ( ! class_exists( 'YahnisElsts\PluginUpdateChecker\v5\PucFactory' ) ) {
 			return;
 		}
 
 		// Setup the updater.
-		$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-locations/', __FILE__, 'mai-locations' );
+		$updater = PucFactory::buildUpdateChecker( 'https://github.com/maithemewp/mai-locations/', __FILE__, 'mai-locations' );
 
 		// Maybe set github api token.
 		if ( defined( 'MAI_GITHUB_API_TOKEN' ) ) {
@@ -277,28 +273,6 @@ final class Mai_Locations_Plugin {
 				'rewrite'           => [ 'slug' => 'location-categories', 'with_front' => false ],
 			]
 		) );
-	}
-
-	/**
-	 * Changes default location archives to order alphabetically by title.
-	 *
-	 * @since TBD
-	 *
-	 * @return void
-	 */
-	public function locations_order( $query ) {
-		// Bail if not the main query.
-		if ( ! $query->is_main_query() ) {
-			return;
-		}
-
-		// Bail if not a location archive.
-		if ( ! ( is_post_type_archive( 'mai_location' ) || is_tax( 'mai_location_cat' ) ) ) {
-			return;
-		}
-
-		$query->set( 'orderby', 'title' );
-		$query->set( 'order', 'ASC' );
 	}
 
 	/**

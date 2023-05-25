@@ -268,7 +268,6 @@ class PhoneNumberMatcher implements \Iterator
      * @param AbstractLeniency $leniency The leniency to use when evaluating candidate phone numbers
      * @param int $maxTries The maximum number of invalid numbers to try before giving up on the text.
      *  This is to cover degenerate cases where the text has a lot of false positives in it. Must be >= 0
-     * @throws \NullPointerException
      * @throws \InvalidArgumentException
      */
     public function __construct(PhoneNumberUtil $util, $text, $country, AbstractLeniency $leniency, $maxTries)
@@ -603,8 +602,8 @@ class PhoneNumberMatcher implements \Iterator
         // Starting from the end, go through in reverse, excluding the first group, and check the
         // candidate and number groups are the same.
         for ($formattedNumberGroupIndex = (\count($formattedNumberGroups) - 1);
-             $formattedNumberGroupIndex > 0 && $candidateNumberGroupIndex >= 0;
-             $formattedNumberGroupIndex--, $candidateNumberGroupIndex--) {
+            $formattedNumberGroupIndex > 0 && $candidateNumberGroupIndex >= 0;
+            $formattedNumberGroupIndex--, $candidateNumberGroupIndex--) {
             if ($candidateGroups[$candidateNumberGroupIndex] != $formattedNumberGroups[$formattedNumberGroupIndex]) {
                 return false;
             }
