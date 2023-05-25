@@ -184,7 +184,7 @@ add_shortcode( 'mai_location_distance', function( $atts ) {
 		[
 			'before' => '',
 			'after'  => '',
-			'round'  => 2,
+			'round'  => 1,
 		],
 		$atts,
 		'mai_location_distance'
@@ -198,8 +198,7 @@ add_shortcode( 'mai_location_distance', function( $atts ) {
 	];
 
 	// Get the distance.
-	$post     = get_post( get_the_ID() );
-	$distance = $post ? mailocations_get_distance( $post, $round = false ) : '';
+	$distance = mailocations_get_distance( null, $atts['round'] );
 
 	// Bail if no distance.
 	if ( ! $distance ) {
