@@ -505,10 +505,18 @@ function mailocations_update_location_from_google_maps( $post_id ) {
  * @return string
  */
 function mailocations_get_google_maps_api_key() {
+	static $key = null;
+
+	if ( ! is_null( $key ) ) {
+		return $key;
+	}
+
 	$key = '';
+
 	if ( function_exists( 'acf_get_setting' ) ) {
 		$key = acf_get_setting( 'google_api_key' );
 	}
+
 	return $key;
 }
 
@@ -570,4 +578,79 @@ function mailocations_is_filtered_locations() {
 	}
 
 	return $filtered;
+}
+
+
+function mailocations_get_location_query_defaults() {
+	static $defaults = null;
+
+	if ( ! is_null( $defaults ) ) {
+		return $defaults;
+	}
+
+	// Set static defaults.
+	$defaults = [
+		'address'    => '',
+		'lat'        => '',
+		'lng'        => '',
+		'distance'   => 100,
+		'units'      => 'mi',
+	];
+
+	// Add taxonomies.
+	foreach ( mailocations_get_location_taxonomies() as $name => $label ) {
+		$defaults[ $name ] = [];
+	}
+
+	// Add filter.
+	$defaults = apply_filters( 'mailocations_location_query_defaults', $defaults );
+
+	// Check query strings.
+	foreach ( $defaults as $key => $value ) {
+		if ( ! isset( $_GET[ $key ] ) ) {
+			continue;
+		}
+
+		$get              = esc_html( $_GET[ $key ] );
+		$get              = is_array( $defaults[ $key ] ) ? explode( ',', $_GET[ $key ] ) : $_GET[ $key ];
+		$defaults[ $key ] = $get;
+	}
+
+	return $defaults;
+}
+
+/**
+ * Gets a stylesheet link.
+ * Returns empty if the same file was already called,
+ * so it's only loaded once on a page.
+ *
+ * @since TBD
+ *
+ * @param string $filename
+ *
+ * @return string
+ */
+function mailocations_get_stylesheet_link( $filename ) {
+	static $loaded = [];
+
+	// Bail if loaded.
+	if ( is_admin() || isset( $loaded[ $filename ] ) ) {
+		return;
+	}
+
+	$suffix              = mailocations_get_suffix();
+	$loaded[ $filename ] = MAI_LOCATIONS_PLUGIN_URL . "assets/css/{$filename}{$suffix}.css";
+
+	return sprintf( '<link rel="stylesheet" href="%s" />', $loaded[ $filename ] );
+}
+
+/**
+ * Gets suffix for scripts.
+ *
+ * @since TBD
+ *
+ * @return string
+ */
+function mailocations_get_suffix() {
+	return defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 }

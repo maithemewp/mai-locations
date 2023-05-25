@@ -39,7 +39,7 @@ function mailocations_do_locations_filter_block( $attributes, $content, $is_prev
 
 	if ( ! $taxonomy || ! taxonomy_exists( $taxonomy ) ) {
 		if ( $is_preview || is_admin() ) {
-			printf( '<p>%s</p>', __( 'Choose a location filter in the block settins.', 'mai-locations' ) );
+			printf( '<p>%s</p>', __( 'Choose a location filter in the block settings.', 'mai-locations' ) );
 		}
 		return;
 	}
@@ -56,6 +56,13 @@ function mailocations_do_locations_filter_block( $attributes, $content, $is_prev
 	if ( ! $terms || is_wp_error( $terms ) ) {
 		return;
 	}
+
+	wp_enqueue_script( 'mailocations-filters' );
+
+	// Maybe load CSS.
+	// if ( ! ( $is_preview || is_admin() ) ) {
+		echo mailocations_get_stylesheet_link( 'mai-locations-filters' );
+	// }
 
 	// Get any selected items.
 	$selected = isset( $_GET[ $taxonomy ] ) && ! empty( $_GET[ $taxonomy ] ) ? $_GET[ $taxonomy ] : [];
@@ -89,7 +96,7 @@ function mailocations_do_locations_filter_block( $attributes, $content, $is_prev
  * @return string
  */
 function mailocations_get_choice_filter( $taxonomy, $terms, $selected, $type ) {
-	$html = '<ul class="mailocations-filter-list">';
+	$html = sprintf( '<ul class="mailocations-filter-list"%s>', is_admin() ? ' style="list-style-type:none;margin-left:0;padding-left:0;"' : '' );
 
 	foreach ( $terms as $term ) {
 		$html .= sprintf( '<li><label><input type="%s" class="mailocations-filter" name="%s[]" data-filter="%s" value="%s"%s> %s</label></li>',
@@ -175,11 +182,11 @@ function mailocations_register_locations_filter_field_group() {
 					'key'           => 'mailocations_locations_filter_type',
 					'label'         => __( 'Field type', 'mai-locations' ),
 					'name'          => 'type',
-					'type'          => 'radio',
+					'type'          => 'select',
 					'choices'       => [
-						'select'   => __( 'Select box', 'mai-locations' ),
-						'checkbox' => __( 'Checkboxes (choose multiple)', 'mai-locations' ),
+						'select'   => __( 'Select box (choose one)', 'mai-locations' ),
 						'radio'    => __( 'Radio buttons (choose one)', 'mai-locations' ),
+						'checkbox' => __( 'Checkboxes (choose multiple)', 'mai-locations' ),
 					],
 					'default_value' => [],
 					'multiple'      => 0,

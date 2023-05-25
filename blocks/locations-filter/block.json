@@ -6,6 +6,7 @@
 	"keywords": [ "location", "filter", "taxonomy" ],
 	"icon": "category",
 	"textdomain": "mai-locations",
+	"editorStyle": "file:./../../assets/css/mai-locations-filters.min.css",
 	"acf": {
 		"mode": "preview",
 		"renderCallback": "mailocations_do_locations_filter_block"
