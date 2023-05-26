@@ -83,14 +83,6 @@ class Mai_Locations_Settings {
 			'mai-locations-section' // page
 		);
 
-		// add_settings_field(
-		// 	'enabled', // id
-		// 	__( 'Enable tracking', 'mai-locations' ), // title
-		// 	[ $this, 'enabled_callback' ], // callback
-		// 	'mai-locations-section', // page
-		// 	'mai_locations_settings' // section
-		// );
-
 		add_settings_field(
 			'label_plural', // id
 			__( 'Plural Label', 'mai-locations' ), // title
@@ -115,13 +107,21 @@ class Mai_Locations_Settings {
 			'mai_locations_settings' // section
 		);
 
-		// add_settings_field(
-		// 	'debug', // id
-		// 	__( 'Enable debugging', 'mai-locations' ), // title
-		// 	[ $this, 'debug_callback' ], // callback
-		// 	'mai-locations-section', // page
-		// 	'mai_locations_settings' // section
-		// );
+		add_settings_field(
+			'distances', // id
+			__( 'Distances', 'mai-locations' ), // title
+			[ $this, 'distances_callback' ], // callback
+			'mai-locations-section', // page
+			'mai_locations_settings' // section
+		);
+
+		add_settings_field(
+			'units', // id
+			__( 'Distance Units', 'mai-locations' ), // title
+			[ $this, 'units_callback' ], // callback
+			'mai-locations-section', // page
+			'mai_locations_settings' // section
+		);
 	}
 
 	/**
@@ -141,26 +141,6 @@ class Mai_Locations_Settings {
 	 * @return string
 	 */
 	public function settings_callback() {}
-
-	/**
-	 * Setting callback.
-	 *
-	 * @since TBD
-	 *
-	 * @return void
-	 */
-	// public function enabled_callback() {
-	// 	$constant = defined( 'MAI_ANALYTICS' );
-	// 	$value    = $constant ? rest_sanitize_boolean( MAI_ANALYTICS ) : $this->options['enabled'];
-
-	// 	printf(
-	// 		'<input type="checkbox" name="mai_locations[enabled]" id="enabled" value="enabled"%s%s> <label for="enabled">%s%s</label>',
-	// 		$value ? ' checked' : '',
-	// 		$constant ? ' disabled' : '',
-	// 		__( 'Enable tracking for this website.', 'mai-locations' ),
-	// 		$constant ? ' ' . $this->config_notice() : ''
-	// 	);
-	// }
 
 	/**
 	 * Setting callback.
@@ -206,19 +186,36 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	// public function debug_callback() {
-	// 	$constant = defined( 'MAI_ANALYTICS_DEBUG' );
-	// 	$value    = $constant ? rest_sanitize_boolean( MAI_ANALYTICS_DEBUG ) : $this->options['debug'];
+	public function distances_callback() {
+		printf( '<input class="regular-text" type="text" name="mai_locations[distances]" id="distances" value="%s">', implode( ', ', $this->options['distances'] ) );
+		printf( '<p>%s</p>', __( 'Comma-separated distance options used for proximity search. Use a single value to force one distance. Use 0 or leave empty to hide this field when using the address search.', 'mai-locations' ) );
+	}
 
-	// 	printf(
-	// 		'<input type="checkbox" name="mai_locations[debug]" id="debug" value="debug"%s%s> <label for="debug">%s%s</label>',
-	// 		$value ? ' checked' : '',
-	// 		$constant ? ' disabled' : '',
-	// 		__( 'Enable debugging to print data to the Console and Spatie Ray.', 'mai-locations' ),
-	// 		$constant ? ' ' . $this->config_notice() : ''
-	// 	);
-	// }
+	/**
+	 * Setting callback.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function units_callback() {
+		$units = (array) $this->options['units'];
+		$options = [
+			'mi' => __( 'Miles', 'mai-locations' ),
+			'km' => __( 'Kilometers', 'mai-locations' ),
+		];
 
+		foreach ( $options as $key => $label ) {
+			printf(
+				'<p><label><input type="checkbox" name="mai_locations[units][]" value="%s"%s> %s</label></p>',
+				$key,
+				in_array( $key, $units ) ? ' checked' : '',
+				$label
+			);
+		}
+
+		printf( '<p>%s</p>', __( 'The distance unit options to use. If none are selected, the field will be hidden and miles will be used.', 'mai-locations' ) );
+	}
 
 	/**
 	 * Return the plugin action links.  This will only be called if the plugin is active.

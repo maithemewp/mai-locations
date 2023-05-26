@@ -30,30 +30,17 @@ function mailocations_register_locations_address_search_block() {
  * @return void
  */
 function mailocations_do_locations_address_search_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
-	static $enqueued = false;
-
+	$params      = wp_parse_args( mailocations_get_query_params(), mailocations_get_query_defaults() );
 	$placeholder = get_field( 'placeholder' );
 	$placeholder = $placeholder ?: __( 'Enter your address', 'mai-locations' );
-	$defaults    = mailocations_get_location_query_defaults();
-	$distance    = get_field( 'distance' );
-	$distance    = $distance ? array_map( 'absint', explode( ',', $distance ) ) : [];
-	$units       = get_field( 'units' );
-	$address     = isset( $_GET['address'] ) && ! empty( $_GET['address'] ) ? esc_html( $_GET['address'] ) : '';
+	$address     = $params['address'];
+	$distances   = mailocations_get_option( 'distances' );
+	$distance    = $params['distance'];
+	$units       = mailocations_get_option( 'units' );
+	$unit        = $params['unit'];
 
 	// Maybe enqueue scripts.
-	// if ( ! $enqueued && ! $is_preview ) {
 	if ( ! $is_preview ) {
-		// $file      = 'assets/js/mai-locations.js';
-		// $file_path = MAI_LOCATIONS_PLUGIN_DIR . $file;
-		// $file_url  = MAI_LOCATIONS_PLUGIN_URL . $file;
-
-		// if ( file_exists( $file_path ) ) {
-		// 	$version = MAI_LOCATIONS_VERSION . '.' . date( 'njYHi', filemtime( $file_path ) );
-		// 	wp_enqueue_script( 'mailocations-autocomplete', $file_url, [], $version, true );
-		// 	wp_localize_script( 'mailocations-autocomplete', 'maiLocationsVars', [ 'taxonomies' => array_keys( mailocations_get_location_taxonomies() ) ] );
-		// 	wp_enqueue_script( 'mailocations-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&v=quarterly&libraries=places&callback=initMap', pfl_get_googlemaps_api_key() ), [], $version, true );
-		// 	$enqueued = true;
-		// }
 		wp_enqueue_script( 'mailocations-filters' );
 		wp_enqueue_script( 'mailocations-googlemaps' );
 	}
@@ -70,25 +57,22 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 			}
 		echo '</div>';
 
-		if ( $distance ) {
-			$default  = isset( $defaults['distance'] ) ? (int) $defaults['distance'] : '';
+		if ( $distances ) {
 			$multiple = count( $units ) > 1;
 			$first    = reset( $units );
 
 			echo '<select class="mailocations-autocomplete-distance">';
-				foreach ( $distance as $value ) {
+				foreach ( $distances as $value ) {
 					$label    = $multiple ? $value : $value . ' ' . $first;
-					$selected = $default && (int) $value === $default ? ' selected' : '';
+					$selected = (int) $value === (int) $distance ? ' selected' : '';
 					printf ( '<option value="%s"%s>%s</option>', $value, $selected, $label );
 				}
 			echo '</select>';
 
 			if ( $units && $multiple ) {
-				$default  = isset( $defaults['units'] ) ? $defaults['units'] : '';
-
-				echo '<select class="mailocations-autocomplete-units">';
+				echo '<select class="mailocations-autocomplete-unit">';
 				foreach ( $units as $value ) {
-					$selected = $default && $value === $default ? ' selected' : '';
+					$selected = $value === $unit ? ' selected' : '';
 					printf ( '<option value="%s"%s>%s</option>', $value, $selected, $value );
 				}
 				echo '</select>';
@@ -122,26 +106,6 @@ function mailocations_register_locations_address_search_field_group() {
 					'name'          => 'placeholder',
 					'type'          => 'text',
 					'placeholder'   => __( 'Enter your address', 'mai-locations' ),
-				],
-				[
-					'key'           => 'mailocations_address_search_distance',
-					'label'         => __( 'Distances', 'mai-locations' ),
-					'instructions'  => __( 'Comma-separated distance options. Use a single value to force one value. Use 0 or leave empty to hide field.', 'mai-locations' ),
-					'name'          => 'distance',
-					'type'          => 'text',
-					'default_value' => '25, 50, 100, 200',
-				],
-				[
-					'key'           => 'mailocations_address_search_units',
-					'label'         => __( 'Units', 'mai-locations' ),
-					'instructions'  => __( 'If none selected, the field will be hidden and miles will be used.', 'mai-locations' ),
-					'name'          => 'units',
-					'type'          => 'checkbox',
-					'default_value' => [ 'mi' ],
-					'choices'       => [
-						'mi' => __( 'Miles', 'mai-locations' ),
-						'km' => __( 'Kilometers', 'mai-locations' ),
-					],
 				],
 			],
 			'location' => [

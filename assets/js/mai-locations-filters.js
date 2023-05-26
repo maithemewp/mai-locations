@@ -2,43 +2,27 @@ window.initMap = function() {
 	const url      = new URL( window.location.href );
 	const searches = document.querySelectorAll( '.mailocations-autocomplete' );
 	const filters  = document.querySelectorAll( '.mailocations-filter' );
-	const submits  = document.querySelectorAll( '.mailocations-filter-submit' );
 	const clears   = document.querySelectorAll( '.mailocations-filter-clear' );
-	var   params   = {};
+	const defaults = maiLocationsVars.defaults;
+	var   params   = maiLocationsVars.params;
 
 	/**
-	 * Check for query string params and set defaults on page load.
+	 * Refresh the page after adding/removing query strings based
+	 * on searches and filters.
 	 */
-	Object.keys( maiLocationsVars ).forEach( key => {
-		var value = url.searchParams.get( key );
-		value = Array.isArray( maiLocationsVars[key] ) ? value.split( ',' ) : value;
-		params[key] = undefined === value || null === value ? maiLocationsVars[key] : value;
-	});
-
 	var refreshPage = function() {
-		Object.keys( params ).forEach( key => {
-			// Skip if not valid property.
-			if ( ! ( key in maiLocationsVars ) ) {
+		Object.keys( defaults ).forEach( key => {
+			// Skip if not a key that has changed.
+			if ( ! ( key in params ) ) {
 				return;
 			}
 
-			// console.log( key, Array.isArray( maiLocationsVars[key] ), maiLocationsVars[key] );
+			// Force strings.
+			var value    = Array.isArray( params[key] ) ? params[key].join() : params[key].toString();
+			var original = Array.isArray( defaults[key] ) ? defaults[key] : defaults[key].toString();
 
-
-			var value = Array.isArray( maiLocationsVars[key] ) ? params[key].push( params[key] ) : params[key];
-
-			if ( Array.isArray( maiLocationsVars[key] ) ) {
-				console.log( key, value );
-			}
-
-
-			// console.log( value );
-			// console.log( params[key] );
-			// console.log( params[key].length );
-
-			// Add param.
-			if ( '' !== params[key] ) {
-				// url.searchParams.set( key, params[key].join( ',' ) );
+			// Add param if there is a value.
+			if ( '' !== value && value !== original ) {
 				url.searchParams.set( key, value );
 			}
 			// Remove.
@@ -48,16 +32,8 @@ window.initMap = function() {
 		});
 
 		// Refresh page.
-		// window.location = url.href;
+		window.location = url.href;
 	};
-
-	/**
-	 * Set properties to the params object.
-	 */
-	// maiLocationsVars.taxonomies.forEach( taxonomy => {
-	// 	var terms          = url.searchParams.get( taxonomy );
-	// 	params[ taxonomy ] = terms ? terms.split( ',' ) : [];
-	// });
 
 	/**
 	 * Handle autocomplete fields.
@@ -71,13 +47,11 @@ window.initMap = function() {
 		// 	west: center.lng - 0.1,
 		// };
 		var distance = input.parentElement.parentElement.querySelectorAll( '.mailocations-autocomplete-distance' );
-		var units    = input.parentElement.parentElement.querySelectorAll( '.mailocations-autocomplete-units' );
+		var unit     = input.parentElement.parentElement.querySelectorAll( '.mailocations-autocomplete-unit' );
 		var clear    = input.parentElement.querySelectorAll( '.mailocations-autocomplete-clear' )[0];
 
-		distance = 'undefined' !== distance ? distance[0] : null;
-		units    = 'undefined' !== units ? units[0] : null;
-		// distance = 'undefined' === distance ? 1000 : distance;
-		// units    = 'undefined' === units ? 'mi' : units;
+		distance = 'undefined' !== distance ? distance[0] : '';
+		unit     = 'undefined' !== unit ? unit[0] : '';
 
 		const autocomplete = new google.maps.places.Autocomplete(
 			input,
@@ -104,12 +78,14 @@ window.initMap = function() {
 			params[ 'lat' ]     = lat;
 			params[ 'lng' ]     = lng;
 
+			// Refresh.
 			refreshPage();
 		});
 
+
 		if ( distance ) {
 			/**
-			 *
+			 * Set distance and only refresh if there is an address.
 			 */
 			distance.addEventListener( 'change', function() {
 				params[ 'distance' ] = this.value;
@@ -120,12 +96,12 @@ window.initMap = function() {
 			});
 		}
 
-		if ( units ) {
+		if ( unit ) {
 			/**
-			 *
+			 * Set unit and only refresh if there is an address.
 			 */
-			units.addEventListener( 'change', function() {
-				params[ 'units' ] = this.value;
+			unit.addEventListener( 'change', function() {
+				params[ 'unit' ] = this.value;
 
 				if ( params['address'] ) {
 					refreshPage();
@@ -142,11 +118,10 @@ window.initMap = function() {
 			// Clear input value and params.
 			input.setAttribute( 'value', '' ); // Empty attribute.
 			input.value = ''; // Empty visual value.
-			params[ 'address' ] = '';
-			params[ 'lat' ]     = '';
-			params[ 'lng' ]     = '';
+			params[ 'address' ]  = '';
+			params[ 'lat' ]      = '';
+			params[ 'lng' ]      = '';
 
-			// If there is a stored value.
 			if ( value ) {
 				refreshPage();
 			}
@@ -157,33 +132,28 @@ window.initMap = function() {
 	 * Handle location filter changes.
 	 */
 	filters.forEach( filter => {
+		var select;
 		filter.addEventListener( 'change', function() {
-			var select = 'select' === this.tagName.toLowerCase();
-			var array  = Array.isArray( maiLocationsVars[ this.dataset.filter ] );
+			select                        = 'select' === this.tagName.toLowerCase();
+			params[ this.dataset.filter ] = ! ( this.dataset.filter in params ) ? [] : params[ this.dataset.filter ]
 
 			// If choosing.
 			if ( this.checked || select ) {
+				// If choosing empty select option (show all).
 				if ( select && ! this.value ) {
-					params[ this.dataset.filter ] = null;
-				} else {
-					// params[ this.dataset.filter ].push( this.value );
-					params[ this.dataset.filter ] = array ? params[ this.dataset.filter ].push( this.value ) : this.value;
+					params[ this.dataset.filter ] = [];
+				}
+				// Add value.
+				else {
+					params[ this.dataset.filter ].push( this.value );
 				}
 			}
 			// Remove.
 			else {
-				params[ this.dataset.filter ] = array ? params[ this.dataset.filter ].splice( params[ this.dataset.filter ].indexOf( this.value ), 1 ) : null;
+				params[ this.dataset.filter ].splice( params[ this.dataset.filter ].indexOf( this.value ), 1 );
 			}
 
-			refreshPage();
-		});
-	});
-
-	/**
-	 * Handle filter submit buttons.
-	 */
-	submits.forEach( submit => {
-		submit.addEventListener( 'click', function() {
+			// Refresh.
 			refreshPage();
 		});
 	});
@@ -193,14 +163,12 @@ window.initMap = function() {
 	 */
 	clears.forEach( clear => {
 		clear.addEventListener( 'click', function() {
+			// Empty all params.
 			Object.keys( params ).forEach( key => {
-				params[key] = [];
+				params[key] = '';
 			});
 
-			searches.forEach( input => {
-				input.setAttribute( 'value', '' );
-			});
-
+			// Refresh.
 			refreshPage();
 		});
 	});

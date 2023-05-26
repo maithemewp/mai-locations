@@ -12,6 +12,10 @@ add_filter( 'register_block_type_args', 'mailocations_render_clear_filters_butto
  * @return array
  */
 function mailocations_render_clear_filters_button_variation( $args, $block_type ) {
+	if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+		return $args;
+	}
+
 	if ( 'core/buttons' !== $block_type ) {
 		return $args;
 	}
@@ -43,6 +47,10 @@ add_filter( 'render_block_core/buttons', 'mailocations_render_clear_filters_butt
  * @return string
  */
 function mailocations_render_clear_filters_button_block( $block_content, $parsed_block, $wp_block ) {
+	if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+		return $block_content;
+	}
+
 	if ( ! isset( $parsed_block['attrs']['variantType'] ) || 'mailocations-filter-clear' !== $parsed_block['attrs']['variantType'] ) {
 		return $block_content;
 	}

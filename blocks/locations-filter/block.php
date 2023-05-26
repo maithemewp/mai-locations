@@ -57,12 +57,11 @@ function mailocations_do_locations_filter_block( $attributes, $content, $is_prev
 		return;
 	}
 
+	// Enqueue script.
 	wp_enqueue_script( 'mailocations-filters' );
 
 	// Maybe load CSS.
-	// if ( ! ( $is_preview || is_admin() ) ) {
-		echo mailocations_get_stylesheet_link( 'mai-locations-filters' );
-	// }
+	echo mailocations_get_stylesheet_link( 'mai-locations-filters' );
 
 	// Get any selected items.
 	$selected = isset( $_GET[ $taxonomy ] ) && ! empty( $_GET[ $taxonomy ] ) ? $_GET[ $taxonomy ] : [];
@@ -70,8 +69,6 @@ function mailocations_do_locations_filter_block( $attributes, $content, $is_prev
 
 	switch ( $type ) {
 		case 'checkbox':
-			echo mailocations_get_choice_filter( $taxonomy, $terms, $selected, $type );
-		break;
 		case 'radio':
 			echo mailocations_get_choice_filter( $taxonomy, $terms, $selected, $type );
 		break;

@@ -27,20 +27,18 @@ function mailocations_pre_get_posts_query( $query ) {
 	// If filtered .
 	if ( mailocations_is_filtered_locations() ) {
 		// Get the filters.
-		$lat   = isset( $_GET['lat'] ) && ! empty( $_GET['lat'] ) ? esc_html( $_GET['lat'] ) : '';
-		$lng   = isset( $_GET['lng'] ) && ! empty( $_GET['lng'] ) ? esc_html( $_GET['lng'] ) : '';
-		$taxos = [];
+		$params   = mailocations_get_query_params();
+		$defaults = mailocations_get_query_defaults();
+		$lat      = isset( $params['lat'] ) ? $params['lat'] : '';
+		$lng      = isset( $params['lng'] ) ? $params['lng'] : '';
+		$dist     = isset( $params['distance'] ) ? $params['distance'] : $defaults['distance'];
+		$unit     = isset( $params['unit'] ) ? $params['unit'] : $defaults['unit'];
+		$taxos    = array_intersect_key( $params, mailocations_get_location_taxonomies() );
 
-		foreach ( array_keys( mailocations_get_location_taxonomies() ) as $name ) {
-			if ( ! isset( $_GET[ $name ] ) || empty( $_GET[ $name ] ) ) {
-				continue;
-			}
-
-			$taxos[ $name ] = explode( ',', esc_html( $_GET[ $name ] ) );
+		// Bail if no coordinates or taxonomies.
+		if ( ! ( $lat && $lng ) && ! $taxos ) {
+			return;
 		}
-
-		// TODO: Set/get distance somewhere.
-		$dist = 1000;
 
 		// If geo query.
 		if ( $lat && $lng ) {
@@ -54,7 +52,7 @@ function mailocations_pre_get_posts_query( $query ) {
 					'latitude'  => $lat,
 					'longitude' => $lng,
 					'distance'  => $dist, // @int The maximum distance to search.
-					'units'     => 'miles', // Supports options: miles, mi, kilometers, km.
+					'units'     => $unit, // Supports options: miles, mi, kilometers, km.
 				]
 			);
 		}
@@ -109,24 +107,19 @@ function mailocations_mai_post_grid_query( $query_args, $args ) {
 		return $query_args;
 	}
 
-	$lat   = isset( $_GET['lat'] ) && ! empty( $_GET['lat'] ) ? esc_html( $_GET['lat'] ) : '';
-	$lng   = isset( $_GET['lng'] ) && ! empty( $_GET['lng'] ) ? esc_html( $_GET['lng'] ) : '';
-	$taxos = [];
-
-	foreach ( array_keys( mailocations_get_location_taxonomies() ) as $name ) {
-		if ( ! isset( $_GET[ $name ] ) || empty( $_GET[ $name ] ) ) {
-			continue;
-		}
-
-		$taxos[ $name ] = explode( ',', esc_html( $_GET[ $name ] ) );
-	}
+	// Get the filters.
+	$params   = mailocations_get_query_params();
+	$defaults = mailocations_get_query_defaults();
+	$lat      = isset( $params['lat'] ) ? $params['lat'] : '';
+	$lng      = isset( $params['lng'] ) ? $params['lng'] : '';
+	$dist     = isset( $params['distance'] ) ? $params['distance'] : $defaults['distance'];
+	$unit     = isset( $params['unit'] ) ? $params['unit'] : $defaults['unit'];
+	$taxos    = array_intersect_key( $params, mailocations_get_location_taxonomies() );
 
 	// Bail if no coordinates or taxonomies.
 	if ( ! ( $lat && $lng ) && ! $taxos ) {
 		return $query_args;
 	}
-
-	$dist = 1000;
 
 	// Show all results.
 	$query_args['posts_per_page'] = -1;
@@ -142,7 +135,7 @@ function mailocations_mai_post_grid_query( $query_args, $args ) {
 			'latitude'  => $lat,
 			'longitude' => $lng,
 			'distance'  => $dist, // @int The maximum distance to search.
-			'units'     => 'miles', // Supports options: miles, mi, kilometers, km
+			'units'     => $unit, // Supports options: miles, mi, kilometers, km
 		];
 	}
 

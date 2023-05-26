@@ -11,12 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return string
  */
 function mailocations_get_plural() {
-	$label = null;
+	static $label = null;
+
 	if ( ! is_null( $label ) ) {
 		return $label;
 	}
-	$label = get_option( 'options_location_label_plural', __( 'Locations', 'mai-location' ) );
+
+	$label = mailocations_get_option( 'label_plural' );
 	$label = apply_filters( 'mailocations_plural', $label );
+
 	return esc_html( $label );
 }
 
@@ -28,12 +31,15 @@ function mailocations_get_plural() {
  * @return string
  */
 function mailocations_get_singular() {
-	$label = null;
+	static $label = null;
+
 	if ( ! is_null( $label ) ) {
 		return $label;
 	}
-	$label = get_option( 'options_location_label_singular', __( 'Location', 'mai-location' ) );
+
+	$label = mailocations_get_option( 'label_singular' );
 	$label = apply_filters( 'mailocations_singular', $label );
+
 	return esc_html( $label );
 }
 
@@ -45,13 +51,102 @@ function mailocations_get_singular() {
  * @return string
  */
 function mailocations_get_base() {
-	$base = null;
+	static $base = null;
+
 	if ( ! is_null( $base ) ) {
 		return $base;
 	}
-	$base = get_option( 'options_location_base', __( 'locations' ) );
+
+	$base = mailocations_get_option( 'base' );
 	$base = apply_filters( 'mailocations_base', $base );
+
 	return sanitize_html_class( $base );
+}
+
+/**
+ * Gets a single option value by key.
+ *
+ * @since TBD
+ *
+ * @param string $key
+ *
+ * @return mixed
+ */
+function mailocations_get_option( $key ) {
+	$defaults = mailocations_get_options_defaults();
+	$options  = mailocations_get_options();
+
+	return isset( $options[ $key ] ) ? $options[ $key ] : $defaults[ $key ];
+}
+
+/**
+ * Gets all options.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_get_options() {
+	static $cache = null;
+
+	if ( ! is_null( $cache ) ) {
+		return $cache;
+	}
+
+	// Get all options, with defaults.
+	$options = (array) get_option( 'mai_locations', mailocations_get_options_defaults() );
+
+	// Sanitize.
+	$cache = mailocations_sanitize_options( $options );
+
+	return $cache;
+}
+
+/**
+ * Gets default options.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_get_options_defaults() {
+	static $cache = null;
+
+	if ( ! is_null( $cache ) ) {
+		return $cache;
+	}
+
+	$cache = [
+		'label_plural'   => __( 'Locations', 'mai-location' ),
+		'label_singular' => __( 'Location', 'mai-location' ),
+		'base'           => 'locations',
+		'distances'      => [ 25, 50, 100, 200 ],
+		'units'          => [ 'mi' ], // Accepts mi or km.
+	];
+
+	return $cache;
+}
+
+/**
+ * Parses and sanitize all options.
+ * Not cached for use when saving values in settings page.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_sanitize_options( $options ) {
+	$options = wp_parse_args( $options, mailocations_get_options_defaults() );
+
+	// Sanitize.
+	$options['label_plural']   = esc_html( $options['label_plural'] );
+	$options['label_singular'] = esc_html( $options['label_singular'] );
+	$options['base']           = sanitize_key( $options['base'] );
+	$options['distances']      = ! is_array( $options['distances'] ) ? explode( ',', $options['distances'] ) : $options['distances'];
+	$options['distances']      = array_map( 'absint', $options['distances'] );
+	$options['units']          = array_map( 'sanitize_key', $options['units'] );
+
+	return $options;
 }
 
 /**
@@ -580,8 +675,40 @@ function mailocations_is_filtered_locations() {
 	return $filtered;
 }
 
+/**
+ * Gets valid query params, if any.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_get_query_params() {
+	$params   = [];
+	$defaults = mailocations_get_query_defaults();
 
-function mailocations_get_location_query_defaults() {
+	// Check query strings.
+	foreach ( $defaults as $key => $value ) {
+		// Skip if the param is not set.
+		if ( ! isset( $_GET[ $key ] ) ) {
+			continue;
+		}
+
+		$get              = esc_html( $_GET[ $key ] );
+		$get              = is_array( $defaults[ $key ] ) ? explode( ',', $_GET[ $key ] ) : $_GET[ $key ];
+		$params[ $key ] = $get;
+	}
+
+	return $params;
+}
+
+/**
+ * Gets valid query param defaults.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_get_query_defaults() {
 	static $defaults = null;
 
 	if ( ! is_null( $defaults ) ) {
@@ -589,12 +716,14 @@ function mailocations_get_location_query_defaults() {
 	}
 
 	// Set static defaults.
+	$distance = mailocations_get_option( 'distances' );
+	$units    = mailocations_get_option( 'units' );
 	$defaults = [
-		'address'    => '',
-		'lat'        => '',
-		'lng'        => '',
-		'distance'   => 100,
-		'units'      => 'mi',
+		'address'  => '',
+		'lat'      => '',
+		'lng'      => '',
+		'distance' => reset( $distance ),
+		'unit'     => reset( $units ),
 	];
 
 	// Add taxonomies.
@@ -604,17 +733,6 @@ function mailocations_get_location_query_defaults() {
 
 	// Add filter.
 	$defaults = apply_filters( 'mailocations_location_query_defaults', $defaults );
-
-	// Check query strings.
-	foreach ( $defaults as $key => $value ) {
-		if ( ! isset( $_GET[ $key ] ) ) {
-			continue;
-		}
-
-		$get              = esc_html( $_GET[ $key ] );
-		$get              = is_array( $defaults[ $key ] ) ? explode( ',', $_GET[ $key ] ) : $_GET[ $key ];
-		$defaults[ $key ] = $get;
-	}
 
 	return $defaults;
 }

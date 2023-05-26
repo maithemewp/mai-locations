@@ -178,12 +178,24 @@ function mailocation_location_email_shortcode( $atts ) {
 	return $html;
 }
 
+/**
+ * Location distance.
+ *
+ * @since TBD
+ *
+ * @param array $atts The shortcode attributes.
+ *
+ * @return string
+ */
 add_shortcode( 'mai_location_distance', function( $atts ) {
+	// Get defaults.
+	$params = wp_parse_args( mailocations_get_query_params(), mailocations_get_query_defaults() );
+
 	// Atts.
 	$atts = shortcode_atts(
 		[
 			'before' => '',
-			'after'  => '',
+			'after'  => sprintf( ' %s %s', $params['unit'], __( 'away', 'mai-locations' ) ),
 			'round'  => 1,
 		],
 		$atts,
@@ -233,76 +245,4 @@ add_shortcode( 'mai_locations_table', 'mailocation_location_table_shortcode' );
  */
 function mailocation_location_table_shortcode( $atts ) {
 	return mailocations_get_locations_table( 0, $atts );
-}
-
-add_shortcode( 'mai_locations_search', 'mailocation_locations_search_shortcode' );
-/**
- *
- *
- * @since TBD
- *
- * @return string
- */
-function mailocation_locations_search_shortcode( $atts ) {
-	static $enqueued = false;
-
-	// Atts.
-	$atts = shortcode_atts(
-		[
-			'placeholder' => __( 'Enter your address', 'mai-locations' ),
-		],
-		$atts,
-		'mai_locations_search'
-	);
-
-	// Sanitize.
-	$atts = [
-		'placeholder' => esc_html( $atts['placeholder'] ),
-	];
-
-	// Maybe enqueue scripts.
-	if ( ! $enqueued ) {
-		$file      = '/assets/js/mai-locations.js';
-		$file_path = MAI_LOCATIONS_PLUGIN_DIR . $file;
-		$file_url  = MAI_LOCATIONS_PLUGIN_URL . $file;
-
-		if ( file_exists( $file_path ) ) {
-			$version = MAI_LOCATIONS_VERSION . '.' . date( 'njYHi', filemtime( $file_path ) );
-			wp_enqueue_script( 'mailocations-autocomplete', $file_url, [], $version, true );
-			wp_localize_script( 'mailocations-autocomplete', 'maiLocationsVars', [ 'taxonomies' => array_keys( mailocations_get_location_taxonomies() ) ] );
-			wp_enqueue_script( 'mailocations-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&v=quarterly&libraries=places&callback=initMap', pfl_get_googlemaps_api_key() ), [], $version, true );
-			$enqueued = true;
-		}
-	}
-
-	return sprintf( '<input type="text" id="mailocations-autocomplete" placeholder="%s" value="%s" />',
-		$atts['placeholder'],
-		isset( $_GET['address'] ) && ! empty( $_GET['address'] ) ? esc_html( $_GET['address'] ) : ''
-	);
-}
-
-add_shortcode( 'mai_locations_filter_submit', 'mailocation_locations_filter_submit_shortcode' );
-/**
- *
- *
- * @since TBD
- *
- * @return string
- */
-function mailocation_locations_filter_submit_shortcode( $atts ) {
-	// Atts.
-	$atts = shortcode_atts(
-		[
-			'text' => __( 'Submit', 'mai-locations' ),
-		],
-		$atts,
-		'mai_locations_filter_submit'
-	);
-
-	// Sanitize.
-	$atts = [
-		'text' => esc_html( $atts['text'] ),
-	];
-
-	return sprintf( '<button type="button" class="mailocations-filter-submit">%s</button>', $atts['text'] );
 }
