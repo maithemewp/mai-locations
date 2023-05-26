@@ -30,9 +30,6 @@ function mailocations_register_locations_filter_block() {
  * @return void
  */
 function mailocations_do_locations_filter_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
-
-	// TODO: Show note in preview/editor so it's not blank when no filter is chosen.
-
 	$taxonomy = get_field( 'filter' );
 	$type     = get_field( 'type' );
 	$type     = $type ?: 'select';
