@@ -47,6 +47,7 @@
 	border: 0;
 }
 
+.wp-block .mailocations-autocomplete-container,
 .wp-block .mailocations-filter,
 .wp-block .mailocations-filter-list {
 	pointer-events: none;

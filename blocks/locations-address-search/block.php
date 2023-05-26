@@ -50,7 +50,8 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 
 	echo '<div class="mailocations-autocomplete-container">';
 		echo '<div class="mailocations-autocomplete-input-container">';
-			printf( '<input type="text" class="mailocations-autocomplete" placeholder="%s" value="%s" />', $placeholder, $address );
+			$value = $is_preview ? '' : sprintf( ' value="%s"', $address );
+			printf( '<input type="text" class="mailocations-autocomplete" placeholder="%s"%s>', $placeholder, $value );
 
 			if ( ! $is_preview  ) {
 				printf( '<button class="mailocations-autocomplete-clear">%s</button>', __( 'Clear', 'mai-locations' ) );
@@ -59,21 +60,24 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 
 		if ( $distances ) {
 			$multiple = count( $units ) > 1;
-			$first    = reset( $units );
 
 			echo '<select class="mailocations-autocomplete-distance">';
 				foreach ( $distances as $value ) {
-					$label    = $multiple ? $value : $value . ' ' . $first;
-					$selected = (int) $value === (int) $distance ? ' selected' : '';
-					printf ( '<option value="%s"%s>%s</option>', $value, $selected, $label );
+					$label    = $multiple ? $value : $value . ' ' . $unit;
+					$selected = ! $is_preview && (int) $value === (int) $distance ? ' selected' : '';
+					$value    = ! $is_preview ? sprintf( ' value="%s"', $value ) : '';
+					printf( '<option %s%s>%s</option>', $value, $selected, $label );
 				}
 			echo '</select>';
 
 			if ( $units && $multiple ) {
 				echo '<select class="mailocations-autocomplete-unit">';
 				foreach ( $units as $value ) {
-					$selected = $value === $unit ? ' selected' : '';
-					printf ( '<option value="%s"%s>%s</option>', $value, $selected, $value );
+					$raw      = $value;
+					$selected = ! $is_preview && $raw === $unit ? ' selected' : '';
+					$value    = ! $is_preview ? sprintf( ' value="%s"', $raw ) : '';
+					printf ( '<option %s%s>%s</option>', $raw, $selected, $value );
+
 				}
 				echo '</select>';
 			}
