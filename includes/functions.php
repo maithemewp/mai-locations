@@ -540,46 +540,61 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 		$international = isset( $data['country_short'] ) && 'US' !== $data['country_short'];
 
 		foreach ( $update as $key ) {
-			$value = '';
+			$meta = $taxo = $term = '';
 
 			switch ( $key ) {
 				case 'address_street':
 					if ( isset( $data['name'] ) && $data['name'] ) {
-						$value = $data['name'];
+						$meta = $data['name'];
 					}
 				break;
 				case 'address_city':
 					if ( isset( $data['city'] ) && $data['city'] ) {
-						$value = $data['city'];
+						$meta = $data['city'];
 					}
 				break;
 				case 'address_state':
 					if ( ! $international && isset( $data['state_short'] ) && $data['state_short'] ) {
-						$value = $data['state_short'];
+						// $meta = $data['state_short'];
+						$taxo = 'mai_location_state';
+						$term = $data['state_short'];
 					}
 				break;
 				case 'address_state_int':
 					if ( $international && isset( $data['state_short'] ) && $data['state_short'] ) {
-						$value = $data['state_short'];
+						// $meta = $data['state_short'];
+						$taxo = 'mai_location_state_int';
+						$term = $data['state_short'];
 					}
 				break;
 				case 'address_postcode':
 					if ( isset( $data['post_code'] ) && $data['post_code'] ) {
-						$value = $data['post_code'];
+						$meta = $data['post_code'];
 					}
 				break;
 				case 'address_country':
 					if ( isset( $data['country_short'] ) && $data['country_short'] ) {
-						$value = $data['country_short'];
+						// $meta = $data['country_short'];
+						$taxo = 'mai_location_country';
+						$term = $data['country_short'];
 					}
 				break;
 			}
 
-			if ( ! $value ) {
-				continue;
+			// TODO: What happens if someone removes an address? Do these fields or terms get deleted/cleared?
+
+			if ( $meta ) {
+				update_post_meta( $post_id, $key, $value );
 			}
 
-			update_post_meta( $post_id, $key, $value );
+			if ( $taxo && $term ) {
+				$array   = wp_create_term( $term, $taxo );
+				$term_id = $array && isset( $array['term_id'] ) ? (int) $array['term_id'] : 0;
+
+				if ( $term_id ) {
+					wp_set_post_terms( $post_id, [ $term_id ], $taxo );
+				}
+			}
 		}
 	}
 
