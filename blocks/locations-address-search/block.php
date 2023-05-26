@@ -50,7 +50,7 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 
 	echo '<div class="mailocations-autocomplete-container">';
 		echo '<div class="mailocations-autocomplete-input-container">';
-			$value = $is_preview ? '' : sprintf( ' value="%s"', $address );
+			$value = ! $is_preview ? sprintf( ' value="%s"', $address ) : ''; // Can't have value attribute or React balks.
 			printf( '<input type="text" class="mailocations-autocomplete" placeholder="%s"%s>', $placeholder, $value );
 
 			if ( ! $is_preview  ) {
@@ -65,7 +65,7 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 				foreach ( $distances as $value ) {
 					$label    = $multiple ? $value : $value . ' ' . $unit;
 					$selected = ! $is_preview && (int) $value === (int) $distance ? ' selected' : '';
-					$value    = ! $is_preview ? sprintf( ' value="%s"', $value ) : '';
+					$value    = ! $is_preview ? sprintf( ' value="%s"', $value ) : ''; // Can't have value attribute or React balks.
 					printf( '<option %s%s>%s</option>', $value, $selected, $label );
 				}
 			echo '</select>';
