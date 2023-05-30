@@ -56,14 +56,22 @@ window.initMap = function() {
 		 * when and address is searched.
 		 */
 		autocomplete.addListener( 'place_changed', function() {
-			var place    = autocomplete.getPlace();
+			const place = autocomplete.getPlace();
+
+			/**
+			 * Bail if we don't have a precise place.
+			 * This happens for "Georgia" because it may be the state or country.
+			 * A suggested option needs to be chosen.
+			 */
+			if ( ! place || ! place.geometry ) {
+				return;
+			}
+
 			var lat      = place.geometry.location.lat();
 			var lng      = place.geometry.location.lng();
 			var country  = null;
 			var state    = null;
 			var province = null;
-
-			console.log( place.address_components );
 
 			// Get address.
 			if ( place.address_components ) {
