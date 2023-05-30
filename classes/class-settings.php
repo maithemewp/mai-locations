@@ -196,7 +196,7 @@ class Mai_Locations_Settings {
 	 */
 	public function distances_callback() {
 		printf( '<input class="regular-text" type="text" name="mai_locations[distances]" id="distances" value="%s">', implode( ', ', $this->options['distances'] ) );
-		printf( '<p>%s</p>', __( 'Comma-separated distance options used for proximity search. Use a single value to force one distance. Use 0 or leave empty to hide this field when using the address search.', 'mai-locations' ) );
+		printf( '<p>%s</p>', __( 'Comma-separated distance options used for proximity search. Use a single value to hide field and force one distance. Use 0 to show all results, typically when limiting results by state/province below.', 'mai-locations' ) );
 	}
 
 	/**
