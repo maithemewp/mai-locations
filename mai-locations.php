@@ -274,80 +274,83 @@ final class Mai_Locations_Plugin {
 			]
 		) );
 
-		/**
-		 * Registers custom taxonomy.
-		 *
-		 * @return void
-		 */
-		register_taxonomy(
-			'mai_location_state', [ 'mai_location' ], apply_filters( 'mai_location_state_args',
-			[
-				'hierarchical' => false,
-				'labels'       => [
-					'name'          => __( 'States', 'mai-location' ),
-					'singular_name' => __( 'State', 'mai-location' ),
-					'menu_name'     => __( 'States', 'mai-location' ),
-				],
-				'meta_box_cb'       => null,
-				'public'            => false,
-				'show_admin_column' => false,
-				'show_in_nav_menus' => false,
-				'show_in_rest'      => true,
-				'show_tagcloud'     => false,
-				'show_ui'           => true,
-				'rewrite'           => false,
-			]
-		) );
+		// TODO: Coming soon, after 0.5.0 is running everywhere,
+		// so we can run upgrade script to convert state/province/country from post meta to taxonomy terms.
 
 		/**
 		 * Registers custom taxonomy.
 		 *
 		 * @return void
 		 */
-		register_taxonomy(
-			'mai_location_state_int', [ 'mai_location' ], apply_filters( 'mai_location_state_int_args',
-			[
-				'hierarchical' => false,
-				'labels'       => [
-					'name'          => __( 'Provinces', 'mai-location' ),
-					'singular_name' => __( 'Province', 'mai-location' ),
-					'menu_name'     => __( 'Provinces', 'mai-location' ),
-				],
-				'meta_box_cb'       => null,
-				'public'            => false,
-				'show_admin_column' => false,
-				'show_in_nav_menus' => false,
-				'show_in_rest'      => true,
-				'show_tagcloud'     => false,
-				'show_ui'           => true,
-				'rewrite'           => false,
-			]
-		) );
+		// register_taxonomy(
+		// 	'mai_location_state', [ 'mai_location' ], apply_filters( 'mai_location_state_args',
+		// 	[
+		// 		'hierarchical' => false,
+		// 		'labels'       => [
+		// 			'name'          => __( 'States', 'mai-location' ),
+		// 			'singular_name' => __( 'State', 'mai-location' ),
+		// 			'menu_name'     => __( 'States', 'mai-location' ),
+		// 		],
+		// 		'meta_box_cb'       => null,
+		// 		'public'            => false,
+		// 		'show_admin_column' => false,
+		// 		'show_in_nav_menus' => false,
+		// 		'show_in_rest'      => true,
+		// 		'show_tagcloud'     => false,
+		// 		'show_ui'           => true,
+		// 		'rewrite'           => false,
+		// 	]
+		// ) );
 
 		/**
 		 * Registers custom taxonomy.
 		 *
 		 * @return void
 		 */
-		register_taxonomy(
-			'mai_location_country', [ 'mai_location' ], apply_filters( 'mai_location_country_args',
-			[
-				'hierarchical' => false,
-				'labels'       => [
-					'name'          => __( 'Countries', 'mai-location' ),
-					'singular_name' => __( 'Country', 'mai-location' ),
-					'menu_name'     => __( 'Countries', 'mai-location' ),
-				],
-				'meta_box_cb'       => null,
-				'public'            => false,
-				'show_admin_column' => false,
-				'show_in_nav_menus' => false,
-				'show_in_rest'      => true,
-				'show_tagcloud'     => false,
-				'show_ui'           => true,
-				'rewrite'           => false,
-			]
-		) );
+		// register_taxonomy(
+		// 	'mai_location_state_int', [ 'mai_location' ], apply_filters( 'mai_location_state_int_args',
+		// 	[
+		// 		'hierarchical' => false,
+		// 		'labels'       => [
+		// 			'name'          => __( 'Provinces', 'mai-location' ),
+		// 			'singular_name' => __( 'Province', 'mai-location' ),
+		// 			'menu_name'     => __( 'Provinces', 'mai-location' ),
+		// 		],
+		// 		'meta_box_cb'       => null,
+		// 		'public'            => false,
+		// 		'show_admin_column' => false,
+		// 		'show_in_nav_menus' => false,
+		// 		'show_in_rest'      => true,
+		// 		'show_tagcloud'     => false,
+		// 		'show_ui'           => true,
+		// 		'rewrite'           => false,
+		// 	]
+		// ) );
+
+		/**
+		 * Registers custom taxonomy.
+		 *
+		 * @return void
+		 */
+		// register_taxonomy(
+		// 	'mai_location_country', [ 'mai_location' ], apply_filters( 'mai_location_country_args',
+		// 	[
+		// 		'hierarchical' => false,
+		// 		'labels'       => [
+		// 			'name'          => __( 'Countries', 'mai-location' ),
+		// 			'singular_name' => __( 'Country', 'mai-location' ),
+		// 			'menu_name'     => __( 'Countries', 'mai-location' ),
+		// 		],
+		// 		'meta_box_cb'       => null,
+		// 		'public'            => false,
+		// 		'show_admin_column' => false,
+		// 		'show_in_nav_menus' => false,
+		// 		'show_in_rest'      => true,
+		// 		'show_tagcloud'     => false,
+		// 		'show_ui'           => true,
+		// 		'rewrite'           => false,
+		// 	]
+		// ) );
 	}
 
 	/**
