@@ -1,5 +1,43 @@
 <?php
 
+add_action( 'admin_init', 'mailocations_do_upgrade' );
+/**
+ * Run setting upgrades during engine update.
+ *
+ * @since TBD
+ *
+ * @return void
+ */
+function mailocations_do_upgrade() {
+	$version    = MAI_LOCATIONS_VERSION;
+	$version_db = mailocations_get_option( 'version_db' );
+
+	// Set first version.
+	if ( ! mailocations_get_option( 'version_first' ) ) {
+		mailocations_update_option( 'version_first', $version );
+	}
+
+	// Return early if current.
+	if ( $version === $version_db ) {
+		return;
+	}
+
+	// Only run upgrades if we have an existing version.
+	if ( $version_db ) {
+
+		// if ( version_compare( $version_db, '0.7.0', '<' ) ) {
+		// 	mailocations_upgrade_0_7_0();
+		// }
+	}
+
+	// Update database version after upgrade.
+	mailocations_update_option( 'version_db', $version );
+}
+
+function mailocations_upgrade_0_7_0() {
+	// TODO.
+}
+
 add_action( 'upgrader_process_complete', 'mailocations_upgrade_completed', 10, 2 );
 /**
  * This function runs when WordPress completes its upgrade process.

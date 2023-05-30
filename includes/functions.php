@@ -122,9 +122,29 @@ function mailocations_get_options_defaults() {
 		'base'           => 'locations',
 		'distances'      => [ 25, 50, 100, 200 ],
 		'units'          => [ 'mi' ], // Accepts mi or km.
+		'limit_state'    => false,
+		'version_first'  => '',
+		'version_db'     => '',
 	];
 
 	return $cache;
+}
+
+/**
+ * Update a single option from mai_locations array of options.
+ *
+ * @since TBD
+ *
+ * @param string $option Option name.
+ * @param mixed  $value  Option value.
+ *
+ * @return void
+ */
+function mailocations_update_option( $option, $value ) {
+	$options            = (array) get_option( 'mai_locations', [] );
+	$options[ $option ] = $value;
+
+	update_option( 'mai_locations', $options );
 }
 
 /**
@@ -145,6 +165,9 @@ function mailocations_sanitize_options( $options ) {
 	$options['distances']      = ! is_array( $options['distances'] ) ? explode( ',', $options['distances'] ) : $options['distances'];
 	$options['distances']      = array_map( 'absint', $options['distances'] );
 	$options['units']          = array_map( 'sanitize_key', $options['units'] );
+	$options['limit_state']    = rest_sanitize_boolean( $options['limit_state'] );
+	$options['version_first']  = esc_html( $options['version_first'] );
+	$options['version_db']     = esc_html( $options['version_db'] );
 
 	return $options;
 }
@@ -555,16 +578,16 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 				break;
 				case 'address_state':
 					if ( ! $international && isset( $data['state_short'] ) && $data['state_short'] ) {
-						// $meta = $data['state_short'];
-						$taxo = 'mai_location_state';
-						$term = $data['state_short'];
+						$meta = $data['state_short'];
+						// $taxo = 'mai_location_state';
+						// $term = $data['state_short'];
 					}
 				break;
 				case 'address_state_int':
 					if ( $international && isset( $data['state_short'] ) && $data['state_short'] ) {
-						// $meta = $data['state_short'];
-						$taxo = 'mai_location_state_int';
-						$term = $data['state_short'];
+						$meta = $data['state_short'];
+						// $taxo = 'mai_location_state_int';
+						// $term = $data['state_short'];
 					}
 				break;
 				case 'address_postcode':
@@ -574,9 +597,9 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 				break;
 				case 'address_country':
 					if ( isset( $data['country_short'] ) && $data['country_short'] ) {
-						// $meta = $data['country_short'];
-						$taxo = 'mai_location_country';
-						$term = $data['country_short'];
+						$meta = $data['country_short'];
+						// $taxo = 'mai_location_country';
+						// $term = $data['country_short'];
 					}
 				break;
 			}
@@ -739,6 +762,8 @@ function mailocations_get_query_defaults() {
 		'lng'      => '',
 		'distance' => reset( $distance ),
 		'unit'     => reset( $units ),
+		'state'    => '',
+		'province' => '',
 	];
 
 	// Add taxonomies.
