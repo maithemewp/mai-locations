@@ -87,16 +87,16 @@ class Mai_Geo_Query {
 			return $sql;
 		}
 
-		$lat_field = 'latitude';
-		$lng_field = 'longitude';
-		$distance  = 20;
+		$lat_field = 'location_lat';
+		$lng_field = 'location_lng';
+		$distance  = 0;
 
 		if ( ! empty( $geo_query['lat_field'] ) ) {
-			$lat_field =  $geo_query['lat_field'];
+			$lat_field = $geo_query['lat_field'];
 		}
 
 		if ( ! empty( $geo_query['lng_field'] ) ) {
-			$lng_field =  $geo_query['lng_field'];
+			$lng_field = $geo_query['lng_field'];
 		}
 
 		if ( isset( $geo_query['distance'] ) ) {
@@ -107,9 +107,16 @@ class Mai_Geo_Query {
 			$sql .= " AND ";
 		}
 
-		$haversine = $this->haversine_term( $geo_query );
-		$new_sql   = "( geo_query_lat.meta_key = %s AND geo_query_lng.meta_key = %s AND " . $haversine . " <= %f )";
-		$sql      .= $wpdb->prepare( $new_sql, $lat_field, $lng_field, $distance );
+		$haversine  = $this->haversine_term( $geo_query );
+		$additional = $distance ? ' <= %f' : '';
+		$new_sql    = "( geo_query_lat.meta_key = %s AND geo_query_lng.meta_key = %s AND {$haversine}{$additional} )";
+		// $new_sql   = "( geo_query_lat.meta_key = %s AND geo_query_lng.meta_key = %s AND " . $haversine . " <= %f )";
+
+		if ( $distance ) {
+			$sql .= $wpdb->prepare( $new_sql, $lat_field, $lng_field, $distance );
+		} else {
+			$sql .= $wpdb->prepare( $new_sql, $lat_field, $lng_field );
+		}
 
 		return $sql;
 	}
