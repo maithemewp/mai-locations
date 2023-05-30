@@ -2,12 +2,12 @@
 
 add_action( 'pre_get_posts', 'mailocations_pre_get_posts_query' );
 /**
- * Filters the location archive page query.
- *
- * @since TBD
- *
- * @return void
- */
+* Filters the location archive page query.
+*
+* @since TBD
+*
+* @return void
+*/
 function mailocations_pre_get_posts_query( $query ) {
 	// Bail if in the Dashboard.
 	if ( is_admin() ) {
@@ -55,6 +55,33 @@ function mailocations_pre_get_posts_query( $query ) {
 					'units'     => $unit, // Supports options: miles, mi, kilometers, km.
 				]
 			);
+
+			// Get state/province.
+			$state    = isset( $params['state'] ) && $params['state'] ? $params['state'] : '';
+			$province = isset( $params['province'] ) && $params['province'] ? $params['province'] : '';
+
+			// If limiting by state.
+			if ( ( $state || $province ) && mailocations_get_option( 'limit_state' ) ) {
+				// Make sure existing meta query is used, if there is one.
+				$meta_query = $query->get( 'meta_query' ) ? $query->get( 'meta_query' ) : [];
+
+				// Remove relation.
+				unset( $meta_query['relation'] );
+
+				// Add new meta query item.
+				$meta_query[] = [
+					'key'     => $state ? 'address_state' : 'address_state_int',
+					'value'   => $state ? $state : $province,
+					'compare' => '=',
+				];
+
+				// Only use relation if more than 1.
+				if ( count( $meta_query ) > 1 ) {
+					$query_args['meta_query']['relation'] = 'AND';
+				}
+
+				$query->set( 'meta_query', $meta_query );
+			}
 		}
 
 		// If tax query.
@@ -92,15 +119,15 @@ function mailocations_pre_get_posts_query( $query ) {
 
 add_filter( 'mai_post_grid_query_args', 'mailocations_mai_post_grid_query', 10, 2 );
 /**
- * Modify Mai Post Grid args with filter arguments.
- *
- * @since TBD
- *
- * @param array $query_args WP_Query args
- * @param array $args       Mai Post Grid block args.
- *
- * @return array
- */
+* Modify Mai Post Grid args with filter arguments.
+*
+* @since TBD
+*
+* @param array $query_args WP_Query args
+* @param array $args       Mai Post Grid block args.
+*
+* @return array
+*/
 function mailocations_mai_post_grid_query( $query_args, $args ) {
 	// Bail if not a location.
 	if ( ! in_array( 'mai_location', (array) $query_args['post_type'] ) ) {
@@ -137,6 +164,31 @@ function mailocations_mai_post_grid_query( $query_args, $args ) {
 			'distance'  => $dist, // @int The maximum distance to search.
 			'units'     => $unit, // Supports options: miles, mi, kilometers, km
 		];
+
+		// Get state/province.
+		$state    = isset( $params['state'] ) && $params['state'] ? $params['state'] : '';
+		$province = isset( $params['province'] ) && $params['province'] ? $params['province'] : '';
+
+		// If limiting by state.
+		if ( ( $state || $province ) && mailocations_get_option( 'limit_state' ) ) {
+			// Make sure existing meta query is used, if there is one.
+			$query_args['meta_query'] = isset( $query_args['meta_query'] ) ? $query_args['meta_query'] : [];
+
+			// Remove relation.
+			unset( $query_args['meta_query']['relation'] );
+
+			// Add new meta query item.
+			$query_args['meta_query'][] = [
+				'key'     => $state ? 'address_state' : 'address_state_int',
+				'value'   => $state ? $state : $province,
+				'compare' => '=',
+			];
+
+			// Only use relation if more than 1.
+			if ( count( $query_args['meta_query'] ) > 1 ) {
+				$query_args['meta_query']['relation'] = 'AND';
+			}
+		}
 	}
 
 	// If tax query.

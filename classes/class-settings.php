@@ -117,8 +117,16 @@ class Mai_Locations_Settings {
 
 		add_settings_field(
 			'units', // id
-			__( 'Distance Units', 'mai-locations' ), // title
+			__( 'Distance - Units', 'mai-locations' ), // title
 			[ $this, 'units_callback' ], // callback
+			'mai-locations-section', // page
+			'mai_locations_settings' // section
+		);
+
+		add_settings_field(
+			'limit_state', // id
+			__( 'Distance - Limit by State/Province', 'mai-locations' ), // title
+			[ $this, 'limit_state_callback' ], // callback
 			'mai-locations-section', // page
 			'mai_locations_settings' // section
 		);
@@ -215,6 +223,21 @@ class Mai_Locations_Settings {
 		}
 
 		printf( '<p>%s</p>', __( 'The distance unit options to use. If none are selected, the field will be hidden and miles will be used.', 'mai-locations' ) );
+	}
+
+	/**
+	 * Setting callback.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function limit_state_callback() {
+		printf(
+			'<p><label><input type="checkbox" name="mai_locations[limit_state]" value="limit_state"%s> %s</label></p>',
+			(bool) $this->options['limit_state'] ? ' checked' : '',
+			__( 'Limit proximity search to the same state or province.', 'mai-locations' )
+		);
 	}
 
 	/**
