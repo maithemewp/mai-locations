@@ -16,8 +16,29 @@ function mailocations_register_scripts() {
 	wp_register_style( 'mai-locations-edit', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations-edit{$suffix}.css", [], MAI_LOCATIONS_VERSION );
 	wp_register_style( 'mai-locations-filters', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations-filters{$suffix}.css", [], MAI_LOCATIONS_VERSION );
 	wp_register_script( 'mailocations-filters', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations-filters{$suffix}.js", [], MAI_LOCATIONS_VERSION, true );
-	wp_localize_script( 'mailocations-filters', 'maiLocationsVars', [ 'params' => mailocations_get_query_params(), 'defaults' => mailocations_get_query_defaults() ] );
 	wp_register_script( 'mailocations-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&v=quarterly&libraries=places&callback=initMap', mailocations_get_google_maps_api_key() ), [], MAI_LOCATIONS_VERSION, true );
+
+	$localize = [
+		'params'       => mailocations_get_query_params(),
+		'defaults'     => mailocations_get_query_defaults(),
+		'autoComplete' => [
+			'fields'       => [ 'geometry', 'name' ],
+			'strictBounds' => false,
+			// 'componentRestrictions' => [ 'country' => 'us' ],
+			// 'types'                 => [ 'establishment' ],
+		],
+	];
+
+	// Only add address_components if limiting by state/province since this adds to the API volume.
+	if ( mailocations_get_option( 'limit_state' ) ) {
+		$localize['autoComplete']['fields'][] = 'address_components';
+	}
+
+	// Allow filtering of script data.
+	$localize = apply_filters( 'mailocations_localize_script_data', $localize );
+
+	// Localize.
+	wp_localize_script( 'mailocations-filters', 'maiLocationsVars', $localize );
 }
 
 add_action( 'get_header', 'mailocations_location_edit_listener', 0 );
