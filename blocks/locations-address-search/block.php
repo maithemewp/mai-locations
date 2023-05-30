@@ -58,11 +58,11 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 			}
 		echo '</div>';
 
-		if ( $distances ) {
+		if ( $distances && count( $distances ) > 1 ) {
 			$multiple = count( $units ) > 1;
 
 			echo '<select class="mailocations-autocomplete-distance">';
-				foreach ( $distances as $value ) {
+			foreach ( $distances as $value ) {
 					$label    = $multiple ? $value : $value . ' ' . $unit;
 					$selected = ! $is_preview && (int) $value === (int) $distance ? ' selected' : '';
 					$value    = ! $is_preview ? sprintf( ' value="%s"', $value ) : ''; // Can't have value attribute or React balks.
