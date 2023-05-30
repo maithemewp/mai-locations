@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.5.0 (TBD)
+## 0.6.0 (TBD)
+
+## 0.5.0 (6/8/22)
 * Added: `[mai_location_phone]`, `[mai_location_url]`, and `[mai_location_email]` shortcodes.
 
 ## 0.4.0 (3/9/22)
