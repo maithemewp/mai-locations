@@ -55,10 +55,10 @@ function mailocations_do_locations_filter_block( $attributes, $content, $is_prev
 	}
 
 	// Enqueue script.
-	wp_enqueue_script( 'mai-locations-filters' );
+	wp_enqueue_script( 'mai-locations' );
 
 	// Maybe load CSS.
-	echo mailocations_get_stylesheet_link( 'mai-locations-filters' );
+	echo mailocations_get_stylesheet_link( 'mai-locations' );
 
 	// Get any selected items.
 	$selected = isset( $_GET[ $taxonomy ] ) && ! empty( $_GET[ $taxonomy ] ) ? $_GET[ $taxonomy ] : [];

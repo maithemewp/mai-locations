@@ -61,7 +61,7 @@ function mailocations_render_clear_filters_button_block( $block_content, $parsed
 	}
 
 	// Maybe load CSS.
-	$block_content = mailocations_get_stylesheet_link( 'mai-locations-filters' ) . $block_content;
+	$block_content = mailocations_get_stylesheet_link( 'mai-locations' ) . $block_content;
 
 	// Replace tags.
 	$block_content = str_replace( '<a ', '<button ', $block_content );

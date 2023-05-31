@@ -6,7 +6,7 @@
 	"keywords": [ "location", "address", "search" ],
 	"icon": "location",
 	"textdomain": "mai-locations",
-	"editorStyle": "file:./../../assets/css/mai-locations-filters.min.css",
+	"editorStyle": "file:./../../assets/css/mai-locations.min.css",
 	"acf": {
 		"mode": "preview",
 		"renderCallback": "mailocations_do_locations_address_search_block"

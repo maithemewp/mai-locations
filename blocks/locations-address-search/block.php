@@ -41,12 +41,12 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 
 	// Maybe enqueue scripts.
 	if ( ! $is_preview ) {
-		wp_enqueue_script( 'mai-locations-filters' );
+		wp_enqueue_script( 'mai-locations' );
 		wp_enqueue_script( 'mai-locations-googlemaps' );
 	}
 
 	// Maybe load CSS.
-	echo mailocations_get_stylesheet_link( 'mai-locations-filters' );
+	echo mailocations_get_stylesheet_link( 'mai-locations' );
 
 	echo '<div class="mailocations-autocomplete-container">';
 		echo '<div class="mailocations-autocomplete-input-container">';
