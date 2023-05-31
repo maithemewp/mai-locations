@@ -117,17 +117,18 @@ function mailocations_pre_get_posts_query( $query ) {
 	}
 }
 
-add_filter( 'mai_post_grid_query_args', 'mailocations_mai_post_grid_query', 10, 2 );
+// add_filter( 'mai_post_grid_query_args', 'mailocations_mai_post_grid_query', 10, 2 );
 /**
-* Modify Mai Post Grid args with filter arguments.
-*
-* @since TBD
-*
-* @param array $query_args WP_Query args
-* @param array $args       Mai Post Grid block args.
-*
-* @return array
-*/
+ * Modify Mai Post Grid args with filter arguments.
+ * TODO: Add setting for when to hijack Mai Post Grid.
+ *
+ * @since TBD
+ *
+ * @param array $query_args WP_Query args
+ * @param array $args       Mai Post Grid block args.
+ *
+ * @return array
+ */
 function mailocations_mai_post_grid_query( $query_args, $args ) {
 	// Bail if not a location.
 	if ( ! in_array( 'mai_location', (array) $query_args['post_type'] ) ) {
