@@ -22,17 +22,18 @@
 }
 
 .mailocations-autocomplete-container {
-	display: grid;
-	grid-template-columns: 1fr auto auto;
+	display: flex;
 	gap: 8px;
 }
 
 .mailocations-autocomplete-input-container {
 	position: relative;
+	flex-grow: 1;
 }
 
 .mailocations-autocomplete-container select {
-	height: 100%;
+	width: auto;
+	height: auto;
 }
 
 .mailocations-autocomplete:placeholder-shown + .mailocations-autocomplete-clear {

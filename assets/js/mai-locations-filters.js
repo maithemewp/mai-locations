@@ -81,8 +81,12 @@ window.initMap = function() {
 		}
 
 		// Add a marker clusterer to manage the markers.
-		const mapMarkers    = map.markers;
-		const markerCluster = new markerClusterer.MarkerClusterer({ map, mapMarkers });
+		const markerCluster = new markerClusterer.MarkerClusterer(
+			{
+				map: map,
+				markers: map.markers,
+			}
+		);
 
 		// Center map based on markers.
 		centerMap( map );

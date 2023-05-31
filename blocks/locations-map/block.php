@@ -35,9 +35,9 @@ function mailocations_do_locations_map_block( $attributes, $content, $is_preview
 
 	// Enqueue script.
 	echo '<script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>';
-	// wp_enqueue_script( 'mailocations-markerclusterer' );
-	wp_enqueue_script( 'mailocations-filters' );
-	wp_enqueue_script( 'mailocations-googlemaps' );
+	// wp_enqueue_script( 'mai-locations-markerclusterer' );
+	wp_enqueue_script( 'mai-locations-filters' );
+	wp_enqueue_script( 'mai-locations-googlemaps' );
 
 	// Maybe load CSS.
 	echo mailocations_get_stylesheet_link( 'mai-locations-filters' );

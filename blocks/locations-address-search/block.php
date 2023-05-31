@@ -41,8 +41,8 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 
 	// Maybe enqueue scripts.
 	if ( ! $is_preview ) {
-		wp_enqueue_script( 'mailocations-filters' );
-		wp_enqueue_script( 'mailocations-googlemaps' );
+		wp_enqueue_script( 'mai-locations-filters' );
+		wp_enqueue_script( 'mai-locations-googlemaps' );
 	}
 
 	// Maybe load CSS.
@@ -74,9 +74,9 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 				echo '<select class="mailocations-autocomplete-unit">';
 				foreach ( $units as $value ) {
 					$raw      = $value;
-					$selected = ! $is_preview && $raw === $unit ? ' selected' : '';
 					$value    = ! $is_preview ? sprintf( ' value="%s"', $raw ) : '';
-					printf ( '<option %s%s>%s</option>', $raw, $selected, $value );
+					$selected = ! $is_preview && $raw === $unit ? ' selected' : '';
+					printf ( '<option %s%s>%s</option>', $value, $selected, $raw );
 
 				}
 				echo '</select>';

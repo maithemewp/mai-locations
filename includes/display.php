@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_action( 'wp_enqueue_scripts', 'mailocations_register_scripts' );
 /**
- * Enqueues CSS files.
+ * Enqueues scripts and styles.
  *
  * @since 0.1.0
  *
@@ -15,9 +15,9 @@ function mailocations_register_scripts() {
 	$suffix = mailocations_get_suffix();
 	wp_register_style( 'mai-locations-edit', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations-edit{$suffix}.css", [], MAI_LOCATIONS_VERSION );
 	wp_register_style( 'mai-locations-filters', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations-filters{$suffix}.css", [], MAI_LOCATIONS_VERSION );
-	wp_register_script( 'mailocations-filters', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations-filters{$suffix}.js", [], MAI_LOCATIONS_VERSION, true );
-	wp_register_script( 'mailocations-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&v=quarterly&libraries=places&callback=initMap', mailocations_get_google_maps_api_key() ), [], MAI_LOCATIONS_VERSION, true );
-	wp_register_script( 'mailocations-markerclusterer', 'https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js', [], '1.0.0', true );
+	wp_register_script( 'mai-locations-filters', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations-filters{$suffix}.js", [], MAI_LOCATIONS_VERSION, false );
+	wp_register_script( 'mai-locations-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&v=quarterly&libraries=places&callback=initMap', mailocations_get_google_maps_api_key() ), [], MAI_LOCATIONS_VERSION, false );
+	wp_register_script( 'mai-locations-markerclusterer', 'https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js', [], '1.0.0', true );
 
 	$localize = [
 		'params'       => mailocations_get_query_params(),
@@ -39,7 +39,7 @@ function mailocations_register_scripts() {
 	$localize = apply_filters( 'mailocations_localize_script_data', $localize );
 
 	// Localize.
-	wp_localize_script( 'mailocations-filters', 'maiLocationsVars', $localize );
+	wp_localize_script( 'mai-locations-filters', 'maiLocationsVars', $localize );
 }
 
 add_action( 'get_header', 'mailocations_location_edit_listener', 0 );
