@@ -17,6 +17,7 @@ function mailocations_register_scripts() {
 	wp_register_style( 'mai-locations-filters', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations-filters{$suffix}.css", [], MAI_LOCATIONS_VERSION );
 	wp_register_script( 'mailocations-filters', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations-filters{$suffix}.js", [], MAI_LOCATIONS_VERSION, true );
 	wp_register_script( 'mailocations-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&v=quarterly&libraries=places&callback=initMap', mailocations_get_google_maps_api_key() ), [], MAI_LOCATIONS_VERSION, true );
+	wp_register_script( 'mailocations-markerclusterer', 'https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js', [], '1.0.0', true );
 
 	$localize = [
 		'params'       => mailocations_get_query_params(),

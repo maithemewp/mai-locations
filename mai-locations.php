@@ -134,6 +134,7 @@ final class Mai_Locations_Plugin {
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-address-search/block.php';
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter/block.php';
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter-clear/block.php';
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-map/block.php';
 		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-table/block.php';
 	}
 

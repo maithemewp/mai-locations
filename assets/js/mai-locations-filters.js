@@ -1,11 +1,92 @@
 window.initMap = function() {
 	const url          = new URL( window.location.href );
+	const maps         = document.querySelectorAll( '.mailocations-map' );
 	const searches     = document.querySelectorAll( '.mailocations-autocomplete' );
 	const filters      = document.querySelectorAll( '.mailocations-filter' );
 	const clears       = document.querySelectorAll( '.mailocations-filter-clear' );
 	const defaults     = maiLocationsVars.defaults;
 	var   params       = maiLocationsVars.params;
 	var   autoComplete = maiLocationsVars.autoComplete;
+
+	/**
+	 */
+	var initMarker = function( markerEl, map ) {
+		// Create marker instance.
+		var marker = new google.maps.Marker(
+			{
+				position: new google.maps.LatLng( parseFloat( markerEl.dataset.lat ), parseFloat( markerEl.dataset.lng ) ),
+				map: map,
+			}
+		);
+
+		// Append to reference for later use.
+		map.markers.push( marker );
+
+		// If marker contains HTML, add it to an infoWindow.
+		if ( markerEl.innerHTML ) {
+			// Create info window.
+			var infowindow = new google.maps.InfoWindow(
+				{
+					content: markerEl.innerHTML
+				}
+			);
+
+			// Show info window when marker is clicked.
+			google.maps.event.addListener( marker, 'click', function() {
+				infowindow.open( map, marker );
+			});
+		}
+	}
+
+	/**
+	 */
+	var centerMap = function( map ) {
+		// Create map boundaries from all map markers.
+		var bounds = new google.maps.LatLngBounds();
+
+		// Loop through markers and extend bounds.
+		for ( const marker of map.markers ) {
+			bounds.extend({
+				lat: marker.position.lat(),
+				lng: marker.position.lng()
+			});
+		}
+
+		// Single marker.
+		if ( 1 === map.markers.length ) {
+			map.setCenter( bounds.getCenter() );
+		}
+		// Multiple markers.
+		else{
+			map.fitBounds( bounds );
+		}
+	}
+
+	// Loop through map elements.
+	for ( const mapEl of maps ) {
+		var markers = mapEl.querySelectorAll( '.marker' );
+		var map     = new google.maps.Map( mapEl,
+			{
+				zoom: parseInt( mapEl.dataset.zoom ),
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			}
+		);
+
+		// Start markers property.
+		map.markers = [];
+
+		// Loop through and add markers.
+		for ( const marker of markers ) {
+			initMarker( marker, map );
+		}
+
+		// Add a marker clusterer to manage the markers.
+		const mapMarkers    = map.markers;
+		const markerCluster = new markerClusterer.MarkerClusterer({ map, mapMarkers });
+
+		// Center map based on markers.
+		centerMap( map );
+	}
 
 	/**
 	 * Refresh the page after adding/removing query strings based
