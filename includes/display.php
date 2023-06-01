@@ -15,14 +15,14 @@ function mailocations_register_scripts() {
 	$suffix = mailocations_get_suffix();
 	wp_register_style( 'mai-locations-edit', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations-edit{$suffix}.css", [], MAI_LOCATIONS_VERSION );
 	wp_register_style( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations{$suffix}.css", [], MAI_LOCATIONS_VERSION );
-	wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations{$suffix}.js", [], MAI_LOCATIONS_VERSION, false );
-	wp_register_script( 'mai-locations-googlemaps', sprintf( 'https://maps.googleapis.com/maps/api/js?key=%s&v=quarterly&libraries=places&callback=initMap', mailocations_get_google_maps_api_key() ), [], MAI_LOCATIONS_VERSION, false );
-	wp_register_script( 'mai-locations-markerclusterer', 'https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js', [], '1.0.0', true );
+	wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations{$suffix}.js", [], MAI_LOCATIONS_VERSION, true );
 
 	$localize = [
-		'params'       => mailocations_get_query_params(),
-		'defaults'     => mailocations_get_query_defaults(),
-		'autoComplete' => [
+		'params'        => mailocations_get_query_params(),
+		'defaults'      => mailocations_get_query_defaults(),
+		'apiKey'        => mailocations_get_google_maps_api_key(),
+		'markerCluster' => MAI_LOCATIONS_PLUGIN_URL . "assets/js/markerclusterer{$suffix}.js", // 2.1.4
+		'autoComplete'  => [
 			'fields'       => [ 'geometry', 'name' ],
 			'strictBounds' => false,
 			// 'componentRestrictions' => [ 'country' => 'us' ],

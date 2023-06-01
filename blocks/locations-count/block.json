@@ -1,0 +1,16 @@
+{
+	"name": "acf/mai-locations-count",
+	"title": "Mai Locations Count",
+	"description": "Show Location Archive/Results Count.",
+	"category": "widgets",
+	"keywords": [ "location", "count", "posts" ],
+	"icon": "location",
+	"textdomain": "mai-locations",
+	"acf": {
+		"mode": "preview",
+		"renderCallback": "mailocations_do_locations_count_block"
+	},
+	"supports": {
+		"align": false
+	}
+  }

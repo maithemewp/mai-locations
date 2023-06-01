@@ -5,7 +5,7 @@ defined( 'ABSPATH' ) || die;
 
 add_action( 'acf/init', 'mailocations_register_locations_map_block' );
 /**
- * Register Mai Location Filter block.
+ * Register Mai Location Map block.
  *
  * @since TBD
  *
@@ -30,12 +30,8 @@ function mailocations_register_locations_map_block() {
  * @return void
  */
 function mailocations_do_locations_map_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
-	// Enqueue script.
-	echo '<script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>';
-
-	// wp_enqueue_script( 'mai-locations-markerclusterer' );
+	// Enqueue JS.
 	wp_enqueue_script( 'mai-locations' );
-	wp_enqueue_script( 'mai-locations-googlemaps' );
 
 	// Maybe load CSS.
 	echo mailocations_get_stylesheet_link( 'mai-locations' );
@@ -49,26 +45,28 @@ function mailocations_do_locations_map_block( $attributes, $content, $is_preview
 	else {
 		global $wp_query;
 
-		if ( $wp_query && $wp_query->posts ) {
-			printf( '<div class="mailocations-map" data-zoom="%s">', 12 );
+		if ( $wp_query ) {
+			printf( '<div class="mailocations-map" data-zoom="%s">', 7 );
 
-			foreach ( $wp_query->posts as $post ) {
-				$lat = get_post_meta( $post->ID, 'location_lat', true );
-				$lng = get_post_meta( $post->ID, 'location_lng', true );
+			if ( $wp_query->posts ) {
+				foreach ( $wp_query->posts as $post ) {
+					$lat = get_post_meta( $post->ID, 'location_lat', true );
+					$lng = get_post_meta( $post->ID, 'location_lng', true );
 
-				if ( ! ( $lat && $lng ) ) {
-					continue;
+					if ( ! ( $lat && $lng ) ) {
+						continue;
+					}
+
+					ray( mailocations_get_address( [], $post->ID ) );
+
+					printf( '<div style="display:block;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $lat ), esc_html( $lng ) );
+						printf( '<strong><a href="%s">%s</a></strong>', get_permalink( $post->ID ), get_the_title( $post->ID ) );
+						echo mailocations_get_address( [], $post->ID );
+					echo '</div>';
 				}
-
-				printf( '<div class="marker" data-lat="%s" data-lng="%s">', esc_html( $lat ), esc_html( $lng ) );
-					printf( '<strong><a href="%s">%s</a></strong>', get_permalink(), get_the_title() );
-					echo mailocations_get_address();
-				echo '</div>';
 			}
 
 			echo '</div>';
-
-			printf( '%s %s %s %s %s', __( 'Showing', 'mai-locations' ), $wp_query->post_count, __( 'of', 'mai-locations' ), $wp_query->found_posts, mailocations_get_plural() );
 		}
 	}
 }
