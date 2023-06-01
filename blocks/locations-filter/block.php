@@ -54,8 +54,10 @@ function mailocations_do_locations_filter_block( $attributes, $content, $is_prev
 		return;
 	}
 
-	// Enqueue script.
-	wp_enqueue_script( 'mai-locations' );
+	// Maybe enqueue scripts.
+	if ( ! $is_preview ) {
+		wp_enqueue_script( 'mai-locations' );
+	}
 
 	// Maybe load CSS.
 	echo mailocations_get_stylesheet_link( 'mai-locations' );

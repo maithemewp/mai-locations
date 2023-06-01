@@ -1,31 +1,3 @@
-// If we have maps, load the API.
-if ( document.querySelectorAll( '.mailocations-map' ).length || document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
-	// Load the Google Maps API asynchronously.
-	const here   = document.getElementById( 'mai-locations-js' );
-	const google = document.createElement( 'script' );
-	let   src    = `https://maps.googleapis.com/maps/api/js?key=${maiLocationsVars.apiKey}`;
-
-	// If we have autocomplete, add places library.
-	if ( document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
-		src += '&libraries=places';
-	}
-
-	// Add script after this one.
-	google.src = src += '&callback=initLocations';
-	here.parentElement.insertBefore( google, here );
-
-	// Add markercluster script if we have a map.
-	if ( document.querySelectorAll( '.mailocations-map' ).length ) {
-		const cluster = document.createElement( 'script' );
-		cluster.src = maiLocationsVars.markerCluster;
-		here.parentElement.insertBefore( cluster, here );
-	}
-}
-// Otherwise run the function directly.
-else {
-	initLocations();
-}
-
 /**
  * The main function to get it started.
  */
@@ -113,20 +85,20 @@ function initLocations() {
 			markers: map.markers,
 		});
 
+		// Create map boundaries from all map markers.
+		const bounds = new google.maps.LatLngBounds();
+
+		// Loop through markers and extend bounds.
+		for ( const marker of map.markers ) {
+			bounds.extend( marker.getPosition() );
+		}
+
 		// Single marker.
 		if ( 1 === map.markers.length ) {
-			map.setCenter( current.getCenter() );
+			map.setCenter( bounds.getCenter() );
 		}
 		// Multiple markers.
 		else {
-			// Create map boundaries from all map markers.
-			const bounds = new google.maps.LatLngBounds();
-
-			// Loop through markers and extend bounds.
-			for ( const marker of map.markers ) {
-				bounds.extend( marker.getPosition() );
-			}
-
 			map.fitBounds( bounds );
 		}
 	}
@@ -318,4 +290,32 @@ function initLocations() {
 		// Refresh page, removing any pagination.
 		window.location = url.href.replace( /\/page\/\d+/, '' );
 	}
+}
+
+// If we have maps, load the API.
+if ( document.querySelectorAll( '.mailocations-map' ).length || document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
+	// Load the Google Maps API asynchronously.
+	const here   = document.getElementById( 'mai-locations-js' );
+	const google = document.createElement( 'script' );
+	let   src    = `https://maps.googleapis.com/maps/api/js?key=${maiLocationsVars.apiKey}`;
+
+	// If we have autocomplete, add places library.
+	if ( document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
+		src += '&libraries=places';
+	}
+
+	// Add script after this one.
+	google.src = src += '&callback=initLocations';
+	here.parentElement.insertBefore( google, here );
+
+	// Add markercluster script if we have a map.
+	if ( document.querySelectorAll( '.mailocations-map' ).length ) {
+		const cluster = document.createElement( 'script' );
+		cluster.src = maiLocationsVars.markerCluster;
+		here.parentElement.insertBefore( cluster, here );
+	}
+}
+// Otherwise run the function directly.
+else {
+	initLocations();
 }

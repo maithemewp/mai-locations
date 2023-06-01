@@ -42,7 +42,6 @@ function mailocations_do_locations_address_search_block( $attributes, $content, 
 	// Maybe enqueue scripts.
 	if ( ! $is_preview ) {
 		wp_enqueue_script( 'mai-locations' );
-		// wp_enqueue_script( 'mai-locations-googlemaps' );
 	}
 
 	// Maybe load CSS.

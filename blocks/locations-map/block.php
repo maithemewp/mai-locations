@@ -30,23 +30,31 @@ function mailocations_register_locations_map_block() {
  * @return void
  */
 function mailocations_do_locations_map_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
-	// Enqueue JS.
-	wp_enqueue_script( 'mai-locations' );
+	// Maybe enqueue scripts.
+	if ( ! $is_preview ) {
+		wp_enqueue_script( 'mai-locations' );
+	}
 
 	// Maybe load CSS.
 	echo mailocations_get_stylesheet_link( 'mai-locations' );
 
+	// Values.
+	$width  = get_field( 'width' );
+	$width  = $width ? absint( $width ) : 800;
+	$height = get_field( 'height' );
+	$height = $height ? absint( $height ) : 533;
+
 	// Back end.
 	if ( $is_preview ) {
 		// Static image.
-		printf( '<div style="aspect-ratio:3/2;"><img style="display:block;height:100%%;width:100%%;position:absolute;top:0;left:0;object-fit:cover" width="800" height="533" src="%s/assets/images/map.png"/></div>', MAI_LOCATIONS_PLUGIN_URL );
+		printf( '<div style="aspect-ratio:%s/%s;"><img style="display:block;height:100%%;width:100%%;position:absolute;top:0;left:0;object-fit:cover" width="%s" height="%s" src="%s/assets/images/map.png"/></div>', $width, $height, $width, $height, MAI_LOCATIONS_PLUGIN_URL );
 	}
 	// Front end.
 	else {
 		global $wp_query;
 
 		if ( $wp_query ) {
-			printf( '<div class="mailocations-map" data-zoom="%s">', 7 );
+			printf( '<div style="aspect-ratio:%s/%s;" class="mailocations-map" data-zoom="%s">', $width, $height, 7 );
 
 			if ( $wp_query->posts ) {
 				foreach ( $wp_query->posts as $post ) {
@@ -57,9 +65,7 @@ function mailocations_do_locations_map_block( $attributes, $content, $is_preview
 						continue;
 					}
 
-					ray( mailocations_get_address( [], $post->ID ) );
-
-					printf( '<div style="display:block;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $lat ), esc_html( $lng ) );
+					printf( '<div style="display:none;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $lat ), esc_html( $lng ) );
 						printf( '<strong><a href="%s">%s</a></strong>', get_permalink( $post->ID ), get_the_title( $post->ID ) );
 						echo mailocations_get_address( [], $post->ID );
 					echo '</div>';
@@ -89,14 +95,29 @@ function mailocations_register_locations_map_field_group() {
 			'key'    => 'mailocations_locations_map_field_group',
 			'title'  => __( 'Mai Locations Map', 'mai-locations' ),
 			'fields' => [
-				// [
-				// 	'key'           => 'mailocations_map_placeholder',
-				// 	'label'         => __( 'Placeholder', 'mai-locations' ),
-				// 	'instructions'  => ! mailocations_get_google_maps_api_key() ? __( 'Google Maps API key missing!', 'mailocations' ) : '',
-				// 	'name'          => 'placeholder',
-				// 	'type'          => 'text',
-				// 	'placeholder'   => __( 'Enter your address', 'mai-locations' ),
-				// ],
+				[
+					'key'          => 'mailocations_map_description',
+					'type'         => 'message',
+					'message'      => __( 'Width/Height mostly used for aspect ratio to prevent CLS.', 'mai-locations' ),
+				],
+				[
+					'key'         => 'mailocations_map_width',
+					'label'       => __( 'Width', 'mai-locations' ),
+					'name'        => 'width',
+					'type'        => 'number',
+					'min'         => 1,
+					'step'        => 1,
+					'placeholder' => 800,
+				],
+				[
+					'key'         => 'mailocations_map_height',
+					'label'       => __( 'Height', 'mai-locations' ),
+					'name'        => 'height',
+					'type'        => 'number',
+					'min'         => 1,
+					'step'        => 1,
+					'placeholder' => 533,
+				],
 			],
 			'location' => [
 				[
