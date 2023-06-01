@@ -9,8 +9,5 @@
 	"acf": {
 		"mode": "preview",
 		"renderCallback": "mailocations_do_locations_count_block"
-	},
-	"supports": {
-		"align": false
 	}
-  }
+}
