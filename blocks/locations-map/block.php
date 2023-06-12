@@ -70,13 +70,16 @@ function mailocations_do_locations_map_block( $attributes, $content, $is_preview
 			wp_reset_postdata();
 		}
 
-		if ( $posts ) {
-			printf( '<div style="aspect-ratio:%s/%s;" class="mailocations-map" data-zoom="%s">', $width, $height, 7 );
+		// Open map.
+		printf( '<div style="aspect-ratio:%s/%s;" class="mailocations-map" data-zoom="%s">', $width, $height, 7 );
 
+		if ( $posts ) {
+			// Loop through posts to build markers.
 			foreach ( $posts as $post ) {
 				$lat = get_post_meta( $post->ID, 'location_lat', true );
 				$lng = get_post_meta( $post->ID, 'location_lng', true );
 
+				// Skip if we don't have the data we want.
 				if ( ! ( $lat && $lng ) ) {
 					continue;
 				}
@@ -86,9 +89,10 @@ function mailocations_do_locations_map_block( $attributes, $content, $is_preview
 					echo mailocations_get_address( [], $post->ID );
 				echo '</div>';
 			}
-
-			echo '</div>';
 		}
+
+		// Close map.
+		echo '</div>';
 	}
 }
 
