@@ -223,9 +223,12 @@ function initLocations() {
 	// Loop through map elements.
 	for ( const filterEl of filters ) {
 		let select;
+		let radio;
 
 		filterEl.addEventListener( 'change', function() {
-			select                        = 'select' === this.tagName.toLowerCase();
+			select = 'select' === this.tagName.toLowerCase();
+			radio  = 'radio'  === this.getAttribute( 'type' );
+
 			params[ this.dataset.filter ] = ! ( this.dataset.filter in params ) ? [] : params[ this.dataset.filter ]
 
 			// If choosing.
@@ -236,7 +239,11 @@ function initLocations() {
 				}
 				// Add value.
 				else {
-					params[ this.dataset.filter ].push( this.value );
+					if ( radio ) {
+						params[ this.dataset.filter ] = [ this.value ];
+					} else {
+						params[ this.dataset.filter ].push( this.value );
+					}
 				}
 			}
 			// Remove.
