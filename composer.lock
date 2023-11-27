@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "giggsey/libphonenumber-for-php",
-            "version": "8.13.12",
+            "version": "8.13.26",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "218caeeeb224bf2f553597b5c3a1647ff936db64"
+                "reference": "1d730fe40d5f32641c12ca143a086757c95cfccf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/218caeeeb224bf2f553597b5c3a1647ff936db64",
-                "reference": "218caeeeb224bf2f553597b5c3a1647ff936db64",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/1d730fe40d5f32641c12ca143a086757c95cfccf",
+                "reference": "1d730fe40d5f32641c12ca143a086757c95cfccf",
                 "shasum": ""
             },
             "require": {
@@ -76,20 +76,20 @@
                 "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
                 "source": "https://github.com/giggsey/libphonenumber-for-php"
             },
-            "time": "2023-05-22T07:19:16+00:00"
+            "time": "2023-11-23T07:57:25+00:00"
         },
         {
             "name": "giggsey/locale",
-            "version": "2.4",
+            "version": "2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/Locale.git",
-                "reference": "a6b33dfc9e8949b7e28133c4628b29cd9f1850bb"
+                "reference": "e6d4540109a01dd2bc7334cdc842d6a6a67cf239"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/Locale/zipball/a6b33dfc9e8949b7e28133c4628b29cd9f1850bb",
-                "reference": "a6b33dfc9e8949b7e28133c4628b29cd9f1850bb",
+                "url": "https://api.github.com/repos/giggsey/Locale/zipball/e6d4540109a01dd2bc7334cdc842d6a6a67cf239",
+                "reference": "e6d4540109a01dd2bc7334cdc842d6a6a67cf239",
                 "shasum": ""
             },
             "require": {
@@ -128,22 +128,22 @@
             "description": "Locale functions required by libphonenumber-for-php",
             "support": {
                 "issues": "https://github.com/giggsey/Locale/issues",
-                "source": "https://github.com/giggsey/Locale/tree/2.4"
+                "source": "https://github.com/giggsey/Locale/tree/2.5"
             },
-            "time": "2023-04-13T07:40:58+00:00"
+            "time": "2023-11-01T17:19:48+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.27.0",
+            "version": "v1.28.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "8ad114f6b39e2c98a8b0e3bd907732c207c2b534"
+                "reference": "42292d99c55abe617799667f454222c54c60e229"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/8ad114f6b39e2c98a8b0e3bd907732c207c2b534",
-                "reference": "8ad114f6b39e2c98a8b0e3bd907732c207c2b534",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/42292d99c55abe617799667f454222c54c60e229",
+                "reference": "42292d99c55abe617799667f454222c54c60e229",
                 "shasum": ""
             },
             "require": {
@@ -158,7 +158,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.27-dev"
+                    "dev-main": "1.28-dev"
                 },
                 "thanks": {
                     "name": "symfony/polyfill",
@@ -197,7 +197,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.27.0"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.28.0"
             },
             "funding": [
                 {
@@ -213,20 +213,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-11-03T14:55:06+00:00"
+            "time": "2023-07-28T09:04:16+00:00"
         },
         {
             "name": "yahnis-elsts/plugin-update-checker",
-            "version": "v5.1",
+            "version": "v5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/YahnisElsts/plugin-update-checker.git",
-                "reference": "48b03e93c9c2587f9276dce00ce2b6d94c1190d2"
+                "reference": "0b6bd7cd3286688ab680201aa6a7d8572c51ae1f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/YahnisElsts/plugin-update-checker/zipball/48b03e93c9c2587f9276dce00ce2b6d94c1190d2",
-                "reference": "48b03e93c9c2587f9276dce00ce2b6d94c1190d2",
+                "url": "https://api.github.com/repos/YahnisElsts/plugin-update-checker/zipball/0b6bd7cd3286688ab680201aa6a7d8572c51ae1f",
+                "reference": "0b6bd7cd3286688ab680201aa6a7d8572c51ae1f",
                 "shasum": ""
             },
             "require": {
@@ -236,7 +236,7 @@
             "type": "library",
             "autoload": {
                 "files": [
-                    "load-v5p1.php"
+                    "load-v5p3.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -261,9 +261,9 @@
             ],
             "support": {
                 "issues": "https://github.com/YahnisElsts/plugin-update-checker/issues",
-                "source": "https://github.com/YahnisElsts/plugin-update-checker/tree/v5.1"
+                "source": "https://github.com/YahnisElsts/plugin-update-checker/tree/v5.3"
             },
-            "time": "2023-05-20T11:55:43+00:00"
+            "time": "2023-11-09T08:34:00+00:00"
         }
     ],
     "packages-dev": [],

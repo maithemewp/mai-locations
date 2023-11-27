@@ -7,5 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => $vendorDir . '/symfony/polyfill-mbstring/bootstrap.php',
-    '9b77ddcfb14408a32f5aaf74e0a11694' => $vendorDir . '/yahnis-elsts/plugin-update-checker/load-v5p1.php',
+    '45a16669595eb3c0a9e2994e57fc3188' => $vendorDir . '/yahnis-elsts/plugin-update-checker/load-v5p3.php',
 );
