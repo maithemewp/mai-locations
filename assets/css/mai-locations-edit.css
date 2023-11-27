@@ -1,0 +1,50 @@
+#mai-location-edit .acf-fields {
+	margin-right: -12px;
+	margin-left: -12px;
+}
+
+#mai-location-edit .acf-fields > .acf-field {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	border-top: 0;
+}
+
+#mai-location-edit .acf-field[data-width] + .acf-field[data-width] {
+	border-left: 0;
+}
+
+#mai-location-edit .acf-field input[type="text"],
+#mai-location-edit .acf-field input[type="password"],
+#mai-location-edit .acf-field input[type="number"],
+#mai-location-edit .acf-field input[type="search"],
+#mai-location-edit .acf-field input[type="email"],
+#mai-location-edit .acf-field input[type="url"],
+#mai-location-edit .acf-field textarea,
+#mai-location-edit .acf-field select {
+	height: auto;
+	padding: var(--input-padding, 0.9em);
+}
+
+#mai-location-edit [id^="mceu_"],
+#mai-location-edit [id^="mceu_"]:hover,
+#mai-location-edit [id^="mceu_"]:focus {
+	background: none;
+}
+
+#mai-location-edit .acf-input-prepend,
+#mai-location-edit .acf-input-append {
+	height: 100%;
+	padding: 8px 7px 7px;
+}
+
+#mai-location-edit .acf-taxonomy-field ul li {
+	margin: 0;
+}
+
+#mai-location-edit .acf-form-submit {
+	margin-top: 16px;
+}
+
+.media-modal-content {
+	--button-color: currentColor;
+}

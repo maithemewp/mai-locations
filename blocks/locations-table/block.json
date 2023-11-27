@@ -1,0 +1,16 @@
+{
+	"name": "acf/mai-locations-table",
+	"title": "Mai Locations Table",
+	"description": "Display a users locations with view and edit buttons.",
+	"category": "widgets",
+	"keywords": [ "location", "table" ],
+	"icon": "location",
+	"textdomain": "mai-locations",
+	"acf": {
+		"mode": "preview",
+		"renderCallback": "mailocations_do_locations_table_block"
+	},
+	"supports": {
+		"align": false
+	}
+}

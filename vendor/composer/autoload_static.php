@@ -7,7 +7,38 @@ namespace Composer\Autoload;
 class ComposerStaticInit15a83dc919f8db61c7a4325dc93d224e
 {
     public static $files = array (
-        '49a1299791c25c6fd83542c6fedacddd' => __DIR__ . '/..' . '/yahnis-elsts/plugin-update-checker/load-v4p11.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '45a16669595eb3c0a9e2994e57fc3188' => __DIR__ . '/..' . '/yahnis-elsts/plugin-update-checker/load-v5p3.php',
+    );
+
+    public static $prefixLengthsPsr4 = array (
+        'l' => 
+        array (
+            'libphonenumber\\' => 15,
+        ),
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
+        ),
+        'G' => 
+        array (
+            'Giggsey\\Locale\\' => 15,
+        ),
+    );
+
+    public static $prefixDirsPsr4 = array (
+        'libphonenumber\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/giggsey/libphonenumber-for-php/src',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
+        'Giggsey\\Locale\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/giggsey/locale/src',
+        ),
     );
 
     public static $classMap = array (
@@ -17,6 +48,8 @@ class ComposerStaticInit15a83dc919f8db61c7a4325dc93d224e
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
+            $loader->prefixLengthsPsr4 = ComposerStaticInit15a83dc919f8db61c7a4325dc93d224e::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit15a83dc919f8db61c7a4325dc93d224e::$prefixDirsPsr4;
             $loader->classMap = ComposerStaticInit15a83dc919f8db61c7a4325dc93d224e::$classMap;
 
         }, null, ClassLoader::class);

@@ -1,0 +1,16 @@
+{
+	"name": "acf/mai-locations-map",
+	"title": "Mai Locations Map",
+	"description": "Show a Google Map of Locations.",
+	"category": "widgets",
+	"keywords": [ "location", "map", "google" ],
+	"icon": "location",
+	"textdomain": "mai-locations",
+	"acf": {
+		"mode": "preview",
+		"renderCallback": "mailocations_do_locations_map_block"
+	},
+	"supports": {
+		"align": false
+	}
+  }

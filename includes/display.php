@@ -5,14 +5,41 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_action( 'wp_enqueue_scripts', 'mailocations_register_scripts' );
 /**
- * Enqueues CSS files.
+ * Enqueues scripts and styles.
  *
  * @since 0.1.0
  *
  * @return void
  */
 function mailocations_register_scripts() {
-	wp_register_style( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . 'assets/css/mai-locations.css', [], MAI_LOCATIONS_VERSION );
+	$suffix = mailocations_get_suffix();
+	wp_register_style( 'mai-locations-edit', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations-edit{$suffix}.css", [], MAI_LOCATIONS_VERSION );
+	wp_register_style( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations{$suffix}.css", [], MAI_LOCATIONS_VERSION );
+	wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations{$suffix}.js", [], MAI_LOCATIONS_VERSION, true );
+
+	$localize = [
+		'params'        => mailocations_get_query_params(),
+		'defaults'      => mailocations_get_query_defaults(),
+		'apiKey'        => mailocations_get_google_maps_api_key(),
+		'markerCluster' => MAI_LOCATIONS_PLUGIN_URL . "assets/js/markerclusterer{$suffix}.js", // 2.1.4
+		'autoComplete'  => [
+			'fields'       => [ 'geometry', 'name' ],
+			'strictBounds' => false,
+			// 'componentRestrictions' => [ 'country' => 'us' ],
+			// 'types'                 => [ 'establishment' ],
+		],
+	];
+
+	// Only add address_components if limiting by state/province since this adds to the API volume.
+	if ( mailocations_get_option( 'limit_state' ) ) {
+		$localize['autoComplete']['fields'][] = 'address_components';
+	}
+
+	// Allow filtering of script data.
+	$localize = apply_filters( 'mailocations_localize_script_data', $localize );
+
+	// Localize.
+	wp_localize_script( 'mai-locations', 'maiLocationsVars', $localize );
 }
 
 add_action( 'get_header', 'mailocations_location_edit_listener', 0 );
@@ -165,7 +192,7 @@ function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
 
 	if ( ! $is_admin && ( $location_id && mailocations_user_can_edit( $location_id ) ) ) {
 
-		wp_enqueue_style( 'mai-locations' );
+		wp_enqueue_style( 'mai-locations-edit' );
 
 		$html .= mailocations_get_location_edit_form( $location_id,
 			[

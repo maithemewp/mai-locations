@@ -89,7 +89,7 @@ function mailocations_load_location_image_value( $value, $post_id, $field ) {
 	return get_post_thumbnail_id( $post_id );
 }
 
-add_filter( 'acf/prepare_field/key=mai_location_image', 'mailocations_prepare_location_image_field');
+add_filter( 'acf/prepare_field/key=mai_location_image', 'mailocations_prepare_location_image_field' );
 /**
  * Disables featured image field in the backend
  * since this will use the standard Featured Image metabox.
@@ -103,6 +103,78 @@ add_filter( 'acf/prepare_field/key=mai_location_image', 'mailocations_prepare_lo
  */
 function mailocations_prepare_location_image_field( $field ) {
 	return ! is_admin() ? $field : false;
+}
+
+add_filter( 'acf/prepare_field/key=mai_location_lat', 'mailocations_prepare_location_coordinates_fields' );
+add_filter( 'acf/prepare_field/key=mai_location_lng', 'mailocations_prepare_location_coordinates_fields' );
+/**
+ *
+ * @since TBD
+ *
+ * @param $field array The field array containing all settings.
+ *
+ * @return array|false
+ */
+function mailocations_prepare_location_coordinates_fields( $field ) {
+	$field['readonly'] = 'readonly';
+
+	return $field;
+}
+
+
+add_action( 'acf/update_value/key=mai_location_location', 'mailocations_save_lat_lng', 10, 4 );
+/**
+ * Saves separate latitude and longitude values from map field.
+ *
+ * @param array $value
+ * @param mixed $post_id
+ * @param array $field
+ * @param JSON  $original I think it's JSON?
+ *
+ * @return array
+ */
+function mailocations_save_lat_lng( $value, $post_id, $field, $original ) {
+	if ( is_array( $value ) ) {
+		if ( isset( $value['lat'] ) ) {
+			update_field( 'location_lat', $value, $post_id );
+		}
+
+		if ( isset( $value['lng'] ) ) {
+			update_field( 'location_lng', $value, $post_id );
+		}
+	}
+
+	return $value;
+}
+
+add_action( 'acf/save_post', 'mailocations_maybe_update_map_field', 20, 1 );
+/**
+ * Update the google map field from address data after a location is saved.
+ *
+ * @since 0.1.0
+ *
+ * @param int $post_id The post ID.
+ *
+ * @return void
+ */
+function mailocations_maybe_update_map_field( $post_id ) {
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	if ( wp_is_post_autosave( $post_id ) ) {
+		return;
+	}
+
+	if ( wp_is_post_revision( $post_id ) ) {
+		return;
+	}
+
+	if ( 'mai_location' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	mailocations_update_location_from_google_maps( $post_id );
 }
 
 /**
@@ -397,6 +469,22 @@ function mailocations_get_address_fields() {
 			'zoom'       => 4,
 			'height'     => '',
 		],
+		'location_lat' => [
+			'key'        => 'mai_location_lat',
+			'label'      => __( 'Latitude', 'mai-locations' ),
+			'type'       => 'text',
+			'wrapper'    => [
+				'width' => '50',
+			],
+		],
+		'location_lng' => [
+			'key'        => 'mai_location_lng',
+			'label'      => __( 'Latitude', 'mai-locations' ),
+			'type'       => 'text',
+			'wrapper'    => [
+				'width' => '50',
+			],
+		],
 	];
 
 	$fields = apply_filters( 'mailocations_address_fields', $fields );
@@ -413,8 +501,6 @@ function mailocations_get_address_fields() {
  * @return array
  */
 function mailocations_get_social_fields() {
-	return [];
-
 	$fields = [
 		'location_social_tab' => [
 			'key'       => 'mai_location_social_tab',
@@ -447,7 +533,7 @@ function mailocations_get_social_fields() {
 			'instructions' => __( 'Enter URL', 'mai-locations' ),
 		],
 		'instagram' => [
-			'key'          => 'field_5773cc5befde8',
+			'key'          => 'mai_location_instagram',
 			'label'        => 'Instagram',
 			'type'         => 'text',
 			'instructions' => __( 'Enter username only', 'mai-locations' ),
@@ -457,6 +543,12 @@ function mailocations_get_social_fields() {
 			'label'        => 'Pinterest',
 			'type'         => 'url',
 			'instructions' => __( 'Enter URL', 'mai-locations' ),
+		],
+		'tiktok' => [
+			'key'          => 'mai_location_tiktok',
+			'label'        => 'TikTok',
+			'type'         => 'text',
+			'instructions' => __( 'Enter username only', 'mai-locations' ),
 		],
 	];
 

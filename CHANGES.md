@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 (TBD)
+
+## 0.5.0 (6/8/22)
+* Added: `[mai_location_phone]`, `[mai_location_url]`, and `[mai_location_email]` shortcodes.
+
 ## 0.4.0 (3/9/22)
 * Added: Support for adding a featured image via the front end location edit form.
 * Changed: Field names are now humnan readable instead of auto-generated key.

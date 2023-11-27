@@ -4,7 +4,7 @@
  * Plugin Name:     Mai Locations
  * Plugin URI:      https://bizbudding.com
  * Description:     A custom post type with info/address/map fields to manage locations.
- * Version:         0.4.0
+ * Version:         0.4.1
  *
  * Author:          BizBudding
  * Author URI:      https://bizbudding.com
@@ -12,6 +12,9 @@
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
+
+// Must be at the top of the file.
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 /**
  * Main Mai_Locations_Plugin Class.
@@ -87,20 +90,14 @@ final class Mai_Locations_Plugin {
 	 * @return  void
 	 */
 	private function setup_constants() {
-
 		// Plugin version.
 		if ( ! defined( 'MAI_LOCATIONS_VERSION' ) ) {
-			define( 'MAI_LOCATIONS_VERSION', '0.4.0' );
+			define( 'MAI_LOCATIONS_VERSION', '0.4.1' );
 		}
 
 		// Plugin Folder Path.
 		if ( ! defined( 'MAI_LOCATIONS_PLUGIN_DIR' ) ) {
 			define( 'MAI_LOCATIONS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-		}
-
-		// Plugin Includes Path.
-		if ( ! defined( 'MAI_LOCATIONS_INCLUDES_DIR' ) ) {
-			define( 'MAI_LOCATIONS_INCLUDES_DIR', MAI_LOCATIONS_PLUGIN_DIR . 'includes/' );
 		}
 
 		// Plugin Folder URL.
@@ -117,7 +114,6 @@ final class Mai_Locations_Plugin {
 		if ( ! defined( 'MAI_LOCATIONS_BASENAME' ) ) {
 			define( 'MAI_LOCATIONS_BASENAME', dirname( plugin_basename( __FILE__ ) ) );
 		}
-
 	}
 
 	/**
@@ -131,7 +127,16 @@ final class Mai_Locations_Plugin {
 		// Include vendor libraries.
 		require_once __DIR__ . '/vendor/autoload.php';
 		// Includes.
-		foreach ( glob( MAI_LOCATIONS_INCLUDES_DIR . '*.php' ) as $file ) { include $file; }
+		foreach ( glob( MAI_LOCATIONS_PLUGIN_DIR . 'includes/' . '*.php' ) as $file ) { include $file; }
+		// Classes.
+		foreach ( glob( MAI_LOCATIONS_PLUGIN_DIR . 'classes/' . '*.php' ) as $file ) { include $file; }
+		// Blocks.
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-address-search/block.php';
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-count/block.php';
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter/block.php';
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-filter-clear/block.php';
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-map/block.php';
+		include MAI_LOCATIONS_PLUGIN_DIR . 'blocks/locations-table/block.php';
 	}
 
 	/**
@@ -141,8 +146,8 @@ final class Mai_Locations_Plugin {
 	 * @return  void
 	 */
 	public function hooks() {
-		add_action( 'admin_init', [ $this, 'updater' ] );
-		add_action( 'init',       [ $this, 'register_content_types' ] );
+		add_action( 'plugins_loaded', [ $this, 'updater' ] );
+		add_action( 'init',           [ $this, 'register_content_types' ] );
 
 		register_activation_hook( __FILE__, [ $this, 'activate' ] );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
@@ -160,18 +165,13 @@ final class Mai_Locations_Plugin {
 	 * @return void
 	 */
 	public function updater() {
-		// Bail if current user cannot manage plugins.
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			return;
-		}
-
 		// Bail if plugin updater is not loaded.
-		if ( ! class_exists( 'Puc_v4_Factory' ) ) {
+		if ( ! class_exists( 'YahnisElsts\PluginUpdateChecker\v5\PucFactory' ) ) {
 			return;
 		}
 
 		// Setup the updater.
-		$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-locations/', __FILE__, 'mai-locations' );
+		$updater = PucFactory::buildUpdateChecker( 'https://github.com/maithemewp/mai-locations/', __FILE__, 'mai-locations' );
 
 		// Maybe set github api token.
 		if ( defined( 'MAI_GITHUB_API_TOKEN' ) ) {
@@ -256,7 +256,8 @@ final class Mai_Locations_Plugin {
 		 *
 		 * @return void
 		 */
-		register_taxonomy( 'mai_location_cat', [ 'mai_location' ], apply_filters( 'mai_location_cat_args',
+		register_taxonomy(
+			'mai_location_cat', [ 'mai_location' ], apply_filters( 'mai_location_cat_args',
 			[
 				'hierarchical' => true,
 				'labels'       => [
@@ -264,16 +265,94 @@ final class Mai_Locations_Plugin {
 					'singular_name' => $cat_singular,
 					'menu_name'     => $cat_plural,
 				],
-				'meta_box_cb'                => false,
-				'public'                     => true,
-				'show_admin_column'          => true,
-				'show_in_nav_menus'          => true,
-				'show_in_rest'               => true,
-				'show_tagcloud'              => true,
-				'show_ui'                    => true,
-				'rewrite'                    => [ 'slug' => 'location-categories', 'with_front' => false ],
+				'meta_box_cb'       => false,
+				'public'            => true,
+				'show_admin_column' => true,
+				'show_in_nav_menus' => true,
+				'show_in_rest'      => true,
+				'show_tagcloud'     => true,
+				'show_ui'           => true,
+				'rewrite'           => [ 'slug' => 'location-categories', 'with_front' => false ],
 			]
 		) );
+
+		// TODO: Coming soon, after 0.5.0 is running everywhere,
+		// so we can run upgrade script to convert state/province/country from post meta to taxonomy terms.
+
+		/**
+		 * Registers custom taxonomy.
+		 *
+		 * @return void
+		 */
+		// register_taxonomy(
+		// 	'mai_location_state', [ 'mai_location' ], apply_filters( 'mai_location_state_args',
+		// 	[
+		// 		'hierarchical' => false,
+		// 		'labels'       => [
+		// 			'name'          => __( 'States', 'mai-location' ),
+		// 			'singular_name' => __( 'State', 'mai-location' ),
+		// 			'menu_name'     => __( 'States', 'mai-location' ),
+		// 		],
+		// 		'meta_box_cb'       => null,
+		// 		'public'            => false,
+		// 		'show_admin_column' => false,
+		// 		'show_in_nav_menus' => false,
+		// 		'show_in_rest'      => true,
+		// 		'show_tagcloud'     => false,
+		// 		'show_ui'           => true,
+		// 		'rewrite'           => false,
+		// 	]
+		// ) );
+
+		/**
+		 * Registers custom taxonomy.
+		 *
+		 * @return void
+		 */
+		// register_taxonomy(
+		// 	'mai_location_state_int', [ 'mai_location' ], apply_filters( 'mai_location_state_int_args',
+		// 	[
+		// 		'hierarchical' => false,
+		// 		'labels'       => [
+		// 			'name'          => __( 'Provinces', 'mai-location' ),
+		// 			'singular_name' => __( 'Province', 'mai-location' ),
+		// 			'menu_name'     => __( 'Provinces', 'mai-location' ),
+		// 		],
+		// 		'meta_box_cb'       => null,
+		// 		'public'            => false,
+		// 		'show_admin_column' => false,
+		// 		'show_in_nav_menus' => false,
+		// 		'show_in_rest'      => true,
+		// 		'show_tagcloud'     => false,
+		// 		'show_ui'           => true,
+		// 		'rewrite'           => false,
+		// 	]
+		// ) );
+
+		/**
+		 * Registers custom taxonomy.
+		 *
+		 * @return void
+		 */
+		// register_taxonomy(
+		// 	'mai_location_country', [ 'mai_location' ], apply_filters( 'mai_location_country_args',
+		// 	[
+		// 		'hierarchical' => false,
+		// 		'labels'       => [
+		// 			'name'          => __( 'Countries', 'mai-location' ),
+		// 			'singular_name' => __( 'Country', 'mai-location' ),
+		// 			'menu_name'     => __( 'Countries', 'mai-location' ),
+		// 		],
+		// 		'meta_box_cb'       => null,
+		// 		'public'            => false,
+		// 		'show_admin_column' => false,
+		// 		'show_in_nav_menus' => false,
+		// 		'show_in_rest'      => true,
+		// 		'show_tagcloud'     => false,
+		// 		'show_ui'           => true,
+		// 		'rewrite'           => false,
+		// 	]
+		// ) );
 	}
 
 	/**

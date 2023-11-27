@@ -11,12 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return string
  */
 function mailocations_get_plural() {
-	$label = null;
+	static $label = null;
+
 	if ( ! is_null( $label ) ) {
 		return $label;
 	}
-	$label = get_option( 'options_location_label_plural', __( 'Locations', 'mai-location' ) );
+
+	$label = mailocations_get_option( 'label_plural' );
 	$label = apply_filters( 'mailocations_plural', $label );
+
 	return esc_html( $label );
 }
 
@@ -28,12 +31,15 @@ function mailocations_get_plural() {
  * @return string
  */
 function mailocations_get_singular() {
-	$label = null;
+	static $label = null;
+
 	if ( ! is_null( $label ) ) {
 		return $label;
 	}
-	$label = get_option( 'options_location_label_singular', __( 'Location', 'mai-location' ) );
+
+	$label = mailocations_get_option( 'label_singular' );
 	$label = apply_filters( 'mailocations_singular', $label );
+
 	return esc_html( $label );
 }
 
@@ -45,13 +51,125 @@ function mailocations_get_singular() {
  * @return string
  */
 function mailocations_get_base() {
-	$base = null;
+	static $base = null;
+
 	if ( ! is_null( $base ) ) {
 		return $base;
 	}
-	$base = get_option( 'options_location_base', __( 'locations' ) );
+
+	$base = mailocations_get_option( 'base' );
 	$base = apply_filters( 'mailocations_base', $base );
+
 	return sanitize_html_class( $base );
+}
+
+/**
+ * Gets a single option value by key.
+ *
+ * @since TBD
+ *
+ * @param string $key
+ *
+ * @return mixed
+ */
+function mailocations_get_option( $key ) {
+	$defaults = mailocations_get_options_defaults();
+	$options  = mailocations_get_options();
+
+	return isset( $options[ $key ] ) ? $options[ $key ] : $defaults[ $key ];
+}
+
+/**
+ * Gets all options.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_get_options() {
+	static $cache = null;
+
+	if ( ! is_null( $cache ) ) {
+		return $cache;
+	}
+
+	// Get all options, with defaults.
+	$options = (array) get_option( 'mai_locations', mailocations_get_options_defaults() );
+
+	// Sanitize.
+	$cache = mailocations_sanitize_options( $options );
+
+	return $cache;
+}
+
+/**
+ * Gets default options.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_get_options_defaults() {
+	static $cache = null;
+
+	if ( ! is_null( $cache ) ) {
+		return $cache;
+	}
+
+	$cache = [
+		'label_plural'   => __( 'Locations', 'mai-location' ),
+		'label_singular' => __( 'Location', 'mai-location' ),
+		'base'           => 'locations',
+		'distances'      => [ 25, 50, 100, 200 ],
+		'units'          => [ 'mi' ], // Accepts mi or km.
+		'limit_state'    => false,
+		'version_first'  => '',
+		'version_db'     => '',
+	];
+
+	return $cache;
+}
+
+/**
+ * Update a single option from mai_locations array of options.
+ *
+ * @since TBD
+ *
+ * @param string $option Option name.
+ * @param mixed  $value  Option value.
+ *
+ * @return void
+ */
+function mailocations_update_option( $option, $value ) {
+	$options            = (array) get_option( 'mai_locations', [] );
+	$options[ $option ] = $value;
+
+	update_option( 'mai_locations', $options );
+}
+
+/**
+ * Parses and sanitize all options.
+ * Not cached for use when saving values in settings page.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_sanitize_options( $options ) {
+	$options = wp_parse_args( $options, mailocations_get_options_defaults() );
+
+	// Sanitize.
+	$options['label_plural']   = esc_html( $options['label_plural'] );
+	$options['label_singular'] = esc_html( $options['label_singular'] );
+	$options['base']           = sanitize_key( $options['base'] );
+	$options['distances']      = ! is_array( $options['distances'] ) ? explode( ',', $options['distances'] ) : $options['distances'];
+	$options['distances']      = array_map( 'absint', $options['distances'] );
+	$options['units']          = array_map( 'sanitize_key', $options['units'] );
+	$options['limit_state']    = rest_sanitize_boolean( $options['limit_state'] );
+	$options['version_first']  = esc_html( $options['version_first'] );
+	$options['version_db']     = esc_html( $options['version_db'] );
+
+	return $options;
 }
 
 /**
@@ -112,11 +230,27 @@ function mailocations_post_exists( $post_id ) {
 }
 
 /**
+ * Gets the distance from the queried location.
+ *
+ * @since TBD
+ *
+ * @param  WP_Post   $post_obj
+ * @param  int|false $round    The amount of decimal places to round the value to.
+ *
+ * @return void
+ */
+function mailocations_get_distance( $post_obj = null, $round = 1 ) {
+	return Mai_Geo_Query::get_distance( $post_obj, $round );
+}
+
+/**
  * Creates a location post.
+ *
+ * @since 0.1.0
  *
  * @param array $post_args The post array used in wp_insert_post().
  * @param array $meta_args The args used for meta_input in wp_insert_post().
- * @param int   $user_id   The user ID to create the
+ * @param int   $user_id   The user ID to add the location to.
  *
  * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
  */
@@ -240,34 +374,37 @@ function mailocations_create_location_from_woocommerce_user( $user_id, $args = [
 	return mailocations_create_location( $post_args, $meta_args, $user_id );
 }
 
-add_action( 'acf/save_post', 'mailocations_maybe_update_map_field', 20, 1 );
 /**
- * Update the google map field from address data after a location is saved.
+ * Gets all taxonomies registered to locations.
  *
- * @since 0.1.0
+ * @since TBD
  *
- * @param int $post_id The post ID.
- *
- * @return void
+ * @return array
  */
-function mailocations_maybe_update_map_field( $post_id ) {
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-		return;
+function mailocations_get_location_taxonomies() {
+	static $taxonomies = null;
+
+	if ( ! is_null( $taxonomies ) ) {
+		return $taxonomies;
 	}
 
-	if ( wp_is_post_autosave( $post_id ) ) {
-		return;
+	if ( ! is_array( $taxonomies ) ) {
+		$ttaxonomies = [];
 	}
 
-	if ( wp_is_post_revision( $post_id ) ) {
-		return;
+	$objects = get_object_taxonomies( 'mai_location' );
+
+	if ( $objects ) {
+		foreach ( $objects as $name ) {
+			$taxonomy = get_taxonomy( $name );
+
+			if ( $taxonomy ) {
+				$taxonomies[ $name ] = $taxonomy->label;
+			}
+		}
 	}
 
-	if ( 'mai_location' !== get_post_type( $post_id ) ) {
-		return;
-	}
-
-	mailocations_update_location_from_google_maps( $post_id );
+	return $taxonomies;
 }
 
 /**
@@ -287,10 +424,12 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 		return;
 	}
 
-	$location = get_post_meta( $post_id, 'location', true );
-	$address  = [];
-	$update   = [];
-	$keys     = [
+	$location  = get_post_meta( $post_id, 'location', true );
+	$countries = mailocations_get_country_choices();
+	$states    = mailocations_get_state_choices();
+	$address   = [];
+	$update    = [];
+	$keys      = [
 		'address_country',
 		'address_street',
 		'address_city',
@@ -301,6 +440,15 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 
 	foreach ( $keys as $key ) {
 		$value = get_post_meta( $post_id, $key, true );
+
+		switch ( $key ) {
+			case 'address_country':
+				$value = isset( $countries[ $key ] ) ? $value : '';
+				break;
+			case 'address_state':
+				$value = isset( $states[ $key ] ) ? $value : '';
+			break;
+		}
 
 		if ( $value ) {
 			$address[] = $value;
@@ -415,46 +563,61 @@ function mailocations_update_location_from_google_maps( $post_id ) {
 		$international = isset( $data['country_short'] ) && 'US' !== $data['country_short'];
 
 		foreach ( $update as $key ) {
-			$value = '';
+			$meta = $taxo = $term = '';
 
 			switch ( $key ) {
 				case 'address_street':
 					if ( isset( $data['name'] ) && $data['name'] ) {
-						$value = $data['name'];
+						$meta = $data['name'];
 					}
 				break;
 				case 'address_city':
 					if ( isset( $data['city'] ) && $data['city'] ) {
-						$value = $data['city'];
+						$meta = $data['city'];
 					}
 				break;
 				case 'address_state':
 					if ( ! $international && isset( $data['state_short'] ) && $data['state_short'] ) {
-						$value = $data['state_short'];
+						$meta = $data['state_short'];
+						// $taxo = 'mai_location_state';
+						// $term = $data['state_short'];
 					}
 				break;
 				case 'address_state_int':
 					if ( $international && isset( $data['state_short'] ) && $data['state_short'] ) {
-						$value = $data['state_short'];
+						$meta = $data['state_short'];
+						// $taxo = 'mai_location_state_int';
+						// $term = $data['state_short'];
 					}
 				break;
 				case 'address_postcode':
 					if ( isset( $data['post_code'] ) && $data['post_code'] ) {
-						$value = $data['post_code'];
+						$meta = $data['post_code'];
 					}
 				break;
 				case 'address_country':
 					if ( isset( $data['country_short'] ) && $data['country_short'] ) {
-						$value = $data['country_short'];
+						$meta = $data['country_short'];
+						// $taxo = 'mai_location_country';
+						// $term = $data['country_short'];
 					}
 				break;
 			}
 
-			if ( ! $value ) {
-				continue;
+			// TODO: What happens if someone removes an address? Do these fields or terms get deleted/cleared?
+
+			if ( $meta ) {
+				update_post_meta( $post_id, $key, $value );
 			}
 
-			update_post_meta( $post_id, $key, $value );
+			if ( $taxo && $term ) {
+				$array   = wp_create_term( $term, $taxo );
+				$term_id = $array && isset( $array['term_id'] ) ? (int) $array['term_id'] : 0;
+
+				if ( $term_id ) {
+					wp_set_post_terms( $post_id, [ $term_id ], $taxo );
+				}
+			}
 		}
 	}
 
@@ -475,15 +638,25 @@ function mailocations_update_location_from_google_maps( $post_id ) {
  * @return string
  */
 function mailocations_get_google_maps_api_key() {
+	static $key = null;
+
+	if ( ! is_null( $key ) ) {
+		return $key;
+	}
+
 	$key = '';
+
 	if ( function_exists( 'acf_get_setting' ) ) {
 		$key = acf_get_setting( 'google_api_key' );
 	}
+
 	return $key;
 }
 
 /**
  * If user can edit a location by ID.
+ *
+ * @since 0.1.0
  *
  * @param int $location_id The post ID.
  *
@@ -501,4 +674,141 @@ function mailocations_user_can_edit( $location_id ) {
 	}
 
 	return in_array( $location_id, $locations );
+}
+
+/**
+ * If current page has any active location filters.
+ *
+ * @access private
+ *
+ * @since TBD
+ *
+ * @return bool
+ */
+function mailocations_is_filtered_locations() {
+	static $filtered = null;
+
+	if ( ! is_null( $filtered ) ) {
+		return $filtered;
+	}
+
+	$filtered = false;
+
+	if ( ! $_GET ) {
+		return $filtered;
+	}
+
+	$keys = array_keys( mailocations_get_location_taxonomies() );
+	$keys = array_merge( $keys, [ 'lat', 'lng' ] );
+
+	foreach ( $keys as $key ) {
+		if ( ! isset( $_GET[ $key ] ) ) {
+			continue;
+		}
+
+		$filtered = true;
+		break;
+	}
+
+	return $filtered;
+}
+
+/**
+ * Gets valid query params, if any.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_get_query_params() {
+	$params   = [];
+	$defaults = mailocations_get_query_defaults();
+
+	// Check query strings.
+	foreach ( $defaults as $key => $value ) {
+		// Skip if the param is not set.
+		if ( ! isset( $_GET[ $key ] ) ) {
+			continue;
+		}
+
+		$get              = esc_html( $_GET[ $key ] );
+		$get              = is_array( $defaults[ $key ] ) ? explode( ',', $_GET[ $key ] ) : $_GET[ $key ];
+		$params[ $key ] = $get;
+	}
+
+	return $params;
+}
+
+/**
+ * Gets valid query param defaults.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_get_query_defaults() {
+	static $defaults = null;
+
+	if ( ! is_null( $defaults ) ) {
+		return $defaults;
+	}
+
+	// Set static defaults.
+	$distance = mailocations_get_option( 'distances' );
+	$units    = mailocations_get_option( 'units' );
+	$defaults = [
+		'address'  => '',
+		'lat'      => '',
+		'lng'      => '',
+		'distance' => reset( $distance ),
+		'unit'     => reset( $units ),
+		'state'    => '',
+		'province' => '',
+	];
+
+	// Add taxonomies.
+	foreach ( mailocations_get_location_taxonomies() as $name => $label ) {
+		$defaults[ $name ] = [];
+	}
+
+	// Add filter.
+	$defaults = apply_filters( 'mailocations_location_query_defaults', $defaults );
+
+	return $defaults;
+}
+
+/**
+ * Gets a stylesheet link.
+ * Returns empty if the same file was already called,
+ * so it's only loaded once on a page.
+ *
+ * @since TBD
+ *
+ * @param string $filename
+ *
+ * @return string
+ */
+function mailocations_get_stylesheet_link( $filename ) {
+	static $loaded = [];
+
+	// Bail if loaded.
+	if ( is_admin() || isset( $loaded[ $filename ] ) ) {
+		return;
+	}
+
+	$suffix              = mailocations_get_suffix();
+	$loaded[ $filename ] = MAI_LOCATIONS_PLUGIN_URL . "assets/css/{$filename}{$suffix}.css";
+
+	return sprintf( '<link rel="stylesheet" href="%s" />', $loaded[ $filename ] );
+}
+
+/**
+ * Gets suffix for scripts.
+ *
+ * @since TBD
+ *
+ * @return string
+ */
+function mailocations_get_suffix() {
+	return defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 }

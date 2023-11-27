@@ -1,50 +1,63 @@
-#mai-location-edit .acf-fields {
-	margin-right: -12px;
-	margin-left: -12px;
+.mailocations-map {
+	aspect-ratio: 16/9;
 }
 
-#mai-location-edit .acf-fields > .acf-field {
-	padding-top: 12px;
-	padding-bottom: 12px;
-	border-top: 0;
+.mailocations-map img {
+	max-width: inherit !important;
 }
 
-#mai-location-edit .acf-field[data-width] + .acf-field[data-width] {
-	border-left: 0;
-}
-
-#mai-location-edit .acf-field input[type="text"],
-#mai-location-edit .acf-field input[type="password"],
-#mai-location-edit .acf-field input[type="number"],
-#mai-location-edit .acf-field input[type="search"],
-#mai-location-edit .acf-field input[type="email"],
-#mai-location-edit .acf-field input[type="url"],
-#mai-location-edit .acf-field textarea,
-#mai-location-edit .acf-field select {
-	height: auto;
-	padding: var(--input-padding, 0.9em);
-}
-
-#mai-location-edit [id^="mceu_"],
-#mai-location-edit [id^="mceu_"]:hover,
-#mai-location-edit [id^="mceu_"]:focus {
-	background: none;
-}
-
-#mai-location-edit .acf-input-prepend,
-#mai-location-edit .acf-input-append {
-	height: 100%;
-	padding: 8px 7px 7px;
-}
-
-#mai-location-edit .acf-taxonomy-field ul li {
+.mailocations-filter-list {
+	list-style-type: none;
 	margin: 0;
 }
 
-#mai-location-edit .acf-form-submit {
-	margin-top: 16px;
+.mailocations-filter-list li {
+	margin: 0;
 }
 
-.media-modal-content {
-	--button-color: currentColor;
+.mailocations-filter-list label {
+	display: inline-block;
+	margin-bottom: 0;
+	cursor: pointer;
+}
+
+.mailocations-autocomplete-container {
+	display: flex;
+	gap: 8px;
+}
+
+.mailocations-autocomplete-input-container {
+	position: relative;
+	flex-grow: 1;
+}
+
+.mailocations-autocomplete-container select {
+	width: auto;
+	height: auto;
+}
+
+.mailocations-autocomplete:placeholder-shown + .mailocations-autocomplete-clear {
+	display: none;
+}
+
+.mailocations-autocomplete-clear,
+.mailocations-autocomplete-clear:hover,
+.mailocations-autocomplete-clear:focus {
+	position: absolute;
+	top: 50%;
+	right: 4px;
+	transform: translateY(-50%);
+	margin: 0;
+	padding: 8px;
+	background: rgba(255, 255, 255, 0.9);
+	color: red;
+	letter-spacing: .5px;
+	font-variant: all-small-caps;
+	border: 0;
+}
+
+.wp-block .mailocations-autocomplete-container,
+.wp-block .mailocations-filter,
+.wp-block .mailocations-filter-list {
+	pointer-events: none;
 }
