@@ -7,7 +7,6 @@
 	"icon": "location",
 	"textdomain": "mai-locations",
 	"acf": {
-		"mode": "preview",
-		"renderCallback": "mailocations_do_locations_count_block"
+		"mode": "preview"
 	}
 }

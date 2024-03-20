@@ -1,0 +1,15 @@
+{
+	"name": "acf/mai-location-submission",
+	"title": "Mai Location Submission Form",
+	"description": "Creates a new location submission form.",
+	"category": "widgets",
+	"keywords": [ "location", "create", "submit" ],
+	"icon": "location",
+	"textdomain": "mai-locations",
+	"acf": {
+		"mode": "preview"
+	},
+	"supports": {
+		"align": false
+	}
+}

@@ -3,7 +3,7 @@
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Locations_Table_Block {
+class Mai_Locations_Location_Submission_Block {
 	/**
 	 * Construct the class.
 	 */
@@ -14,7 +14,7 @@ class Mai_Locations_Locations_Table_Block {
 	/**
 	 * Add hooks.
 	 *
-	 * @since 0.1.0
+	 * @since TBD
 	 *
 	 * @return void
 	 */
@@ -26,7 +26,7 @@ class Mai_Locations_Locations_Table_Block {
 	/**
 	 * Registers block.
 	 *
-	 * @since 0.1.0
+	 * @since TBD
 	 *
 	 * @return void
 	 */
@@ -39,36 +39,36 @@ class Mai_Locations_Locations_Table_Block {
 	}
 
 	/**
-	 * Callback function to render the Mai Location Table block.
+	 * Callback function to render the block.
 	 *
-	 * @since 0.1.0
+	 * @since TBD
 	 *
 	 * @param array    $attributes The block attributes.
-	 * @param string   $content    The block content.
+	 * @param string   $content The block content.
 	 * @param bool     $is_preview Whether or not the block is being rendered for editing preview.
-	 * @param int      $post_id    The current post being edited or viewed.
-	 * @param WP_Block $block      The block instance (since WP 5.5).
+	 * @param int      $post_id The current post being edited or viewed.
+	 * @param WP_Block $wp_block The block instance (since WP 5.5).
+	 * @param array    $context The block context array.
 	 *
 	 * @return void
 	 */
-	function render_block( $attributes, $content, $is_preview, $post_id, $block ) {
+	function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
 		$args = [
-			'title'      => get_field( 'locations_table_title' ),
-			'header'     => get_field( 'locations_table_header' ),
-			'no_results' => get_field( 'locations_no_results' ),
-			'redirect'   => get_field( 'location_redirect' ),
-			'fields'     => (array) get_field( 'location_fields' ),
-			'class'      => isset( $attributes['className'] ) && ! empty( $attributes['className'] ) ? $attributes['className'] : '',
-			'align'      => isset( $attributes['align'] ) ? esc_html( $attributes['align'] ) : '',
+			'fields'   => array_filter( (array) get_field( 'location_fields' ) ),
+			'status'   => get_field( 'location_status' ),
+			'redirect' => get_field( 'location_redirect' ),
+			'emails'   => get_field( 'location_emails' ),
+			'class'    => isset( $attributes['className'] ) && ! empty( $attributes['className'] ) ? $attributes['className'] : '',
+			'preview'  => $is_preview,
 		];
 
-		echo mailocations_get_locations_table( 0, $args );
+		echo mailocations_get_location_submission_form( $args );
 	}
 
 	/**
 	 * Add field group.
 	 *
-	 * @since 0.1.0
+	 * @since TBD
 	 *
 	 * @return void
 	 */
@@ -76,32 +76,18 @@ class Mai_Locations_Locations_Table_Block {
 		$plural   = mailocations_get_plural();
 		$singular = mailocations_get_singular();
 
-		// Locations Table block.
 		acf_add_local_field_group(
 			[
 				'title'  => __( 'Locations Table', 'mai-locations' ),
-				'key'    => 'mailocations_locations_table_field_group',
+				'key'    => 'mai_location_submission_field_group',
 				'fields' => [
 					[
-						'label'       => __( 'Title', 'mai-locations' ),
-						'key'         => 'field_6071bfebbfdab',
-						'name'        => 'locations_table_title',
-						'type'        => 'text',
-						'placeholder' => sprintf( '%s %s', __( 'My', 'mai-locations' ), $plural ),
-					],
-					[
-						'label'       => __( 'Table Header', 'mai-location' ),
-						'key'         => 'field_6071c00cbfdac',
-						'name'        => 'locations_table_header',
-						'type'        => 'text',
-						'placeholder' => $plural,
-					],
-					[
-						'label' => __( 'No Results Message', 'mai-location' ),
-						'key'   => 'field_6071d22cdrdbd',
-						'name'  => 'locations_no_results',
-						'type'  => 'textarea',
-						'rows'  => 2,
+						'label'    => __( 'Location Status', 'mai-locations'),
+						'key'      => 'mai_location_status',
+						'name'     => 'location_status',
+						'type'     => 'select',
+						'required' => 1,
+						'choices'  => get_post_statuses(),
 					],
 					[
 						// This field has to match what's in locations-table/block.php.
@@ -112,8 +98,15 @@ class Mai_Locations_Locations_Table_Block {
 						'type'         => 'text',
 					],
 					[
-						// This field has to match what's in location-submission/block.php.
-						'label'         => sprintf( '%s %s', $singular, __( 'Edit Form Fields', 'mai-locations' ) ),
+						'label'        => sprintf( '%s %s', $singular, __( 'Submission Notifications', 'mai-locations' ) ),
+						'instructions' => __( 'Send notificaiton of submission the following comma-separated email addresses.', 'mai-locations' ),
+						'key'          => 'mai_location_emails',
+						'name'         => 'location_emails',
+						'type'         => 'text',
+					],
+					[
+						// This field has to match what's in locations-table/block.php.
+						'label'         => sprintf( '%s %s', $singular, __( 'Submission Form Fields', 'mai-locations' ) ),
 						'instructions'  => __( 'Allow editing of these fields.', 'mai-locations' ),
 						'key'           => 'mai_location_fields',
 						'name'          => 'location_fields',
@@ -134,7 +127,7 @@ class Mai_Locations_Locations_Table_Block {
 						[
 							'param'    => 'block',
 							'operator' => '==',
-							'value'    => 'acf/mai-locations-table',
+							'value'    => 'acf/mai-location-submission',
 						],
 					],
 				],
