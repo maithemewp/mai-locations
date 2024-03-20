@@ -213,6 +213,7 @@ function initLocations() {
 			params['lng']      = '';
 			params['state']    = '';
 			params['province'] = '';
+			// params['distance'] = ''; // Leave this setting incase they want to do another search.
 
 			if ( value ) {
 				refreshPage();
@@ -299,30 +300,33 @@ function initLocations() {
 	}
 }
 
-// If we have maps, load the API.
-if ( document.querySelectorAll( '.mailocations-map' ).length || document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
-	// Load the Google Maps API asynchronously.
-	const here   = document.getElementById( 'mai-locations-js' );
-	const google = document.createElement( 'script' );
-	let   src    = `https://maps.googleapis.com/maps/api/js?key=${maiLocationsVars.apiKey}`;
+// On domcontent loaded.
+document.addEventListener( 'DOMContentLoaded', function() {
+	// If we have maps, load the API.
+	if ( document.querySelectorAll( '.mailocations-map' ).length || document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
+		// Load the Google Maps API asynchronously.
+		const here   = document.getElementById( 'mai-locations-js' );
+		const google = document.createElement( 'script' );
+		let   src    = `https://maps.googleapis.com/maps/api/js?key=${maiLocationsVars.apiKey}`;
 
-	// If we have autocomplete, add places library.
-	if ( document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
-		src += '&libraries=places';
+		// Add markercluster script if we have a map. Before the main init script.
+		if ( document.querySelectorAll( '.mailocations-map' ).length ) {
+			const cluster = document.createElement( 'script' );
+			cluster.src = maiLocationsVars.markerCluster;
+			here.parentElement.insertBefore( cluster, here );
+		}
+
+		// If we have autocomplete, add places library.
+		if ( document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
+			src += '&libraries=places';
+		}
+
+		// Add script after this one.
+		google.src = src += '&callback=initLocations';
+		here.parentElement.insertBefore( google, here );
 	}
-
-	// Add script after this one.
-	google.src = src += '&callback=initLocations';
-	here.parentElement.insertBefore( google, here );
-
-	// Add markercluster script if we have a map.
-	if ( document.querySelectorAll( '.mailocations-map' ).length ) {
-		const cluster = document.createElement( 'script' );
-		cluster.src = maiLocationsVars.markerCluster;
-		here.parentElement.insertBefore( cluster, here );
+	// Otherwise run the function directly.
+	else {
+		initLocations();
 	}
-}
-// Otherwise run the function directly.
-else {
-	initLocations();
-}
+});

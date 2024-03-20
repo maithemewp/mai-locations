@@ -28,22 +28,28 @@ function mailocation_location_phone_shortcode( $atts ) {
 	$atts = shortcode_atts(
 		[
 			'before' => '',
+			'after'  => '',
 			'link'   => true,
+			'style'  => '',
 		],
 		$atts,
 		'mai_location_phone'
 	);
 
-	$atts['before'] = esc_html( $atts['before'] ); // Don't trim(). We want spaces.
+	// Get data.
+	$atts['before'] = sanitize_text_field( $atts['before'] ); // Don't trim(). We want spaces.
+	$atts['after']  = sanitize_text_field( $atts['after'] ); // Don't trim(). We want spaces.
 	$atts['link']   = rest_sanitize_boolean( $atts['link'] );
 	$phone          = esc_html( get_post_meta( get_the_ID(), 'location_phone', true ) );
 	$country        = esc_html( get_post_meta( get_the_ID(), 'address_country', true ) );
 	$country        = $country ?: '';
 
+	// Bail if no phone.
 	if ( ! $phone ) {
 		return;
 	}
 
+	// Start the HTML.
 	$html = sprintf( '<div class="mai-location-phone"%s>', $atts['style'] ? sprintf( ' style="%s"', $atts['style'] ) : '' );
 		$html .= $atts['before'];
 
@@ -79,6 +85,8 @@ function mailocation_location_phone_shortcode( $atts ) {
 			$html .= '</a>';
 		}
 
+		$html .= $atts['after'];
+
 	$html .= '</div>';
 
 	return $html;
@@ -98,13 +106,15 @@ function mailocation_location_url_shortcode( $atts ) {
 		[
 			'style'  => '',
 			'before' => '',
+			'after'  => '',
 		],
 		$atts,
 		'mai_location_url'
 	);
 
 	$atts['style']  = esc_attr( $atts['style'] );
-	$atts['before'] = esc_html( $atts['before'] ); // Don't trim(). We want spaces.
+	$atts['before'] = sanitize_text_field( $atts['before'] ); // Don't trim(). We want spaces.
+	$atts['after']  = sanitize_text_field( $atts['after'] ); // Don't trim(). We want spaces.
 	$url            = get_post_meta( get_the_ID(), 'location_url', true );
 
 	if ( ! $url ) {
@@ -123,6 +133,8 @@ function mailocation_location_url_shortcode( $atts ) {
 		}
 
 		$html .= sprintf( '<a href="%s">%s</a>', esc_url( $url ), $formatted );
+
+		$html .= $atts['after'];
 
 	$html .= '</div>';
 
@@ -143,6 +155,7 @@ function mailocation_location_email_shortcode( $atts ) {
 		[
 			'style'  => '',
 			'before' => '',
+			'after'  => '',
 			'link'   => true,
 		],
 		$atts,
@@ -150,7 +163,8 @@ function mailocation_location_email_shortcode( $atts ) {
 	);
 
 	$atts['style']  = esc_attr( $atts['style'] );
-	$atts['before'] = esc_html( $atts['before'] ); // Don't trim(). We want spaces.
+	$atts['before'] = sanitize_text_field( $atts['before'] ); // Don't trim(). We want spaces.
+	$atts['after']  = sanitize_text_field( $atts['after'] ); // Don't trim(). We want spaces.
 	$email          = get_post_meta( get_the_ID(), 'location_email', true );
 	$email          = sanitize_email( $email );
 	$email          = antispambot( $email );
@@ -173,9 +187,46 @@ function mailocation_location_email_shortcode( $atts ) {
 			$html .= '</a>';
 		}
 
+		$html .= $atts['after'];
+
 	$html .= '</div>';
 
 	return $html;
+}
+
+add_shortcode( 'mai_location_place', 'mailocation_location_place_shortcode' );
+/**
+ * Gets a link to the location place on Google.
+ *
+ * @since TBD
+ *
+ * @return string
+ */
+function mailocation_location_place_shortcode( $atts ) {
+	$place_id = get_post_meta( get_the_ID(), 'place_id', true );
+
+	if ( ! $place_id ) {
+		return;
+	}
+
+	// Atts.
+	$atts = shortcode_atts(
+		[
+			'style'  => '',
+			'before' => '',
+			'after'  => '',
+			'text'   => __( 'View on Google', 'mai-locations' ),
+		],
+		$atts,
+		'mai_location_place'
+	);
+
+	$atts['style']  = esc_attr( $atts['style'] );
+	$atts['before'] = sanitize_text_field( $atts['before'] ); // Don't trim(). We want spaces.
+	$atts['after']  = sanitize_text_field( $atts['after'] ); // Don't trim(). We want spaces.
+	$atts['text']   = sanitize_text_field( $atts['text'] );
+
+	return sprintf( '<div class="mai-location-place">%s<a target="_blank" href="https://www.google.com/maps/place/?q=place_id:%s">%s</a>%s</div>', $place_id, $atts['text'] );
 }
 
 /**
@@ -204,8 +255,8 @@ add_shortcode( 'mai_location_distance', function( $atts ) {
 
 	// Sanitize.
 	$atts = [
-		'before' => esc_html( $atts['before'] ),
-		'after'  => esc_html( $atts['after'] ),
+		'before' => sanitize_text_field( $atts['before'] ),
+		'after'  => sanitize_text_field( $atts['after'] ),
 		'round'  => absint( $atts['round'] ),
 	];
 

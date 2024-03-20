@@ -19,21 +19,26 @@ function mailocations_pre_get_posts_query( $query ) {
 		return;
 	}
 
+	// Get formatted taxonomies.
+	$_taxonomies = mailocations_get_location_taxonomies_underscored();
+	$taxonomies  = mailocations_get_location_taxonomies_trimmed();
+
 	// Bail if not a location archive page.
-	if ( ! ( is_post_type_archive( 'mai_location' ) || is_tax( array_keys( mailocations_get_location_taxonomies() ) ) ) ) {
+	if ( ! ( is_post_type_archive( 'mai_location' ) || is_tax( array_keys( $taxonomies ) ) ) ) {
 		return;
 	}
 
-	// If filtered .
+	// If filtered.
 	if ( mailocations_is_filtered_locations() ) {
 		// Get the filters.
 		$params   = mailocations_get_query_params();
 		$defaults = mailocations_get_query_defaults();
+		$filters  = isset( $params['filter'] ) ? $params['filter'] : '';
 		$lat      = isset( $params['lat'] ) ? $params['lat'] : '';
 		$lng      = isset( $params['lng'] ) ? $params['lng'] : '';
 		$dist     = isset( $params['distance'] ) ? $params['distance'] : $defaults['distance'];
 		$unit     = isset( $params['unit'] ) ? $params['unit'] : $defaults['unit'];
-		$taxos    = array_intersect_key( $params, mailocations_get_location_taxonomies() );
+		$taxos    = array_intersect_key( $params, $_taxonomies );
 
 		// Bail if no coordinates or taxonomies.
 		if ( ! ( $lat && $lng ) && ! $taxos ) {
@@ -95,7 +100,7 @@ function mailocations_pre_get_posts_query( $query ) {
 			// Loop though taxonomies.
 			foreach ( $taxos as $name => $values ) {
 				$tax_query[] = [
-					'taxonomy' => $name,
+					'taxonomy' => ltrim( $name, '_' ),
 					'field'    => 'slug',
 					'terms'    => $values,
 					'operator' => 'AND',

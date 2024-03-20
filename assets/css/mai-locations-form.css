@@ -1,0 +1,182 @@
+.mailocations-form .acf-form > .acf-fields {
+	margin-right: -12px;
+	margin-left: -12px;
+}
+
+.mailocations-form .acf-fields > .acf-field {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	border-top: 0;
+}
+
+.mailocations-form .acf-field .acf-label label {
+	font-family: var(--heading-font-family);
+	font-weight: var(--heading-font-weight);
+	font-size: var(--font-size-base);
+	line-height: var(--heading-line-height,1.219);
+}
+
+.mailocations-form .acf-fields.-left .acf-field .acf-label label {
+	margin-top: 1em;
+	font-size: var(--font-size-sm);
+}
+
+.mailocations-form .acf-field p.description {
+	color: var(--color-body);
+	font-size: var(--font-size-base);
+}
+
+.mailocations-form .acf-field[data-width] + .acf-field[data-width] {
+	border-left: 0;
+}
+
+.mailocations-form .acf-field input[type="text"],
+.mailocations-form .acf-field input[type="password"],
+.mailocations-form .acf-field input[type="number"],
+.mailocations-form .acf-field input[type="search"],
+.mailocations-form .acf-field input[type="email"],
+.mailocations-form .acf-field input[type="url"],
+.mailocations-form .acf-field textarea {
+	height: auto;
+	padding: var(--input-padding, 0.9em);
+}
+
+.mailocations-form .acf-field select {
+	height: auto;
+	padding: 1em var(--spacing-sm);
+}
+
+.mailocations-form .acf-url i {
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.mailocations-form [id^="mceu_"],
+.mailocations-form [id^="mceu_"]:hover,
+.mailocations-form [id^="mceu_"]:focus {
+	background: none;
+}
+
+.mailocations-form .acf-input-prepend,
+.mailocations-form .acf-input-append {
+	height: 100%;
+	padding: 8px 7px 7px;
+}
+
+.mailocations-form .acf-repeater .acf-label label {
+	margin-bottom: var(--spacing-xxs);
+	font-size: var(--font-size-sm);
+}
+
+.mailocations-form .acf-repeater .acf-actions {
+	text-align: start;
+}
+
+.mailocations-form .acf-repeater > .acf-actions .acf-button {
+	float: left;
+}
+
+.mailocations-form .acf-taxonomy-field .categorychecklist-holder {
+	max-height: unset;
+	border: 0;
+}
+
+.mailocations-form .acf-taxonomy-field .acf-checkbox-list {
+	column-count: 2;
+	padding: 0;
+}
+
+@media only screen and (min-width: 600px) {
+	.mailocations-form .acf-taxonomy-field .acf-checkbox-list {
+		column-count: 3;
+	}
+}
+
+@media only screen and (min-width: 800px) {
+	.mailocations-form .acf-taxonomy-field .acf-checkbox-list {
+		column-count: 4;
+	}
+}
+
+.mailocations-form .acf-taxonomy-field ul li {
+	margin: 0;
+}
+
+/* This isn't rendered inside our form div. */
+.mailocations-form .ui-datepicker .ui-datepicker-prev,
+.mailocations-form .ui-datepicker .ui-datepicker-next {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.mailocations-form .ui-datepicker .ui-datepicker-title {
+	display: flex;
+	justify-content: space-between;
+}
+
+.mailocations-form .ui-timepicker-div.ui-timepicker-oneLine dl {
+	display: flex;
+	justify-content: center;
+	margin-block: .4em;
+}
+
+.mailocations-form .ui-timepicker-div.ui-timepicker-oneLine dl dd.ui_tpicker_minute::before {
+	margin-inline: 0.4em;
+}
+
+.mailocations-form .ui-timepicker-div .ui-widget-header,
+.mailocations-form .ui-timepicker-div .ui_tpicker_time_label,
+.mailocations-form .ui-timepicker-div .ui_tpicker_second {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	color: var(--color-black);
+	background: var(--color-white);
+	border: 0;
+	clip: rect(0, 0, 0, 0);
+}
+
+
+/* hides "No image selected" text */
+/* .mailocations-form .acf-image-uploader .hide-if-value p {
+	font-size: 0;
+} */
+
+.mailocations-form .acf-form-submit {
+	margin-top: 16px;
+}
+
+.media-modal-content {
+	--button-color: currentColor;
+}
+
+.mailocations-form #message {
+	position: relative;
+	margin-bottom: var(--spacing-md);
+	padding: 4px 12px;
+	color: var(--mailocations-form-message-color, inherit);
+	border-radius: var(--border-radius);
+	border-left: 4px solid var(--mailocations-form-message-background, transparent );
+	overflow: hidden;
+}
+
+.mailocations-form #message::before {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: var(--mailocations-form-message-background, var(--color-white));
+	opacity: 0.05;
+	content: "";
+}
+
+.mailocations-form #message.error {
+	--mailocations-form-message-background: var(--color-danger);
+}
+
+.mailocations-form #message.updated {
+	--mailocations-form-message-background: var(--color-success);
+}

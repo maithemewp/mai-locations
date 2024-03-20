@@ -1,5 +1,7 @@
 <?php
 
+new Mai_Locations_Settings;
+
 /**
  * Adds settings page.
  *
@@ -16,7 +18,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function __construct() {
+	function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_menu_item' ], 12 );
 		add_action( 'admin_init', [ $this, 'init' ] );
 		add_filter( 'plugin_action_links_mai-locations/mai-locations.php', [ $this, 'add_settings_link' ], 10, 4 );
@@ -29,7 +31,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function add_menu_item() {
+	function add_menu_item() {
 		add_submenu_page(
 			'edit.php?post_type=mai_location',
 			__( 'Mai Locations', 'mai-locations' ), // page_title
@@ -47,12 +49,11 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function add_content() {
+	function add_content() {
 		$this->options = mailocations_get_options();
 
 		echo '<div class="wrap">';
 			printf( '<h2>%s</h2>', __( 'Mai Locations', 'mai-locations' ) );
-			// printf( '<p>%s</p>', __( 'Connect your WordPress website to Matomo Analytics.', 'mai-locations' ) );
 
 			echo '<form method="post" action="options.php">';
 				settings_fields( 'mai_locations_group' );
@@ -69,7 +70,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function init() {
+	function init() {
 		register_setting(
 			'mai_locations_group', // option_group
 			'mai_locations', // option_name
@@ -101,11 +102,20 @@ class Mai_Locations_Settings {
 
 		add_settings_field(
 			'base', // id
-			__( 'Singular Label', 'mai-locations' ), // title
+			__( 'Permalinks', 'mai-locations' ), // title
 			[ $this, 'base_callback' ], // callback
 			'mai-locations-section', // page
 			'mai_locations_settings' // section
 		);
+
+		add_settings_field(
+			'category_base', // id
+			__( 'Category Permalinks', 'mai-locations' ), // title
+			[ $this, 'category_base_callback' ], // callback
+			'mai-locations-section', // page
+			'mai_locations_settings' // section
+		);
+
 
 		add_settings_field(
 			'distances', // id
@@ -139,7 +149,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return array
 	 */
-	public function sanitize_callback( $input ) {
+	function sanitize_callback( $input ) {
 		return mailocations_sanitize_options( $input );
 	}
 
@@ -148,7 +158,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return string
 	 */
-	public function settings_callback() {}
+	function settings_callback() {}
 
 	/**
 	 * Setting callback.
@@ -157,7 +167,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function label_plural_callback() {
+	function label_plural_callback() {
 		printf( '<input class="regular-text" type="text" name="mai_locations[label_plural]" id="label_plural" value="%s">', $this->options['label_plural'] );
 	}
 
@@ -168,7 +178,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function label_singular_callback() {
+	function label_singular_callback() {
 		printf( '<input class="regular-text" type="text" name="mai_locations[label_singular]" id="label_singular" value="%s">', $this->options['label_singular'] );
 	}
 
@@ -179,7 +189,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function base_callback() {
+	function base_callback() {
 		$instructions = sprintf( '<a href="%s">%s</a>', get_admin_url( null, 'options-permalink.php' ), __( 'Permalinks', 'mai-locations' ) );
 		$instructions = sprintf( __( 'Visit Dashboard > Settings > %s and hit "Save" if updating this setting.', 'mai-locations' ), $instructions );
 
@@ -194,7 +204,22 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function distances_callback() {
+	function category_base_callback() {
+		$instructions = sprintf( '<a href="%s">%s</a>', get_admin_url( null, 'options-permalink.php' ), __( 'Permalinks', 'mai-locations' ) );
+		$instructions = sprintf( __( 'Visit Dashboard > Settings > %s and hit "Save" if updating this setting.', 'mai-locations' ), $instructions );
+
+		printf( '<input class="regular-text" type="text" name="mai_locations[category_base]" id="category_base" value="%s">', $this->options['category_base'] );
+		printf( '<p>%s</p>', $instructions );
+	}
+
+	/**
+	 * Setting callback.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	function distances_callback() {
 		printf( '<input class="regular-text" type="text" name="mai_locations[distances]" id="distances" value="%s">', implode( ', ', $this->options['distances'] ) );
 		printf( '<p>%s</p>', __( 'Comma-separated distance options used for proximity search. Use a single value to hide field and force one distance. Use 0 to show all results, typically when limiting results by state/province below.', 'mai-locations' ) );
 	}
@@ -206,7 +231,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function units_callback() {
+	function units_callback() {
 		$units = (array) $this->options['units'];
 		$options = [
 			'mi' => __( 'Miles', 'mai-locations' ),
@@ -232,7 +257,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	public function limit_state_callback() {
+	function limit_state_callback() {
 		printf(
 			'<p><label><input type="checkbox" name="mai_locations[limit_state]" value="limit_state"%s> %s</label></p>',
 			(bool) $this->options['limit_state'] ? ' checked' : '',
@@ -252,7 +277,7 @@ class Mai_Locations_Settings {
 	 *
 	 * @return array associative array of plugin action links
 	 */
-	public function add_settings_link( $actions, $plugin_file, $plugin_data, $context ) {
+	function add_settings_link( $actions, $plugin_file, $plugin_data, $context ) {
 		$url                 = esc_url( admin_url( 'edit.php?post_type=mai_location' ) );
 		$link                = sprintf( '<a href="%s">%s</a>', $url, __( 'Settings', 'mai-locations' ) );
 		$actions['settings'] = $link;
@@ -260,5 +285,3 @@ class Mai_Locations_Settings {
 		return $actions;
 	}
 }
-
-new Mai_Locations_Settings;
