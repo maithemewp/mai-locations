@@ -226,7 +226,12 @@ function mailocation_location_place_shortcode( $atts ) {
 	$atts['after']  = sanitize_text_field( $atts['after'] ); // Don't trim(). We want spaces.
 	$atts['text']   = sanitize_text_field( $atts['text'] );
 
-	return sprintf( '<div class="mai-location-place">%s<a target="_blank" href="https://www.google.com/maps/place/?q=place_id:%s">%s</a>%s</div>', $place_id, $atts['text'] );
+	return sprintf( '<div class="mai-location-place">%s<a target="_blank" href="https://www.google.com/maps/place/?q=place_id:%s">%s</a>%s</div>',
+		$atts['before'],
+		$place_id,
+		$atts['text'],
+		$atts['after']
+	);
 }
 
 /**
