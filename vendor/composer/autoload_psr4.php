@@ -7,12 +7,15 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'libphonenumber\\' => array($vendorDir . '/giggsey/libphonenumber-for-php/src'),
+    'Symfony\\Polyfill\\Php80\\' => array($vendorDir . '/symfony/polyfill-php80'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
-    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src', $vendorDir . '/psr/http-factory/src'),
+    'Slim\\Psr7\\' => array($vendorDir . '/slim/psr7/src'),
+    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-factory/src', $vendorDir . '/psr/http-message/src'),
     'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
     'ML\\JsonLD\\' => array($vendorDir . '/ml/json-ld'),
     'HtmlParser\\' => array($vendorDir . '/oscarotero/html-parser/src'),
     'Giggsey\\Locale\\' => array($vendorDir . '/giggsey/locale/src'),
+    'Fig\\Http\\Message\\' => array($vendorDir . '/fig/http-message-util/src'),
     'Embed\\' => array($vendorDir . '/embed/embed/src'),
     'Composer\\CaBundle\\' => array($vendorDir . '/composer/ca-bundle/src'),
 );
