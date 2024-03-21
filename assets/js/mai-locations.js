@@ -240,7 +240,7 @@ function initLocations() {
 				}
 				// Add value.
 				else {
-					if ( radio ) {
+					if ( radio || select ) {
 						params[ this.dataset.filter ] = [ this.value ];
 					} else {
 						params[ this.dataset.filter ].push( this.value );
