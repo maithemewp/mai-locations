@@ -273,8 +273,8 @@ final class Mai_Locations_Plugin {
 		 *  Custom Taxonomies  *
 		 ***********************/
 
-		$cat_plural   = apply_filters( 'mailocations_taxonomy_plural', __( 'Location Categories', 'mai-locations' ) );
-		$cat_singular = apply_filters( 'mailocations_taxonomy_singular', __( 'Location Category', 'mai-locations' ) );
+		$cat_plural   = apply_filters( 'mailocations_taxonomy_plural', sprintf( '%s %s', $singular, __( 'Categories', 'mai-locations' ) ) );
+		$cat_singular = apply_filters( 'mailocations_taxonomy_singular', sprintf( '%s %s', $singular, __( 'Category', 'mai-locations' ) ) );
 		$cat_base     = mailocations_get_option( 'category_base' );
 		$cat_base     = apply_filters( 'mailocations_taxonomy_base', $cat_base );
 		$cat_base     = $cat_base ? sanitize_title_with_dashes( $cat_base ) : 'location-category';
