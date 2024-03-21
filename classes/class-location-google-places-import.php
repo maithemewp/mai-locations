@@ -3,8 +3,6 @@
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-use Embed\Embed;
-
 /**
  * Instantiate the class.
  *
@@ -312,23 +310,24 @@ class Mai_Locations_Google_Places_Import {
 					if ( $image_id ) {
 						$needs_image = false;
 					}
-					// No featured image, but we have a website url.
-					elseif ( $website_url ) {
-						// Get image from website.
-						$image_url = mailocations_get_image_url_from_website( $website_url );
+				}
 
-						// Maybe upload the image.
-						$image_id = mailocations_upload_image( $website_url, 'website_url', $image_url, $post_id );
+				// If we need an image and have a website url.
+				if ( $needs_image && $website_url ) {
+					// Get image from website.
+					$image_url = mailocations_get_data_from_website( $website_url, 'image' );
 
-						// If we have an image ID.
-						if ( $image_id ) {
-							$needs_image = false;
+					// Maybe upload the image.
+					$image_id = $image_url ? mailocations_upload_image( $website_url, 'website_url', $image_url, $post_id ) : '';
 
-							// Set the featured image.
-							set_post_thumbnail( $post_id, $image_id );
+					// If we have an image ID.
+					if ( $image_id ) {
+						$needs_image = false;
 
-							WP_CLI::line( sprintf( 'Featured image updated from website: %s', get_permalink( $post_id ) ) );
-						}
+						// Set the featured image.
+						set_post_thumbnail( $post_id, $image_id );
+
+						WP_CLI::line( sprintf( 'Featured image updated from website: %s', get_permalink( $post_id ) ) );
 					}
 				}
 
@@ -459,56 +458,17 @@ class Mai_Locations_Google_Places_Import {
 					continue;
 				}
 
-				// Check if url is valid.
-				$response = wp_remote_get( $url );
-				$code     = wp_remote_retrieve_response_code( $response );
+				// Get website data.
+				$data = mailocations_get_data_from_website( $url );
 
-				// Bail if error. 403 is a valid response, but sometimes we were blocked.
-				if ( ! in_array( $code, [ 200, 403 ] ) ) {
-					WP_CLI::line( sprintf( 'Not a valid url: %s', $url ) );
-					continue;
-				}
-
-				// Get info.
-				$embed = new Embed();
-				$info  = $embed->get( $url );
-
-				// Bail if error.
-				if ( ! $info || 200 !== $info->getResponse()->getStatusCode() ) {
-					WP_CLI::line( sprintf( 'Error: %s', get_permalink( $post_id ) ) );
-					continue;
-				}
-
-				// Get data open graph description.
-				$metas       = $info->getMetas();
-				$description = $metas->str( 'og:description' );
-				$image_url   = $metas->url( 'og:image' );
-
-				// Fallback to page description.
-				if ( ! $description ) {
-					$description = (string) $info->description;
-				}
-
-				// Fall back to page image.
-				if ( ! $image_url ) {
-					$image_obj = $info->image;
-					$image_url = $image_obj ? $image_obj->__toString() : '';
-					ray( $image_url );
-				}
-
-				// Fallback to twitter image.
-				if ( ! $image_url ) {
-					$image_url = $metas->url( 'twitter:image' );
-				}
-
-				// Bail if no description and no image.
-				if ( ! ( $description && $image_url ) ) {
+				// Bail if no data.
+				if ( ! array_values( $data ) ) {
 					WP_CLI::line( sprintf( 'No description or image: %s', get_permalink( $post_id ) ) );
 					continue;
 				}
 
 				// Log if no description.
-				if ( ! $description ) {
+				if ( ! $data['desc'] ) {
 					WP_CLI::line( sprintf( 'No description: %s', $url ) );
 				}
 				// Update the post excerpt.
@@ -516,7 +476,7 @@ class Mai_Locations_Google_Places_Import {
 					$post_id = wp_update_post(
 						[
 							'ID'           => $post_id,
-							'post_excerpt' => $description,
+							'post_excerpt' => $data['desc'],
 						]
 					);
 
@@ -532,7 +492,7 @@ class Mai_Locations_Google_Places_Import {
 				}
 
 				// Log if no image.
-				if ( ! $image_url ) {
+				if ( ! $data['image'] ) {
 					WP_CLI::line( sprintf( 'No image: %s', $url ) );
 				}
 				// Update featured image.
@@ -543,7 +503,7 @@ class Mai_Locations_Google_Places_Import {
 					// If no featured image, or we're forcing the update.
 					if ( ! $image_id || rest_sanitize_boolean( $assoc_args['force_image'] ) ) {
 						// Maybe upload the image.
-						$image_id = mailocations_upload_image( $url, 'location_url', $image_url, $post_id );
+						$image_id = mailocations_upload_image( $url, 'location_url', $data['image'], $post_id );
 
 						// If we have an image ID.
 						if ( $image_id ) {
@@ -565,32 +525,95 @@ class Mai_Locations_Google_Places_Import {
 	}
 }
 
-function mailocations_get_image_url_from_website( $url ) {
-	// Get info.
-	$image_url = '';
-	$embed     = new Embed();
-	$info      = $embed->get( $url );
+/**
+ * Gets data from the website url source.
+ *
+ * @access private
+ *
+ * @since TBD
+ *
+ * @param string $url
+ * @param string $key
+ *
+ * @return array|string
+ */
+function mailocations_get_data_from_website( $url, $key = '' ) {
+	// Start data.
+	$data = [
+		'image' => '',
+		'desc'  => '',
+	];
 
-	// Bail if error.
-	if ( ! $info || 200 !== $info->getResponse()->getStatusCode() ) {
-		return $image_url;
+	// Request.
+	$response = wp_remote_get( $url );
+	$code     = wp_remote_retrieve_response_code( $response );
+
+	// Bail if error. 403 is a valid response, but sometimes we were blocked.
+	if ( ! in_array( $code, [ 200, 403 ] ) ) {
+		return $key ? $data['key'] : $data;
 	}
 
-	// Get data open graph description.
-	$metas       = $info->getMetas();
-	$image_url   = $metas->url( 'og:image' );
+	// Get body.
+	$body = wp_remote_retrieve_body( $response );
+	$body = str_replace( '<!DOCTYPE html>', '', $body );
 
-	// Fall back to page image.
-	if ( ! $image_url ) {
-		$image_url = $info->image ? $info->image->__toString() : '';
+	// Bail if no body.
+	if ( ! $body ) {
+		return $key ? $data['key'] : $data;
 	}
 
-	// Fallback to twitter image.
-	if ( ! $image_url ) {
-		$image_url = $metas->url( 'twitter:image' );
+	// Set up tag processor.
+	$tags = new WP_HTML_Tag_Processor( $body );
+
+	// Loop through tags.
+	while ( $tags->next_tag( [ 'tag_name' => 'meta' ] ) ) {
+		// Get property.
+		$property = $tags->get_attribute( 'property' );
+
+		// Skip if no property or not the right property.
+		if ( ! $property || ! in_array( $property, [ 'og:description', 'og:image' ] ) ) {
+			continue;
+		}
+
+		// Try for data.
+		switch ( $property ) {
+			case 'og:description':
+				$data['desc'] = (string) $tags->get_attribute( 'content' );
+				break;
+			case 'og:image':
+				$data['image'] = (string) $tags->get_attribute( 'content' );
+				break;
+		}
 	}
 
-	return $image_url;
+	// Maybe try for fallbacks.
+	if ( ! array_values( $data ) ) {
+		// Set up tag processor.
+		$tags = new WP_HTML_Tag_Processor( $body );
+
+		// Loop through tags.
+		while ( $tags->next_tag( [ 'tag_name' => 'meta' ] ) ) {
+			// Get name.
+			$name = $tags->get_attribute( 'name' );
+
+			// Skip if no name or not the right name.
+			if ( ! $name || ! in_array( $name, [ 'twitter:description', 'twitter:image' ] ) ) {
+				continue;
+			}
+
+			// Try for name.
+			switch ( $property ) {
+				case 'twitter:description':
+					$data['desc'] = $data['desc'] ?: (string) $tags->get_attribute( 'content' );
+					break;
+				case 'twitter:image':
+					$data['image'] = $data['image'] ?: (string) $tags->get_attribute( 'content' );
+					break;
+			}
+		}
+	}
+
+	return $key ? $data[ $key ] : $data;
 }
 
 /**
