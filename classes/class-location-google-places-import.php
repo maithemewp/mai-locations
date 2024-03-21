@@ -516,7 +516,7 @@ class Mai_Locations_Google_Places_Import {
 							set_post_thumbnail( $post_id, $image_id );
 
 							// Log.
-							WP_CLI::line( sprintf( 'Featured image updated: %s', get_permalink( $post_id ) ) );
+							WP_CLI::line( sprintf( 'Image updated: %s', get_permalink( $post_id ) ) );
 						}
 					}
 				}
