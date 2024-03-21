@@ -55,6 +55,7 @@ class Mai_Locations_Locations_Map_Block {
 	function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
 		// Maybe enqueue scripts.
 		if ( ! $is_preview ) {
+			wp_enqueue_script( 'mai-locations-markerclusterer' );
 			wp_enqueue_script( 'mai-locations' );
 		}
 

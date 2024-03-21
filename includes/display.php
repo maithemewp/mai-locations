@@ -15,13 +15,14 @@ function mailocations_register_scripts() {
 	$suffix = mailocations_get_suffix();
 	wp_register_style( 'mai-locations-form', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations-form{$suffix}.css", [], MAI_LOCATIONS_VERSION );
 	wp_register_style( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations{$suffix}.css", [], MAI_LOCATIONS_VERSION );
+	wp_register_script( 'mai-locations-markerclusterer', MAI_LOCATIONS_PLUGIN_URL . "assets/js/markerclusterer{$suffix}.js", [], '2.1.4', true );
 	wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations{$suffix}.js", [], MAI_LOCATIONS_VERSION, true );
 
 	$localize = [
 		'params'        => mailocations_get_query_params(),
 		'defaults'      => mailocations_get_query_defaults(),
 		'apiKey'        => mailocations_get_google_maps_api_key(),
-		'markerCluster' => MAI_LOCATIONS_PLUGIN_URL . "assets/js/markerclusterer{$suffix}.js", // 2.1.4
+		// 'markerCluster' => MAI_LOCATIONS_PLUGIN_URL . "assets/js/markerclusterer{$suffix}.js", // 2.1.4
 		'autoComplete'  => [
 			'fields'       => [ 'geometry', 'name' ],
 			'strictBounds' => false,

@@ -310,11 +310,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		let   src    = `https://maps.googleapis.com/maps/api/js?key=${maiLocationsVars.apiKey}`;
 
 		// Add markercluster script if we have a map. Before the main init script.
-		if ( document.querySelectorAll( '.mailocations-map' ).length ) {
-			const cluster = document.createElement( 'script' );
-			cluster.src = maiLocationsVars.markerCluster;
-			here.parentElement.insertBefore( cluster, here );
-		}
+		// if ( document.querySelectorAll( '.mailocations-map' ).length ) {
+		// 	const cluster = document.createElement( 'script' );
+		// 	cluster.src = maiLocationsVars.markerCluster;
+		// 	here.parentElement.insertBefore( cluster, here );
+		// }
 
 		// If we have autocomplete, add places library.
 		if ( document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
