@@ -498,15 +498,15 @@ class Mai_Locations_Google_Places_Import {
 				// Update featured image.
 				else {
 					// Get featured image.
-					$image_id = get_post_thumbnail_id( $post_id );
+					$featured_id = get_post_thumbnail_id( $post_id );
 
 					// If no featured image, or we're forcing the update.
-					if ( ! $image_id || rest_sanitize_boolean( $assoc_args['force_image'] ) ) {
+					if ( ! $featured_id || rest_sanitize_boolean( $assoc_args['force_image'] ) ) {
 						// Maybe upload the image.
 						$image_id = mailocations_upload_image( $url, 'location_url', $data['image'], $post_id );
 
 						// If we have an image ID.
-						if ( $image_id ) {
+						if ( $image_id && $image_id !== $featured_id ) {
 							// Set the featured image.
 							set_post_thumbnail( $post_id, $image_id );
 
