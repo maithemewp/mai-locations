@@ -419,6 +419,7 @@ class Mai_Locations_Google_Places_Import {
 				'post_status'    => 'any',
 				'posts_per_page' => 50,
 				'offset'         => 0,
+				'force_excerpt'  => false, // Whether to force update the post excerpt if it already exists.
 				'force_image'    => false, // Whether to force update the featured image if it already exists.
 			]
 		);
@@ -473,21 +474,25 @@ class Mai_Locations_Google_Places_Import {
 				}
 				// Update the post excerpt.
 				else {
-					$post_id = wp_update_post(
-						[
-							'ID'           => $post_id,
-							'post_excerpt' => $data['desc'],
-						]
-					);
+					// If no excerpt or we're forcing the update.
+					if ( ! has_excerpt( $post_id ) || rest_sanitize_boolean( $assoc_args['force_excerpt'] ) ) {
+						// Update the post excerpt.
+						$post_id = wp_update_post(
+							[
+								'ID'           => $post_id,
+								'post_excerpt' => $data['desc'],
+							]
+						);
 
-					// If error.
-					if ( is_wp_error( $post_id ) ) {
-						WP_CLI::line( sprintf( 'Error: %s', $post_id->get_error_message() ) );
-						continue;
-					}
-					// Success.
-					else {
-						WP_CLI::line( sprintf( 'Excerpt updated: %s', get_permalink( $post_id ) ) );
+						// If error.
+						if ( is_wp_error( $post_id ) ) {
+							WP_CLI::line( sprintf( 'Error: %s', $post_id->get_error_message() ) );
+							continue;
+						}
+						// Success.
+						else {
+							WP_CLI::line( sprintf( 'Excerpt updated: %s', get_permalink( $post_id ) ) );
+						}
 					}
 				}
 
