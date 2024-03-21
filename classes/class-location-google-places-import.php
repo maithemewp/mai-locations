@@ -674,7 +674,7 @@ function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 		$upload_url = $upload_dir['baseurl'];
 
 		// Specify the path to the destination directory within uploads.
-		$destination_dir = $upload_dir['basedir'] . '/mai-publisher/';
+		$destination_dir = $upload_dir['basedir'] . '/mai-locations/';
 
 		// Create the destination directory if it doesn't exist.
 		if ( ! file_exists( $destination_dir ) ) {
@@ -700,7 +700,7 @@ function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 	}
 
 	// Build the image url.
-	$image_url = untrailingslashit( $upload_url ) . '/mai-publisher/' . $image_hashed;
+	$image_url = untrailingslashit( $upload_url ) . '/mai-locations/' . $image_hashed;
 
 	// Build a temp url.
 	$tmp = download_url( $image_url );
