@@ -1,6 +1,7 @@
 {
     "require": {
         "yahnis-elsts/plugin-update-checker": "^5",
-        "giggsey/libphonenumber-for-php": "^8.12"
+        "giggsey/libphonenumber-for-php": "^8.12",
+        "embed/embed": "^4.4"
     }
 }

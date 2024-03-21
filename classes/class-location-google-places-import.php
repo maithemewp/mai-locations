@@ -3,6 +3,8 @@
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
+use Embed\Embed;
+
 /**
  * Instantiate the class.
  *
@@ -170,7 +172,7 @@ class Mai_Locations_Google_Places_Import {
 			];
 
 			// Get post with a meta key of place_id and meta value of the $place_id.
-			$post_ids = get_posts(
+			$existing_ids = get_posts(
 				[
 					'post_type'    => 'mai_location',
 					'post_status'  => 'any',
@@ -183,16 +185,16 @@ class Mai_Locations_Google_Places_Import {
 			);
 
 			// Get post ID.
-			$post_id = $post_ids && isset( $post_ids[0] ) ? $post_ids[0] : 0;
+			$existing_id = $existing_ids && isset( $existing_ids[0] ) ? $existing_ids[0] : 0;
 
 			// Maybe update existing.
-			if ( $post_id ) {
-				if ( $assoc_args['skip_update'] ) {
-					WP_CLI::line( sprintf( 'Post exists: %s', get_the_title( $post_id ) ) );
+			if ( $existing_id ) {
+				if ( rest_sanitize_boolean( $assoc_args['skip_update'] ) ) {
+					WP_CLI::line( sprintf( 'Post exists: %s', get_the_title( $existing_id ) ) );
 					continue;
 				}
 
-				$post_data['ID'] = $post_id;
+				$post_data['ID'] = $existing_id;
 			} else {
 				$post_data['post_status'] = $assoc_args['post_status'];
 			}
@@ -251,9 +253,26 @@ class Mai_Locations_Google_Places_Import {
 				}
 			}
 
+			// Set website.
+			$website_url = '';
+
 			// If we have a website.
 			if ( isset( $place['websiteUri'] ) ) {
-				$meta['location_url'] = $place['websiteUri'];
+				$website_url  = esc_url( $place['websiteUri'] );
+				$website_vars = wp_parse_url( $website_url, PHP_URL_QUERY );
+
+				// If we have vars, parse them to array.
+				if ( $website_vars ) {
+					parse_str( $website_vars, $website_vars );
+
+					// If we have query variables, remove them.
+					if ( $website_vars ) {
+						$website_url = remove_query_arg( array_keys( $website_vars ), $website_url );
+					}
+				}
+
+				// Set meta.
+				$meta['location_url'] = $website_url;
 			}
 
 			// Maybe add post meta.
@@ -281,8 +300,40 @@ class Mai_Locations_Google_Places_Import {
 					wp_set_object_terms( $post_id, $cats, 'mai_location_cat', $append = false );
 				}
 
-				// If we have a photo.
-				if ( isset( $place['photos'] ) ) {
+				// If we need a featured image from places.
+				$needs_image = true;
+
+				// If we have an existing post.
+				if ( $existing_id ) {
+					// Get featured image.
+					$image_id = get_post_thumbnail_id( $existing_id );
+
+					// Skip if we have a featured image.
+					if ( $image_id ) {
+						$needs_image = false;
+					}
+					// No featured image, but we have a website url.
+					elseif ( $website_url ) {
+						// Get image from website.
+						$image_url = mailocations_get_image_url_from_website( $website_url );
+
+						// Maybe upload the image.
+						$image_id = mailocations_upload_image( $website_url, 'website_url', $image_url, $post_id );
+
+						// If we have an image ID.
+						if ( $image_id ) {
+							$needs_image = false;
+
+							// Set the featured image.
+							set_post_thumbnail( $post_id, $image_id );
+
+							WP_CLI::line( sprintf( 'Featured image updated from website: %s', get_permalink( $post_id ) ) );
+						}
+					}
+				}
+
+				// If we need a featured image and have a photo.
+				if ( $needs_image && isset( $place['photos'] ) ) {
 					// Loop through photos.
 					foreach ( $place['photos'] as $photo ) {
 						// This reference seems to stay the same.
@@ -318,7 +369,7 @@ class Mai_Locations_Google_Places_Import {
 						);
 
 						// Maybe upload the image.
-						$image_id = mailocations_upload_image( $ref_uri, $image_url, $post_id );
+						$image_id = mailocations_upload_image( $ref_uri, 'places_url', $image_url, $post_id );
 
 						// If we have an image ID.
 						if ( $image_id ) {
@@ -346,6 +397,200 @@ class Mai_Locations_Google_Places_Import {
 
 		WP_CLI::success( 'Done.' );
 	}
+
+	/**
+	 * Updates locations from website.
+	 *
+	 * Usage: wp mailocations update_locations_from_website --posts_per_page="50" --offset="0"
+	 *
+	 * @link https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places/get
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $args       Standard command args.
+	 * @param array $assoc_args Keyed args like --search and --fields.
+	 *
+	 * @return void
+	 */
+	function update_locations_from_website( $args, $assoc_args ) {
+		// Parse args.
+		$assoc_args = wp_parse_args(
+			$assoc_args,
+			[
+				'post_status'    => 'any',
+				'posts_per_page' => 50,
+				'offset'         => 0,
+				'force_image'    => false, // Whether to force update the featured image if it already exists.
+			]
+		);
+
+		// Get query.
+		$query = new WP_Query(
+			[
+				'post_type'              => 'mai_location',
+				'post_status'            => $assoc_args['post_status'],
+				'posts_per_page'         => $assoc_args['posts_per_page'],
+				'offset'                 => $assoc_args['offset'],
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+				'meta_query'             => [
+					[
+						'key'     => 'location_url',
+						'value'   => '',
+						'compare' => '!=',
+					],
+				],
+			]
+		);
+
+		if ( $query->have_posts() ) {
+			// Log total.
+			WP_CLI::line( count( $query->posts ) . ' found' );
+
+			while ( $query->have_posts() ) : $query->the_post();
+				// Get place ID.
+				$post_id = get_the_ID();
+				$url     = get_post_meta( $post_id, 'location_url', true );
+
+				// Bail if no location url.
+				if ( ! $url ) {
+					WP_CLI::line( 'No location url' );
+					continue;
+				}
+
+				// Check if url is valid.
+				$response = wp_remote_get( $url );
+				$code     = wp_remote_retrieve_response_code( $response );
+
+				// Bail if error. 403 is a valid response, but sometimes we were blocked.
+				if ( ! in_array( $code, [ 200, 403 ] ) ) {
+					WP_CLI::line( sprintf( 'Not a valid url: %s', $url ) );
+					continue;
+				}
+
+				// Get info.
+				$embed = new Embed();
+				$info  = $embed->get( $url );
+
+				// Bail if error.
+				if ( ! $info || 200 !== $info->getResponse()->getStatusCode() ) {
+					WP_CLI::line( sprintf( 'Error: %s', get_permalink( $post_id ) ) );
+					continue;
+				}
+
+				// Get data open graph description.
+				$metas       = $info->getMetas();
+				$description = $metas->str( 'og:description' );
+				$image_url   = $metas->url( 'og:image' );
+
+				// Fallback to page description.
+				if ( ! $description ) {
+					$description = (string) $info->description;
+				}
+
+				// Fall back to page image.
+				if ( ! $image_url ) {
+					$image_obj = $info->image;
+					$image_url = $image_obj ? $image_obj->__toString() : '';
+					ray( $image_url );
+				}
+
+				// Fallback to twitter image.
+				if ( ! $image_url ) {
+					$image_url = $metas->url( 'twitter:image' );
+				}
+
+				// Bail if no description and no image.
+				if ( ! ( $description && $image_url ) ) {
+					WP_CLI::line( sprintf( 'No description or image: %s', get_permalink( $post_id ) ) );
+					continue;
+				}
+
+				// Log if no description.
+				if ( ! $description ) {
+					WP_CLI::line( sprintf( 'No description: %s', $url ) );
+				}
+				// Update the post excerpt.
+				else {
+					$post_id = wp_update_post(
+						[
+							'ID'           => $post_id,
+							'post_excerpt' => $description,
+						]
+					);
+
+					// If error.
+					if ( is_wp_error( $post_id ) ) {
+						WP_CLI::line( sprintf( 'Error: %s', $post_id->get_error_message() ) );
+						continue;
+					}
+					// Success.
+					else {
+						WP_CLI::line( sprintf( 'Excerpt updated: %s', get_permalink( $post_id ) ) );
+					}
+				}
+
+				// Log if no image.
+				if ( ! $image_url ) {
+					WP_CLI::line( sprintf( 'No image: %s', $url ) );
+				}
+				// Update featured image.
+				else {
+					// Get featured image.
+					$image_id = get_post_thumbnail_id( $post_id );
+
+					// If no featured image, or we're forcing the update.
+					if ( ! $image_id || rest_sanitize_boolean( $assoc_args['force_image'] ) ) {
+						// Maybe upload the image.
+						$image_id = mailocations_upload_image( $url, 'location_url', $image_url, $post_id );
+
+						// If we have an image ID.
+						if ( $image_id ) {
+							// Set the featured image.
+							set_post_thumbnail( $post_id, $image_id );
+
+							// Log.
+							WP_CLI::line( sprintf( 'Featured image updated: %s', get_permalink( $post_id ) ) );
+						}
+					}
+				}
+			endwhile;
+
+			WP_CLI::success( 'Done.' );
+		} else {
+			WP_CLI::line( 'No locations found' );
+		}
+		wp_reset_postdata();
+	}
+}
+
+function mailocations_get_image_url_from_website( $url ) {
+	// Get info.
+	$image_url = '';
+	$embed     = new Embed();
+	$info      = $embed->get( $url );
+
+	// Bail if error.
+	if ( ! $info || 200 !== $info->getResponse()->getStatusCode() ) {
+		return $image_url;
+	}
+
+	// Get data open graph description.
+	$metas       = $info->getMetas();
+	$image_url   = $metas->url( 'og:image' );
+
+	// Fall back to page image.
+	if ( ! $image_url ) {
+		$image_url = $info->image ? $info->image->__toString() : '';
+	}
+
+	// Fallback to twitter image.
+	if ( ! $image_url ) {
+		$image_url = $metas->url( 'twitter:image' );
+	}
+
+	return $image_url;
 }
 
 /**
@@ -356,12 +601,13 @@ class Mai_Locations_Google_Places_Import {
  * @see https://developer.wordpress.org/reference/functions/media_handle_sideload/
  *
  * @param string $ref_uri The reference URI of a remote file.
+ * @param string $ref_key The reference key of a remote file.
  * @param string $url     HTTP URL address of a remote file.
  * @param int    $post_id The post ID the media is associated with.
  *
  * @return int|WP_Error The ID of the attachment or a WP_Error on failure.
  */
-function mailocations_upload_image( $ref_uri, $image_url, $post_id ) {
+function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 	// Make sure we have the functions we need.
 	if ( ! function_exists( 'download_url' ) || ! function_exists( 'media_handle_sideload' ) ) {
 		require_once( ABSPATH . 'wp-admin/includes/media.php' );
@@ -369,21 +615,24 @@ function mailocations_upload_image( $ref_uri, $image_url, $post_id ) {
 		require_once( ABSPATH . 'wp-admin/includes/image.php' );
 	}
 
-	// Check if there is an attachment with unitedrobots_url meta key and value of $image_url.
+	// Check if there is an attachment with places_url meta key and value of $image_url.
 	$existing_ids = get_posts(
 		[
 			'post_type'    => 'attachment',
 			'post_status'  => 'any',
-			'meta_key'     => 'places_url',
+			'meta_key'     => $ref_key,
 			'meta_value'   => $ref_uri,
 			'meta_compare' => '=',
 			'fields'       => 'ids',
 		]
 	);
 
+	// Get existing ID.
+	$existing_id = $existing_ids && isset( $existing_ids[0] ) ? $existing_ids[0] : 0;
+
 	// Bail if the image already exists.
-	if ( $existing_ids ) {
-		return $existing_ids[0];
+	if ( $existing_id ) {
+		return $existing_id;
 	}
 
 	// Get contents of the image url.
@@ -458,7 +707,7 @@ function mailocations_upload_image( $ref_uri, $image_url, $post_id ) {
 	@unlink( $file_array[ 'tmp_name' ] );
 
 	// Set the reference url for possible reference later.
-	update_post_meta( $image_id, 'places_url', $ref_uri );
+	update_post_meta( $image_id, $ref_key, $ref_uri );
 
 	return $image_id;
 }
