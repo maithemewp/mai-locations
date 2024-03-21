@@ -659,8 +659,8 @@ function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 	}
 
 	// Get contents of the image url.
-	$image_contents = file_get_contents( $image_url );
 	$image_hashed   = md5( $image_url ) . '.jpg';
+	$image_contents = file_get_contents( $image_url );
 
 	// If contents.
 	if ( $image_contents ) {
