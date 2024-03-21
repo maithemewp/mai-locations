@@ -78,9 +78,8 @@ class Mai_Locations_Locations_Map_Block {
 		else {
 			global $wp_query;
 
-			// If showing all.
-			// if ( $get && 'all' === $get && ! mailocations_is_filtered_locations() ) {
-			if ( $get && 'all' === $get ) {
+			// If showing all. We can't show all pages when filtered, because we'll lose the address data.
+			if ( $get && 'all' === $get && ! mailocations_is_filtered_locations() ) {
 				$args             = $wp_query->query;
 				$args['nopaging'] = true;
 
