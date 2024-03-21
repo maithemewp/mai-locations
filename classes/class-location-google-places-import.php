@@ -80,6 +80,7 @@ class Mai_Locations_Google_Places_Import {
 				'post_status' => 'publish',
 				'set_cats'    => '',
 				'append_cats' => true, // Whether to replace or append to existing categories.
+				'skip_update' => false, // Whether to skip updating existing posts.
 			]
 		);
 
@@ -186,6 +187,11 @@ class Mai_Locations_Google_Places_Import {
 
 			// Maybe update existing.
 			if ( $post_id ) {
+				if ( $assoc_args['skip_update'] ) {
+					WP_CLI::line( sprintf( 'Post exists: %s', get_the_title( $post_id ) ) );
+					continue;
+				}
+
 				$post_data['ID'] = $post_id;
 			} else {
 				$post_data['post_status'] = $assoc_args['post_status'];
