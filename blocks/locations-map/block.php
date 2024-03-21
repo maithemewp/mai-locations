@@ -78,11 +78,9 @@ class Mai_Locations_Locations_Map_Block {
 		else {
 			global $wp_query;
 
-			// Get all posts.
-			$posts = $wp_query->posts;
-
 			// If showing all.
-			if ( $get && 'all' === $get && ! mailocations_is_filtered_locations() ) {
+			// if ( $get && 'all' === $get && ! mailocations_is_filtered_locations() ) {
+			if ( $get && 'all' === $get ) {
 				$args             = $wp_query->query;
 				$args['nopaging'] = true;
 
@@ -92,6 +90,10 @@ class Mai_Locations_Locations_Map_Block {
 				$posts = $all->posts;
 
 				wp_reset_postdata();
+			}
+			// Use existing query.
+			else {
+				$posts = $wp_query->posts;
 			}
 
 			// Open map.
