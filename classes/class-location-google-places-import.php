@@ -464,13 +464,13 @@ class Mai_Locations_Google_Places_Import {
 
 				// Bail if no data.
 				if ( ! array_values( $data ) ) {
-					WP_CLI::line( sprintf( 'No description or image: %s', get_permalink( $post_id ) ) );
+					// WP_CLI::line( sprintf( 'No description or image: %s', get_permalink( $post_id ) ) );
 					continue;
 				}
 
 				// Log if no description.
 				if ( ! $data['desc'] ) {
-					WP_CLI::line( sprintf( 'No description: %s', get_permalink( $post_id ) ) );
+					// WP_CLI::line( sprintf( 'No description: %s', get_permalink( $post_id ) ) );
 				}
 				// Update the post excerpt.
 				else {
@@ -498,7 +498,7 @@ class Mai_Locations_Google_Places_Import {
 
 				// Log if no image.
 				if ( ! $data['image'] ) {
-					WP_CLI::line( sprintf( 'No image: %s', $url ) );
+					// WP_CLI::line( sprintf( 'No image: %s', $url ) );
 				}
 				// Update featured image.
 				else {
