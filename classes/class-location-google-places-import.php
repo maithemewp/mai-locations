@@ -697,14 +697,15 @@ function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 	$tmp = download_url( $image_url );
 
 	// Remove the temp file.
-	@unlink( $destination_file );
+	wp_delete_file( $destination_file );
 
 	// Bail if error.
 	if ( is_wp_error( $tmp ) ) {
 		// ray( $tmp->get_error_code() . ': upload_image() 1 ' . $image_url . ' ' . $tmp->get_error_message() );
 
 		// Remove the original image and return the error.
-		@unlink( $tmp );
+		wp_delete_file( $tmp );
+
 		return 0;
 	}
 
@@ -722,12 +723,12 @@ function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 		// ray( $image_id->get_error_code() . ': upload_image() 2 ' . $image_url . ' ' . $image_id->get_error_message() );
 
 		// Remove the original image and return the error.
-		@unlink( $file_array[ 'tmp_name' ] );
+		wp_delete_file( $file_array[ 'tmp_name' ] );
 		return $image_id;
 	}
 
 	// Remove the original image.
-	@unlink( $file_array[ 'tmp_name' ] );
+	wp_delete_file( $file_array[ 'tmp_name' ] );
 
 	// Set the reference url for possible reference later.
 	update_post_meta( $image_id, $ref_key, $ref_uri );
