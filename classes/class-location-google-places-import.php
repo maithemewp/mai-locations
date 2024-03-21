@@ -278,6 +278,14 @@ class Mai_Locations_Google_Places_Import {
 				$post_data['meta_input'] = $meta;
 			}
 
+			// Get data from website.
+			$data = $website_url ? mailocations_get_data_from_website( $website_url ) : false;
+
+			// If we have an excerpt, add it.
+			if ( $data && $data['desc'] ) {
+				$post_data['post_excerpt'] = $data['desc'];
+			}
+
 			// Insert or update post.
 			$post_id = wp_insert_post( $post_data );
 
@@ -313,12 +321,9 @@ class Mai_Locations_Google_Places_Import {
 				}
 
 				// If we need an image and have a website url.
-				if ( $needs_image && $website_url ) {
-					// Get image from website.
-					$image_url = mailocations_get_data_from_website( $website_url, 'image' );
-
+				if ( $needs_image && $data && $data['image'] ) {
 					// Maybe upload the image.
-					$image_id = $image_url ? mailocations_upload_image( $website_url, 'website_url', $image_url, $post_id ) : '';
+					$image_id = mailocations_upload_image( $website_url, 'website_url', $data['image'], $post_id );
 
 					// If we have an image ID.
 					if ( $image_id ) {
