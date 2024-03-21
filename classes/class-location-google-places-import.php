@@ -469,7 +469,7 @@ class Mai_Locations_Google_Places_Import {
 
 				// Log if no description.
 				if ( ! $data['desc'] ) {
-					WP_CLI::line( sprintf( 'No description: %s', $url ) );
+					WP_CLI::line( sprintf( 'No description: %s', get_permalink( $post_id ) ) );
 				}
 				// Update the post excerpt.
 				else {
