@@ -689,6 +689,10 @@ function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 
 		$image_url = $image_hashed;
 	}
+	// Bail, no image contents.
+	else {
+		return 0;
+	}
 
 	// Build the image url.
 	$image_url = untrailingslashit( $upload_url ) . '/mai-publisher/' . $image_hashed;
