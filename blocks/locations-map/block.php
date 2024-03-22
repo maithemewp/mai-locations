@@ -80,15 +80,23 @@ class Mai_Locations_Locations_Map_Block {
 
 			// If showing all. We can't show all pages when filtered, because we'll lose the address data.
 			if ( $get && 'all' === $get && ! mailocations_is_filtered_locations() ) {
-				$args             = $wp_query->query;
-				$args['nopaging'] = true;
+				$transient_key = 'mai_locations_map_' . md5( serialize( $wp_query->query_vars ) );
 
-				unset( $args['posts_per_page'] );
+				// Check transient.
+				if ( false === ( $posts = get_transient( $transient_key ) ) ) {
+					$args             = $wp_query->query;
+					$args['nopaging'] = true;
 
-				$all   = new WP_Query( $args );
-				$posts = $all->posts;
+					unset( $args['posts_per_page'] );
 
-				wp_reset_postdata();
+					$all   = new WP_Query( $args );
+					$posts = $all->posts;
+
+					wp_reset_postdata();
+
+					// Set transient.
+					set_transient( $transient_key, $posts, 1 * HOUR_IN_SECONDS );
+				}
 			}
 			// Use existing query.
 			else {
@@ -97,8 +105,6 @@ class Mai_Locations_Locations_Map_Block {
 
 			// Open map.
 			printf( '<div style="aspect-ratio:%s/%s;" class="mailocations-map" data-zoom="%s">', $width, $height, 7 );
-
-			// ray( $posts );
 
 			// If posts.
 			if ( $posts ) {
