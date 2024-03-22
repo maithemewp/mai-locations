@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || die;
  *
  * @return void
  */
-new Mai_Locations_Google_Places_Import;
+new Mai_Locations_CLI;
 
 /**
  * Gets it started.
@@ -23,15 +23,15 @@ new Mai_Locations_Google_Places_Import;
  * @return void
  */
 add_action( 'cli_init', function() {
-	WP_CLI::add_command( 'mailocations', 'Mai_Locations_Google_Places_Import' );
+	WP_CLI::add_command( 'mailocations', 'Mai_Locations_CLI' );
 });
 
 /**
- * Main Mai_Locations_Google_Places_Import Class.
+ * Main Mai_Locations_CLI Class.
  *
  * @since 0.1.0
  */
-class Mai_Locations_Google_Places_Import {
+class Mai_Locations_CLI {
 	/**
 	 * Gets environment.
 	 *

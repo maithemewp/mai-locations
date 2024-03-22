@@ -137,8 +137,8 @@ final class Mai_Locations_Plugin {
 		include_once __DIR__ . '/classes/class-location-form-edit.php';
 		include_once __DIR__ . '/classes/class-location-form-listener.php';
 		include_once __DIR__ . '/classes/class-location-form-submit.php';
-		include_once __DIR__ . '/classes/class-location-google-places-import.php';
 		include_once __DIR__ . '/classes/class-location-import.php';
+		include_once __DIR__ . '/classes/class-locations-cli.php';
 		include_once __DIR__ . '/classes/class-locations-table.php';
 		include_once __DIR__ . '/classes/class-settings.php';
 
