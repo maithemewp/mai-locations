@@ -11,8 +11,6 @@ function initLocations() {
 	const params       = maiLocationsVars.params;
 	const autoComplete = maiLocationsVars.autoComplete;
 
-	console.log( params );
-
 	// Loop through map elements.
 	for ( const mapEl of maps ) {
 		let   current = null;
