@@ -80,47 +80,56 @@ class Mai_Locations_Locations_Map_Block {
 
 			// If showing all. We can't show all pages when filtered, because we'll lose the address data.
 			if ( $get && 'all' === $get && ! mailocations_is_filtered_locations() ) {
-				$transient_key = 'mai_locations_map_' . md5( serialize( $wp_query->query_vars ) );
+				// Build transient key.
+				$transient_key = 'mai_locations_markers_' . md5( serialize( $wp_query->query_vars ) );
 
 				// Check transient.
-				if ( false === ( $posts = get_transient( $transient_key ) ) ) {
-					$args             = $wp_query->query;
-					$args['nopaging'] = true;
+				if ( false === ( $markers = get_transient( $transient_key ) ) ) {
+					$args                           = $wp_query->query;
+					$args['fields']                 = 'ids';
+					$args['nopaging']               = true;
+					$args['no_found_rows']          = true;
+					$args['update_post_meta_cache'] = false;
+					$args['update_post_term_cache'] = false;
 
 					unset( $args['posts_per_page'] );
 
-					$all   = new WP_Query( $args );
-					$posts = $all->posts;
+					// Get posts as array of ids.
+					$new   = new WP_Query( $args );
+					$posts = $new->posts;
 
+					// Get markers.
+					$markers = $this->get_markers( $posts );
+
+					// Reset post data.
 					wp_reset_postdata();
 
 					// Set transient.
-					set_transient( $transient_key, $posts, 1 * HOUR_IN_SECONDS );
+					set_transient( $transient_key, $markers, 1 * HOUR_IN_SECONDS );
 				}
 			}
 			// Use existing query.
 			else {
+				// Get posts as array of ids.
 				$posts = $wp_query->posts;
+				$posts = array_map( function( $post ) {
+					return $post->ID;
+				}, $posts );
+
+				// Get markers.
+				$markers = $this->get_markers( $posts );
 			}
 
 			// Open map.
 			printf( '<div style="aspect-ratio:%s/%s;" class="mailocations-map" data-zoom="%s">', $width, $height, 7 );
 
-			// If posts.
-			if ( $posts ) {
-				// Loop through posts to build markers.
-				foreach ( $posts as $post ) {
-					$lat = get_post_meta( $post->ID, 'location_lat', true );
-					$lng = get_post_meta( $post->ID, 'location_lng', true );
-
-					// Skip if we don't have the data we want.
-					if ( ! ( $lat && $lng ) ) {
-						continue;
-					}
-
-					printf( '<div style="display:none;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $lat ), esc_html( $lng ) );
-						printf( '<strong><a href="%s">%s</a></strong>', get_permalink( $post->ID ), get_the_title( $post->ID ) );
-						echo mailocations_get_address( [], $post->ID );
+			// If markers.
+			if ( $markers ) {
+				// Loop through and build markers.
+				foreach ( $markers as $marker ) {
+					printf( '<div style="display:none;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $marker['lat'] ), esc_html( $marker['lng'] ) );
+						printf( '<strong><a href="%s">%s</a></strong>', $marker['href'], $marker['title'] );
+						echo $marker['address'];
 					echo '</div>';
 				}
 			}
@@ -128,6 +137,41 @@ class Mai_Locations_Locations_Map_Block {
 			// Close map.
 			echo '</div>';
 		}
+	}
+
+	/**
+	 * Get markers data.
+	 *
+	 * @since TBD
+	 *
+	 * @param array $posts Array of post ids.
+	 *
+	 * @return array
+	 */
+	function get_markers( $posts ) {
+		$data = [];
+
+		// Loop through posts to build marker data.
+		foreach ( $posts as $post_id ) {
+			$lat = get_post_meta( $post_id, 'location_lat', true );
+			$lng = get_post_meta( $post_id, 'location_lng', true );
+
+			// Skip if we don't have the data we want.
+			if ( ! ( $lat && $lng ) ) {
+				continue;
+			}
+
+			// Add to data array.
+			$data[] = [
+				'lat'     => $lat,
+				'lng'     => $lng,
+				'href'    => get_permalink( $post_id ),
+				'title'   => get_the_title( $post_id ),
+				'address' => mailocations_get_address( [], $post_id ),
+			];
+		}
+
+		return $data;
 	}
 
 	/**
