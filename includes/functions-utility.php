@@ -175,6 +175,45 @@ function mailocations_sanitize_options( $options ) {
 }
 
 /**
+ * Deletes all transient keys in the database with `mai_locations`.
+ *
+ * Note that this doesn't work for sites that use a persistent object
+ * cache, since in that case, transients are stored in memory.
+ *
+ * @since TBD
+ *
+ * @link https://gist.github.com/kellenmace/7d8f3b4c48cef3fd68ebc8606415d7dd
+ *
+ * @param string $prefix Prefix to search for.
+ *
+ * @return array Transient keys with prefix, or empty array on error.
+ */
+function mailocations_delete_transients() {
+	global $wpdb;
+
+	$prefix = 'mai_locations';
+	$prefix = $wpdb->esc_like( '_transient_' . $prefix );
+	$sql    = "SELECT `option_name` FROM $wpdb->options WHERE `option_name` LIKE '%s'";
+	$keys   = $wpdb->get_results( $wpdb->prepare( $sql, $prefix . '%' ), ARRAY_A );
+
+	// Bail if no keys or error.
+	if ( ! $keys || is_wp_error( $keys ) ) {
+		return;
+	}
+
+	// Get all transient keys.
+	$transients = array_map( function( $key ) {
+		// Remove '_transient_' from the option name.
+		return substr( $key['option_name'], strlen( '_transient_' ) );
+	}, $keys );
+
+	// Loop through and delete.
+	foreach ( $transients as $key ) {
+		delete_transient( $key );
+	}
+}
+
+/**
  * Determines if a post exists in the DB.
  *
  * @since 0.1.0

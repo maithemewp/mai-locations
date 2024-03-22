@@ -399,6 +399,9 @@ class Mai_Locations_CLI {
 			}
 		}
 
+		// Flush all transients.
+		mailocations_delete_transients();
+
 		WP_CLI::success( 'Done.' );
 	}
 
@@ -527,10 +530,14 @@ class Mai_Locations_CLI {
 				}
 			endwhile;
 
+			// Flush all transients.
+			mailocations_delete_transients();
+
 			WP_CLI::success( 'Done.' );
 		} else {
 			WP_CLI::line( 'No locations found' );
 		}
+
 		wp_reset_postdata();
 	}
 }
