@@ -11,6 +11,8 @@ function initLocations() {
 	const params       = maiLocationsVars.params;
 	const autoComplete = maiLocationsVars.autoComplete;
 
+	console.log( params );
+
 	// Loop through map elements.
 	for ( const mapEl of maps ) {
 		let   current = null;
@@ -28,7 +30,7 @@ function initLocations() {
 
 		// If we have a search.
 		if ( params['lat'] && params['lng'] ) {
-			// Define the Font Awesome person (is this gender specific?) icon as SVG path
+			// Define the Font Awesome person (is this gender specific?) icon as SVG path.
 			const icon = {
 				path: 'M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z',
 				fillColor: 'rgba(0,0,0,0.8)',
@@ -79,27 +81,37 @@ function initLocations() {
 			map.markers.push( marker );
 		}
 
+		// Create map boundaries from all map markers.
+		const bounds = new google.maps.LatLngBounds();
+
 		// Add a marker clusterer to manage the markers.
 		const markerCluster = new markerClusterer.MarkerClusterer({
 			map: map,
 			markers: map.markers,
 		});
 
-		// Create map boundaries from all map markers.
-		const bounds = new google.maps.LatLngBounds();
-
-		// Loop through markers and extend bounds.
-		for ( const marker of map.markers ) {
-			bounds.extend( marker.getPosition() );
+		// If we have no markers, set the center of the map.
+		if ( ! map.markers.length ) {
+			// Center coordinates of the US.
+			map.setCenter({ lat: 37.0902, lng: -95.7129 });
+			// Zoom level can be adjusted as needed
+			map.setZoom(4);
 		}
-
-		// Single marker.
-		if ( 1 === map.markers.length ) {
-			map.setCenter( bounds.getCenter() );
-		}
-		// Multiple markers.
+		// Handle markers.
 		else {
-			map.fitBounds( bounds );
+			// Loop through markers and extend bounds.
+			for ( const marker of map.markers ) {
+				bounds.extend( marker.getPosition() );
+			}
+
+			// Single marker.
+			if ( 1 === map.markers.length ) {
+				map.setCenter( bounds.getCenter() );
+			}
+			// Multiple markers.
+			else {
+				map.fitBounds( bounds );
+			}
 		}
 	}
 
