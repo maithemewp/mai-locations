@@ -303,7 +303,7 @@ class Mai_Locations_CLI {
 					$cats = array_map( 'trim', $cats );
 
 					// Append to existing categories.
-					wp_set_object_terms( $post_id, $cats, 'mai_location_cat', $append = false );
+					wp_set_object_terms( $post_id, $cats, 'mai_location_cat', $assoc_args['append_cats'] );
 				}
 
 				// If we need a featured image from places.
