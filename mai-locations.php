@@ -330,6 +330,8 @@ final class Mai_Locations_Plugin {
 			return;
 		}
 
+		// TODO: Only flush if any address/locations fields were update.
+
 		// Flush transients.
 		delete_transient( 'mailocations_locations' );
 	}
