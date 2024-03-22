@@ -275,6 +275,24 @@ function initLocations() {
 	 * on searches and filters.
 	 */
 	function refreshPage() {
+		// Get main element.
+		const main = document.getElementsByTagName( 'main' )[0];
+
+		// Add mai-locations-loading class to body.
+		main.classList.add( 'mai-locations-loading' );
+
+		// Add div to main.
+		const loading = document.createElement( 'div' );
+		loading.classList.add( 'mai-locations-loader' );
+		document.body.appendChild( loading );
+
+		// Add img to div.
+		const loader = document.createElement( 'img' );
+		loader.src = maiLocationsVars.loaderUrl;
+		loading.classList.add( 'mai-locations-loader-svg' );
+		loading.appendChild( loader );
+
+		// Loop through defaults and find params to add to url.
 		Object.keys( defaults ).forEach( key => {
 			// Skip if not a key that has changed.
 			if ( ! ( key in params ) ) {
