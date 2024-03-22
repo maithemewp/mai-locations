@@ -172,8 +172,9 @@ final class Mai_Locations_Plugin {
 	 * @return  void
 	 */
 	function hooks() {
-		add_action( 'plugins_loaded', [ $this, 'updater' ] );
-		add_action( 'init',           [ $this, 'register_content_types' ] );
+		add_action( 'plugins_loaded',         [ $this, 'updater' ] );
+		add_action( 'init',                   [ $this, 'register_content_types' ] );
+		add_action( 'save_post_mai_location', [ $this, 'save_post' ], 10, 3 );
 
 		register_activation_hook( __FILE__, [ $this, 'activate' ] );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
@@ -302,6 +303,35 @@ final class Mai_Locations_Plugin {
 				'rewrite'                    => [ 'slug' => $cat_base, 'with_front' => false ],
 			]
 		) );
+	}
+
+	/**
+	 * Flushes transients any time a location is saved or updated.
+	 *
+	 * @param int     $post_id
+	 * @param WP_Post $post
+	 * @param bool    $update
+	 *
+	 * @return void
+	 */
+	function save_post( $post_id, $post, $update ) {
+		// Bail if autosaving.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+
+		// Bail if this is an autosave.
+		if ( wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+
+		// Bail if this is a revision.
+		if ( wp_is_post_revision( $post_id ) ) {
+			return;
+		}
+
+		// Flush transients.
+		delete_transient( 'mailocations_locations' );
 	}
 
 	/**
