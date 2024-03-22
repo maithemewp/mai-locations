@@ -19,12 +19,10 @@ function mailocations_register_scripts() {
 	wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations{$suffix}.js", [], MAI_LOCATIONS_VERSION, true );
 
 	$localize = [
-		'params'        => mailocations_get_query_params(),
-		'defaults'      => mailocations_get_query_defaults(),
-		'apiKey'        => mailocations_get_google_maps_api_key(),
-		'loaderUrl'     => MAI_LOCATIONS_PLUGIN_URL . "assets/svg/puff.svg",
-		// 'markerCluster' => MAI_LOCATIONS_PLUGIN_URL . "assets/js/markerclusterer{$suffix}.js", // 2.1.4
-		'autoComplete'  => [
+		'params'       => mailocations_get_query_params(),
+		'defaults'     => mailocations_get_query_defaults(),
+		'apiKey'       => mailocations_get_google_maps_api_key(),
+		'autoComplete' => [
 			'fields'       => [ 'geometry', 'name' ],
 			'strictBounds' => false,
 			// 'componentRestrictions' => [ 'country' => 'us' ],
