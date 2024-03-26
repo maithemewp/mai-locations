@@ -573,6 +573,13 @@ function mailocations_get_location_taxonomies() {
 	return $taxonomies;
 }
 
+/**
+ * Gets all taxonomies registered to locations with an underscore prefix.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
 function mailocations_get_location_taxonomies_underscored() {
 	static $taxonomies = null;
 

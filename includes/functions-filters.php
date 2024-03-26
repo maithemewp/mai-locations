@@ -102,6 +102,15 @@ function mailocations_get_query_defaults() {
 	return $defaults;
 }
 
+/**
+ * Gets filtered query args for `WP_Query`.
+ *
+ * @since TBD
+ *
+ * @param array $args Any existing args.
+ *
+ * @return array
+ */
 function mailocations_get_filtered_query_args( $args = [] ) {
 	$params   = mailocations_get_query_params();
 	$defaults = mailocations_get_query_defaults();
