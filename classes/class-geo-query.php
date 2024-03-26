@@ -28,9 +28,11 @@ Mai_Geo_Query::instance();
 class Mai_Geo_Query {
 	public static function instance() {
 		static $instance = null;
+
 		if ( is_null( $instance ) ) {
 			$instance = new self();
 		}
+
 		return $instance;
 	}
 

@@ -587,18 +587,3 @@ function mailocations_get_location_taxonomies_underscored() {
 
 	return $taxonomies;
 }
-
-function mailocations_get_location_taxonomies_trimmed() {
-	static $taxonomies = null;
-
-	if ( ! is_null( $taxonomies ) ) {
-		return $taxonomies;
-	}
-
-	$taxonomies = mailocations_get_location_taxonomies();
-	$taxonomies = array_combine( array_map( function( $key ) {
-		return ltrim( $key, '_' );
-	}, array_keys( $taxonomies ) ), $taxonomies );
-
-	return $taxonomies;
-}

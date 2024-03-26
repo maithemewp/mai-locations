@@ -68,11 +68,12 @@ class Mai_Locations_Map_Block {
 		echo mailocations_get_stylesheet_link( 'mai-locations' );
 
 		// Values.
-		$get    = get_field( 'query' );
-		$width  = get_field( 'width' );
-		$width  = $width ? absint( $width ) : 800;
-		$height = get_field( 'height' );
-		$height = $height ? absint( $height ) : 533;
+		$q_default  = get_field( 'query' );
+		$q_filtered = get_field( 'query_filtered' );
+		$width      = get_field( 'width' );
+		$width      = $width ? absint( $width ) : 800;
+		$height     = get_field( 'height' );
+		$height     = $height ? absint( $height ) : 533;
 
 		// Back end.
 		if ( $is_preview ) {
@@ -83,24 +84,45 @@ class Mai_Locations_Map_Block {
 		else {
 			global $wp_query;
 
-			// If showing all. We can't show all pages when filtered, because we'll lose the address data.
-			if ( $get && 'all' === $get && ! mailocations_is_filtered_locations() ) {
+			// If current page is filtered.
+			$filtered = mailocations_is_filtered_locations();
+
+			// 		'geo_query' => [
+// 			'lat_field' => '_latitude',  // this is the name of the meta field storing latitude
+// 			'lng_field' => '_longitude', // this is the name of the meta field storing longitude
+// 			'latitude'  => 44.485261,    // this is the latitude of the point we are getting distance from
+// 			'longitude' => -73.218952,   // this is the longitude of the point we are getting distance from
+// 			'distance'  => 20,           // this is the maximum distance to search
+// 			'units'     => 'miles'       // this supports options: miles, mi, kilometers, km
+// 		],
+
+			// If showing all.
+			$show_all = false;
+			$show_all = $show_all || ( ! $filtered && $q_default && 'all' === $q_default );
+			$show_all = $show_all || ( $filtered && $q_filtered && 'all' === $q_filtered );
+
+			// If showing all.
+			if ( $show_all ) {
+				// Get filtered args.
+				$filtered_args = mailocations_get_filtered_query_args( $wp_query->query );
+
+				// Add new args.
+				$filtered_args['fields']                 = 'ids';
+				$filtered_args['nopaging']               = true;
+				$filtered_args['no_found_rows']          = true;
+				$filtered_args['update_post_meta_cache'] = false;
+				$filtered_args['update_post_term_cache'] = false;
+
+				// Remove `posts_per_page`.
+				unset( $filtered_args['posts_per_page'] );
+
 				// Build transient key.
-				$transient_key = 'mai_locations_markers_' . md5( serialize( $wp_query->query_vars ) );
+				$transient_key = 'mai_locations_markers_' . md5( serialize( $filtered_args ) );
 
 				// Check transient.
 				if ( false === ( $markers = get_transient( $transient_key ) ) ) {
-					$args                           = $wp_query->query;
-					$args['fields']                 = 'ids';
-					$args['nopaging']               = true;
-					$args['no_found_rows']          = true;
-					$args['update_post_meta_cache'] = false;
-					$args['update_post_term_cache'] = false;
-
-					unset( $args['posts_per_page'] );
-
 					// Get posts as array of ids.
-					$new   = new WP_Query( $args );
+					$new   = new WP_Query( $filtered_args );
 					$posts = $new->posts;
 
 					// Get markers.
@@ -116,7 +138,8 @@ class Mai_Locations_Map_Block {
 			// Use existing query.
 			else {
 				// Get posts as array of ids.
-				$posts = $wp_query->posts;
+				// $posts = $wp_query->posts;
+				$posts = [];
 				$posts = array_map( function( $post ) {
 					return $post->ID;
 				}, $posts );
@@ -200,6 +223,16 @@ class Mai_Locations_Map_Block {
 						'key'          => 'mailocations_map_query',
 						'label'        => __( 'Locations to show by default', 'mai-locations' ),
 						'name'         => 'query',
+						'type'         => 'select',
+						'choices'      => [
+							''    => __( 'Current page', 'mai-locations' ),
+							'all' => __( 'All Locations', 'mai-locations' ),
+						],
+					],
+					[
+						'key'          => 'mailocations_map_query_filtered',
+						'label'        => __( 'Locations to show when filtered', 'mai-locations' ),
+						'name'         => 'query_filtered',
 						'type'         => 'select',
 						'choices'      => [
 							''    => __( 'Current page', 'mai-locations' ),
