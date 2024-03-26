@@ -11,11 +11,11 @@ function initLocations() {
 	const defaults     = maiLocationsVars.defaults;
 	const params       = maiLocationsVars.params;
 	const autoComplete = maiLocationsVars.autoComplete;
+	let   mapId        = 0;
 
 	// Loop through map elements.
 	for ( const mapEl of maps ) {
 		let   current = null;    // Current location marker.
-		// let   radius  = 40233.6; // 25 miles in meters.
 		let   radius  = 0; // 25 miles in meters.
 		let   lat     = parseFloat( params['lat'] );
 		let   lng     = parseFloat( params['lng'] );
@@ -25,6 +25,7 @@ function initLocations() {
 				zoom: parseInt( mapEl.dataset.zoom ),
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				center: lat && lng ? { lat: lat, lng: lng } : null,
+				mapId: 'mailocationsMap' + mapId++, // Map ID is required for advanced markers.
 			}
 		);
 
@@ -33,22 +34,19 @@ function initLocations() {
 
 		// If we have a search.
 		if ( lat && lng ) {
-			// Define the Font Awesome person (is this gender specific?) icon as SVG path.
-			const icon = {
-				path: 'M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z',
-				fillColor: 'rgba(0,0,0,0.8)',
-				fillOpacity: 1,
-				strokeWeight: 0,
-				scale: .05,
-				anchor: new google.maps.Point(110, 600),
-			};
+			// Create pin element.
+			const pin = new google.maps.marker.PinElement({
+				background: 'var(--color-primary, #333)',
+				borderColor: 'var(--color-primary-dark, #000)',
+				glyphColor: 'var(--color-primary-dark, rgba(0, 0, 0, 0.2))',
+				scale: 0.6,
+			});
 
 			// Create current search location marker.
-			current = new google.maps.Marker({
+			current = new google.maps.marker.AdvancedMarkerElement({
 				position: { lat: lat, lng: lng },
 				map: map,
-				icon: icon,
-				animation: google.maps.Animation.DROP,
+				content: pin.element,
 			});
 
 			// Add location marker.
@@ -57,7 +55,6 @@ function initLocations() {
 			// If we have a distance and a unit.
 			let distance = params['distance'];
 			let unit     = params['unit'];
-
 
 			// If no distance, check for distance element.
 			if ( ! distance ) {
@@ -68,9 +65,6 @@ function initLocations() {
 			if ( ! unit ) {
 				unit = getDefaultValue( '.mailocations-autocomplete-unit', 'mi' );
 			}
-
-			console.log( distance, unit );
-
 
 			// If we have a distance, convert distance to meters.
 			if ( distance ) {
@@ -102,7 +96,7 @@ function initLocations() {
 		// Loop through and add markers.
 		for ( const markerEl of markers ) {
 			// Create marker instance.
-			var marker = new google.maps.Marker({
+			const marker = new google.maps.marker.AdvancedMarkerElement({
 				position: { lat: parseFloat( markerEl.dataset.lat ), lng: parseFloat( markerEl.dataset.lng ) },
 				map: map,
 			});
@@ -110,7 +104,7 @@ function initLocations() {
 			// If marker contains HTML, add it to an infoWindow.
 			if ( markerEl.innerHTML ) {
 				// Create info window.
-				var infowindow = new google.maps.InfoWindow({
+				const infowindow = new google.maps.InfoWindow({
 					content: markerEl.innerHTML,
 				});
 
@@ -170,7 +164,7 @@ function initLocations() {
 
 				// Loop through markers and extend bounds.
 				for ( const marker of map.markers ) {
-					bounds.extend( marker.getPosition() );
+					bounds.extend( marker.position );
 				}
 
 				// Single marker, set new center to the marker.
@@ -190,30 +184,20 @@ function initLocations() {
 		let distance     = searchEl.parentElement.parentElement.querySelectorAll( '.mailocations-autocomplete-distance' );
 		let unit         = searchEl.parentElement.parentElement.querySelectorAll( '.mailocations-autocomplete-unit' );
 		let clear        = searchEl.parentElement.querySelectorAll( '.mailocations-autocomplete-clear' )[0];
-		let limitstate   = searchEl.dataset.limitstate === 'true';
 		let countries    = searchEl.dataset.countries;
-		let fields       = [ 'geometry', 'name' ];
-		let restrictions = {};
+		let options      = { fields: [ 'geometry', 'name' ] };
 
-		// If we have a limit state.
-		if ( limitstate ) {
-			fields.push( 'address_components' );
-		}
+		// Set first.
+		distance = distance.length ? distance[0] : '';
+		unit     = unit.length ? unit[0] : '';
 
-		// If we're limiting to a country.
+		// If we're limiting to a country, add restrictions.
 		if ( countries ) {
-			restrictions['country'] = countries.split( ',' );
+			options['componentRestrictions'] = { country: countries.split( ',' ) };
 		}
-
-		// Get elements.
-		distance = 'undefined' !== distance ? distance[0] : '';
-		unit     = 'undefined' !== unit ? unit[0] : '';
 
 		// Build autcomplete object.
-		const autocomplete = new google.maps.places.Autocomplete( searchEl, {
-			fields: fields,
-			ComponentRestrictions: restrictions,
-		});
+		const autocomplete = new google.maps.places.Autocomplete( searchEl, options );
 
 		/**
 		 * Update url query parameters and refresh the page
@@ -271,7 +255,7 @@ function initLocations() {
 			params['lng']     = lng;
 
 			// Refresh.
-			// refreshPage();
+			refreshPage();
 		});
 
 		// If we have a distance.
@@ -507,14 +491,18 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	// If we have maps, load the API.
 	if ( document.querySelectorAll( '.mailocations-map' ).length || document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
 		// Load the Google Maps API asynchronously.
-		const target = document.getElementById( 'mai-locations-js' );
-		const script = document.createElement( 'script' );
-		let   src    = `https://maps.googleapis.com/maps/api/js?key=${maiLocationsVars.apiKey}`;
+		const target    = document.getElementById( 'mai-locations-js' );
+		const script    = document.createElement( 'script' );
+		let   src       = `https://maps.googleapis.com/maps/api/js?key=${maiLocationsVars.apiKey}`;
+		let   libraries = [ 'marker' ];
 
 		// If we have autocomplete, add places library.
 		if ( document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
-			src += '&libraries=places';
+			libraries.push( 'places' );
 		}
+
+		// Add libraries.
+		src += '&libraries=' + libraries.join( ',' );
 
 		// Add script after this one.
 		script.src = src += '&loading=async';

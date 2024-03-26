@@ -517,9 +517,6 @@ class Mai_Locations_CLI {
 
 					// If no featured image, or we're forcing the update.
 					if ( ! $featured_id || rest_sanitize_boolean( $assoc_args['force_image'] ) ) {
-
-						// TODO: CLI to change all attachment `location_url` meta to `original_url` meta on PBD.
-
 						// Maybe upload the image.
 						$image_id = mailocations_upload_image( $data['image'], 'original_url', $data['image'], $post_id );
 
