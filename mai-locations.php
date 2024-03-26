@@ -139,30 +139,39 @@ final class Mai_Locations_Plugin {
 		include_once __DIR__ . '/classes/class-location-form-submit.php';
 		include_once __DIR__ . '/classes/class-location-import.php';
 		include_once __DIR__ . '/classes/class-locations-cli.php';
+		include_once __DIR__ . '/classes/class-locations-scripts.php';
 		include_once __DIR__ . '/classes/class-locations-table.php';
+		include_once __DIR__ . '/classes/class-locations-queries.php';
 		include_once __DIR__ . '/classes/class-settings.php';
+		include_once __DIR__ . '/classes/class-upgrade.php';
 
 		// Blocks.
+		include_once __DIR__ . '/blocks/location-address-search/block.php';
+		include_once __DIR__ . '/blocks/location-count/block.php';
+		include_once __DIR__ . '/blocks/location-filter/block.php';
+		include_once __DIR__ . '/blocks/location-filter-clear/block.php';
+		include_once __DIR__ . '/blocks/location-filter-submit/block.php';
+		include_once __DIR__ . '/blocks/location-map/block.php';
 		include_once __DIR__ . '/blocks/location-submission/block.php';
-		include_once __DIR__ . '/blocks/locations-address-search/block.php';
-		include_once __DIR__ . '/blocks/locations-count/block.php';
-		include_once __DIR__ . '/blocks/locations-filter/block.php';
-		include_once __DIR__ . '/blocks/locations-filter-clear/block.php';
-		include_once __DIR__ . '/blocks/locations-map/block.php';
-		include_once __DIR__ . '/blocks/locations-table/block.php';
+		include_once __DIR__ . '/blocks/location-table/block.php';
 
 		// Instantiate classes.
 		new Mai_Locations_Location_Fields;
 		new Mai_Locations_Location_Form_Listener;
 		new Mai_Locations_Location_Import;
+		new Mai_Locations_Scripts;
+		new Mai_Locations_Queries;
+		new Mai_Locations_Upgrade;
 
 		// Instantiate blocks.
-		new Mai_Locations_Location_Submission_Block;
-		new Mai_Locations_Locations_Address_Search_Block;
-		new Mai_Locations_Locations_Count_Block;
-		new Mai_Locations_Locations_Filter_Block;
-		new Mai_Locations_Locations_Map_Block;
-		new Mai_Locations_Locations_Table_Block;
+		new Mai_Locations_Address_Search_Block;
+		new Mai_Locations_Count_Block;
+		new Mai_Locations_Filter_Block;
+		new Mai_Locations_Filter_Clear_Block;
+		new Mai_Locations_Filter_Submit_Block;
+		new Mai_Locations_Submission_Block;
+		new Mai_Locations_Table_Block;
+		new Mai_Locations_Map_Block;
 	}
 
 	/**
@@ -175,6 +184,7 @@ final class Mai_Locations_Plugin {
 		add_action( 'plugins_loaded',         [ $this, 'updater' ] );
 		add_action( 'init',                   [ $this, 'register_content_types' ] );
 		add_action( 'save_post_mai_location', [ $this, 'save_post' ], 10, 3 );
+		add_filter( 'genesis_noposts_text',   [ $this, 'no_results_text' ] );
 
 		register_activation_hook( __FILE__, [ $this, 'activate' ] );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
@@ -334,6 +344,16 @@ final class Mai_Locations_Plugin {
 
 		// Flush transients.
 		delete_transient( 'mailocations_locations' );
+	}
+
+	function no_results_text( $text ) {
+		ray( $text );
+		return sprintf( '%s %s %s %s',
+			__( 'Sorry, no', 'mai-locations' ),
+			strtolower( mailocations_get_plural() ),
+			__( 'found.', 'mai-locations' ),
+			__( 'Please adjust your search criteria and try again.', 'mai-locations' )
+		);
 	}
 
 	/**

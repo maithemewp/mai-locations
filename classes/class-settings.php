@@ -1,5 +1,9 @@
 <?php
 
+// Prevent direct file access.
+defined( 'ABSPATH' ) || die;
+
+// Instantiate the class.
 new Mai_Locations_Settings;
 
 /**
@@ -19,8 +23,9 @@ class Mai_Locations_Settings {
 	 * @return void
 	 */
 	function __construct() {
-		add_action( 'admin_menu', [ $this, 'add_menu_item' ], 12 );
-		add_action( 'admin_init', [ $this, 'init' ] );
+		add_action( 'admin_menu',            [ $this, 'add_menu_item' ], 12 );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_script' ] );
+		add_action( 'admin_init',            [ $this, 'init' ] );
 		add_filter( 'plugin_action_links_mai-locations/mai-locations.php', [ $this, 'add_settings_link' ], 10, 4 );
 	}
 
@@ -40,6 +45,25 @@ class Mai_Locations_Settings {
 			'mai-locations', // menu_slug
 			[ $this, 'add_content' ], // callback
 		);
+	}
+
+	/**
+	 * Enqueue script for select2.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	function enqueue_script() {
+		$screen = get_current_screen();
+
+		if ( 'mai_location_page_mai-locations' !== $screen->id ) {
+			return;
+		}
+
+		// Select2 from CDN.
+		wp_enqueue_style( 'mai-locations-select2', 'https://cdn.jsdelivr.net/npm/select2/dist/css/select2.min.css' );
+		wp_enqueue_script( 'mai-locations-select2', 'https://cdn.jsdelivr.net/npm/select2/dist/js/select2.min.js' );
 	}
 
 	/**
@@ -116,7 +140,6 @@ class Mai_Locations_Settings {
 			'mai_locations_settings' // section
 		);
 
-
 		add_settings_field(
 			'distances', // id
 			__( 'Distances', 'mai-locations' ), // title
@@ -127,16 +150,8 @@ class Mai_Locations_Settings {
 
 		add_settings_field(
 			'units', // id
-			__( 'Distance - Units', 'mai-locations' ), // title
+			__( 'Units', 'mai-locations' ), // title
 			[ $this, 'units_callback' ], // callback
-			'mai-locations-section', // page
-			'mai_locations_settings' // section
-		);
-
-		add_settings_field(
-			'limit_state', // id
-			__( 'Distance - Limit by State/Province', 'mai-locations' ), // title
-			[ $this, 'limit_state_callback' ], // callback
 			'mai-locations-section', // page
 			'mai_locations_settings' // section
 		);
@@ -232,7 +247,7 @@ class Mai_Locations_Settings {
 	 * @return void
 	 */
 	function units_callback() {
-		$units = (array) $this->options['units'];
+		$units   = (array) $this->options['units'];
 		$options = [
 			'mi' => __( 'Miles', 'mai-locations' ),
 			'km' => __( 'Kilometers', 'mai-locations' ),
@@ -248,21 +263,6 @@ class Mai_Locations_Settings {
 		}
 
 		printf( '<p>%s</p>', __( 'The distance unit options to use. If none are selected, the field will be hidden and miles will be used.', 'mai-locations' ) );
-	}
-
-	/**
-	 * Setting callback.
-	 *
-	 * @since TBD
-	 *
-	 * @return void
-	 */
-	function limit_state_callback() {
-		printf(
-			'<p><label><input type="checkbox" name="mai_locations[limit_state]" value="limit_state"%s> %s</label></p>',
-			(bool) $this->options['limit_state'] ? ' checked' : '',
-			__( 'Limit proximity search to the same state or province.', 'mai-locations' )
-		);
 	}
 
 	/**

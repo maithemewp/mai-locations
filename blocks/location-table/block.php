@@ -3,7 +3,12 @@
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Locations_Table_Block {
+/**
+ * The locations map block class.
+ *
+ * @since TBD
+ */
+class Mai_Locations_Table_Block {
 	/**
 	 * Construct the class.
 	 */

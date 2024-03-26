@@ -3,7 +3,12 @@
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Location_Submission_Block {
+/**
+ * The location submission block class.
+ *
+ * @since TBD
+ */
+class Mai_Locations_Submission_Block {
 	/**
 	 * Construct the class.
 	 */

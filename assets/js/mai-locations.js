@@ -6,6 +6,7 @@ function initLocations() {
 	const maps         = document.querySelectorAll( '.mailocations-map' );
 	const searches     = document.querySelectorAll( '.mailocations-autocomplete' );
 	const filters      = document.querySelectorAll( '.mailocations-filter' );
+	const submits      = document.querySelectorAll( '.mailocations-filter-submit' );
 	const clears       = document.querySelectorAll( '.mailocations-filter-clear' );
 	const defaults     = maiLocationsVars.defaults;
 	const params       = maiLocationsVars.params;
@@ -13,13 +14,17 @@ function initLocations() {
 
 	// Loop through map elements.
 	for ( const mapEl of maps ) {
-		let   current = null;
+		let   current = null;    // Current location marker.
+		// let   radius  = 40233.6; // 25 miles in meters.
+		let   radius  = 0; // 25 miles in meters.
+		let   lat     = parseFloat( params['lat'] );
+		let   lng     = parseFloat( params['lng'] );
 		const markers = mapEl.querySelectorAll( '.marker' );
 		const map     = new google.maps.Map( mapEl,
 			{
 				zoom: parseInt( mapEl.dataset.zoom ),
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
-				center: params['lat'] && params['lng'] ? { lat: parseFloat( params['lat'] ), lng: parseFloat( params['lng'] ) } : null,
+				center: lat && lng ? { lat: lat, lng: lng } : null,
 			}
 		);
 
@@ -27,7 +32,7 @@ function initLocations() {
 		map.markers = [];
 
 		// If we have a search.
-		if ( params['lat'] && params['lng'] ) {
+		if ( lat && lng ) {
 			// Define the Font Awesome person (is this gender specific?) icon as SVG path.
 			const icon = {
 				path: 'M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z',
@@ -36,12 +41,11 @@ function initLocations() {
 				strokeWeight: 0,
 				scale: .05,
 				anchor: new google.maps.Point(110, 600),
-
 			};
 
 			// Create current search location marker.
 			current = new google.maps.Marker({
-				position: { lat: parseFloat( params['lat'] ), lng: parseFloat( params['lng'] ) },
+				position: { lat: lat, lng: lng },
 				map: map,
 				icon: icon,
 				animation: google.maps.Animation.DROP,
@@ -49,6 +53,50 @@ function initLocations() {
 
 			// Add location marker.
 			map.markers.push( current );
+
+			// If we have a distance and a unit.
+			let distance = params['distance'];
+			let unit     = params['unit'];
+
+
+			// If no distance, check for distance element.
+			if ( ! distance ) {
+				distance = getDefaultValue( '.mailocations-autocomplete-distance', null );
+			}
+
+			// If no unit, check for unit element.
+			if ( ! unit ) {
+				unit = getDefaultValue( '.mailocations-autocomplete-unit', 'mi' );
+			}
+
+			console.log( distance, unit );
+
+
+			// If we have a distance, convert distance to meters.
+			if ( distance ) {
+				radius = parseFloat( distance );
+
+				// If miles.
+				if ( 'mi' === unit ) {
+					radius *= 1609.34;
+				}
+				// If kilometers.
+				else if ( 'km' === unit ) {
+					radius *= 1000;
+				}
+
+				// Add circle overlay for search radius.
+				const circle = new google.maps.Circle({
+					strokeColor: '#ff0000',
+					strokeOpacity: 0.5,
+					strokeWeight: 1,
+					fillColor: '#ff0000',
+					fillOpacity: 0.05,
+					map: map,
+					center: { lat: lat, lng: lng },
+					radius: radius, // Specify radius in meters.
+				});
+			}
 		}
 
 		// Loop through and add markers.
@@ -79,52 +127,93 @@ function initLocations() {
 			map.markers.push( marker );
 		}
 
-		// Create map boundaries from all map markers.
-		const bounds = new google.maps.LatLngBounds();
-
-		// Add a marker clusterer to manage the markers.
-		const markerCluster = new markerClusterer.MarkerClusterer({
-			map: map,
-			markers: map.markers,
-		});
-
-		// If we have no markers, set the center of the map.
+		// If we have no map markers, set the center of the map.
 		if ( ! map.markers.length ) {
 			// Center coordinates of the US.
 			map.setCenter({ lat: 37.0902, lng: -95.7129 });
-			// Zoom level can be adjusted as needed
+			// Zoom level can be adjusted as needed.
 			map.setZoom(4);
 		}
 		// Handle markers.
 		else {
-			// Loop through markers and extend bounds.
-			for ( const marker of map.markers ) {
-				bounds.extend( marker.getPosition() );
-			}
+			// Add a marker clusterer to manage the markers.
+			const markerCluster = new markerClusterer.MarkerClusterer({
+				map: map,
+				markers: map.markers,
+			});
 
-			// Single marker.
-			if ( 1 === map.markers.length ) {
-				map.setCenter( bounds.getCenter() );
-			}
-			// Multiple markers.
-			else {
+			// If radius.
+			if ( radius ) {
+				// Get the center coordinates of the map.
+				const mapCenter = map.getCenter();
+
+				// Convert radius from meters to degrees (approximately).
+				const radiusInDegrees = radius / 111300; // 111300 meters = 1 degree of latitude
+
+				// Calculate the latitude and longitude offsets.
+				const latOffset = radiusInDegrees;
+				const lngOffset = radiusInDegrees / Math.cos( mapCenter.lat() * Math.PI / 180 );
+
+				// Calculate the map bounds based on the center and offsets.
+				const bounds = new google.maps.LatLngBounds(
+					new google.maps.LatLng( mapCenter.lat() - latOffset, mapCenter.lng() - lngOffset ),
+					new google.maps.LatLng( mapCenter.lat() + latOffset, mapCenter.lng() + lngOffset )
+				);
+
+				// Fit the map to the bounds
 				map.fitBounds( bounds );
 			}
-		}
-	}
+			// No radius.
+			else {
+				// Create map boundaries.
+				const bounds = new google.maps.LatLngBounds();
 
-	// Loop through map elements.
+				// Loop through markers and extend bounds.
+				for ( const marker of map.markers ) {
+					bounds.extend( marker.getPosition() );
+				}
+
+				// Single marker, set new center to the marker.
+				if ( 1 === map.markers.length ) {
+					map.setCenter( bounds.getCenter() );
+				}
+				// Multiple markers.
+				else {
+					map.fitBounds( bounds );
+				}
+			}
+		}
+	} // End map loop.
+
+	// Loop through search elements.
 	for ( const searchEl of searches ) {
-		let distance = searchEl.parentElement.parentElement.querySelectorAll( '.mailocations-autocomplete-distance' );
-		let unit     = searchEl.parentElement.parentElement.querySelectorAll( '.mailocations-autocomplete-unit' );
-		let clear    = searchEl.parentElement.querySelectorAll( '.mailocations-autocomplete-clear' )[0];
+		let distance     = searchEl.parentElement.parentElement.querySelectorAll( '.mailocations-autocomplete-distance' );
+		let unit         = searchEl.parentElement.parentElement.querySelectorAll( '.mailocations-autocomplete-unit' );
+		let clear        = searchEl.parentElement.querySelectorAll( '.mailocations-autocomplete-clear' )[0];
+		let limitstate   = searchEl.dataset.limitstate === 'true';
+		let countries    = searchEl.dataset.countries;
+		let fields       = [ 'geometry', 'name' ];
+		let restrictions = {};
+
+		// If we have a limit state.
+		if ( limitstate ) {
+			fields.push( 'address_components' );
+		}
+
+		// If we're limiting to a country.
+		if ( countries ) {
+			restrictions['country'] = countries.split( ',' );
+		}
 
 		// Get elements.
 		distance = 'undefined' !== distance ? distance[0] : '';
 		unit     = 'undefined' !== unit ? unit[0] : '';
 
 		// Build autcomplete object.
-		const autocomplete = new google.maps.places.Autocomplete( searchEl, autoComplete );
+		const autocomplete = new google.maps.places.Autocomplete( searchEl, {
+			fields: fields,
+			ComponentRestrictions: restrictions,
+		});
 
 		/**
 		 * Update url query parameters and refresh the page
@@ -142,6 +231,7 @@ function initLocations() {
 				return;
 			}
 
+			// Set initial vars.
 			const lat      = place.geometry.location.lat();
 			const lng      = place.geometry.location.lng();
 			let   country  = null;
@@ -150,6 +240,7 @@ function initLocations() {
 
 			// Get address.
 			if ( place.address_components ) {
+				// Get country/state.
 				for ( const component of place.address_components ) {
 					var type = component.types[0];
 
@@ -180,9 +271,10 @@ function initLocations() {
 			params['lng']     = lng;
 
 			// Refresh.
-			refreshPage();
+			// refreshPage();
 		});
 
+		// If we have a distance.
 		if ( distance ) {
 			/**
 			 * Set distance and only refresh if there is an address.
@@ -196,6 +288,7 @@ function initLocations() {
 			});
 		}
 
+		// If we have a unit value.
 		if ( unit ) {
 			/**
 			 * Set unit and only refresh if there is an address.
@@ -209,26 +302,35 @@ function initLocations() {
 			});
 		}
 
-		/**
-		 * Clear the autocomplete field when clicking clear button.
-		 */
-		clear.addEventListener( 'click', function() {
-			var value = searchEl.getAttribute( 'value' );
+		// If we have a clear link.
+		if ( clear ) {
+			/**
+			 * Clear the autocomplete field when clicking clear button.
+			 */
+			clear.addEventListener( 'click', function() {
+				var value = searchEl.getAttribute( 'value' );
 
-			// Clear input value and params.
-			searchEl.setAttribute( 'value', '' ); // Empty attribute.
-			searchEl.value     = ''; // Empty visual value.
-			params['address']  = '';
-			params['lat']      = '';
-			params['lng']      = '';
-			params['state']    = '';
-			params['province'] = '';
-			// params['distance'] = ''; // Leave this setting incase they want to do another search.
+				// Clear input value and params.
+				searchEl.setAttribute( 'value', '' ); // Empty attribute.
+				searchEl.value     = ''; // Empty visual value.
+				params['address']  = '';
+				params['lat']      = '';
+				params['lng']      = '';
+				params['state']    = '';
+				params['province'] = '';
+				// params['distance'] = ''; // Leave this setting incase they want to do another search.
 
-			if ( value ) {
-				refreshPage();
-			}
-		});
+				// If submit buttons, focus on the search input because this won't force a refresh.
+				if ( submits.length ) {
+					searchEl.focus();
+				}
+
+				// If a value is getting cleared.
+				if ( value ) {
+					refreshPage();
+				}
+			});
+		}
 	}
 
 	// Loop through map elements.
@@ -236,6 +338,9 @@ function initLocations() {
 		let select;
 		let radio;
 
+		/**
+		 * Update url query parameters and refresh the page when a filter changes.
+		 */
 		filterEl.addEventListener( 'change', function() {
 			select = 'select' === this.tagName.toLowerCase();
 			radio  = 'radio'  === this.getAttribute( 'type' );
@@ -267,8 +372,50 @@ function initLocations() {
 		});
 	}
 
+	// Loop through submit button elements.
+	for ( const submitEl of submits ) {
+		/**
+		 * Add loader icon and refresh the page when a submit button is clicked.
+		 */
+		submitEl.addEventListener( 'click', function() {
+			// Add loading spinner.
+			this.innerHTML = `&nbsp;<svg class="mailocations-loading-svg" width="36" height="12" viewBox="0 0 36 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+				<style>
+				.mailocations-loading-svg {
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					transform: translate(-50%, -50%);
+				}
+				.mailocations-spinner {
+					animation: spinner_xe7Q .8s linear infinite;
+				}
+				.mailocations-spinner2 {
+					animation-delay: -.65s;
+				}
+				.mailocations-spinner3 {
+					animation-delay: -.5s;
+				}
+				@keyframes spinner_xe7Q{
+					93.75%,100% { r:3px; }
+					46.875% { r:.2px; }
+				}
+				</style>
+				<circle class="mailocations-spinner" cx="4" cy="6" r="3"/>
+				<circle class="mailocations-spinner mailocations-spinner2" cx="18" cy="6" r="3"/>
+				<circle class="mailocations-spinner mailocations-spinner3" cx="30" cy="6" r="3"/>
+			</svg>`;
+
+			// Refresh.
+			refreshPage( true );
+		});
+	}
+
 	// Loop through map elements.
 	for ( const clearEl of clears ) {
+		/**
+		 * Clear all filters and refresh the page when a clear button is clicked.
+		 */
 		clearEl.addEventListener( 'click', function() {
 			// Empty all params.
 			Object.keys( params ).forEach( key => {
@@ -276,15 +423,48 @@ function initLocations() {
 			});
 
 			// Refresh.
-			refreshPage();
+			refreshPage( true );
 		});
+	}
+
+	/**
+	 * Gets a default value from a selector or returns a fallback.
+	 *
+	 * @param {string} selector
+	 * @param {mixed}  fallback
+	 *
+	 * @returns {mixed}
+	 */
+	function getDefaultValue( selector, fallback ) {
+		let value    = null;
+		let elements = document.querySelectorAll( selector );
+		let element  = elements.length ? elements[0] : '';
+
+		// If we have a elementlement, get the value.
+		if ( element ) {
+			value = element.value;
+		}
+
+		// Return value or fallback.
+		return value || fallback;
 	}
 
 	/**
 	 * Refresh the page after adding/removing query strings based
 	 * on searches and filters.
+	 *
+	 * @param {boolean} force Force a refresh.
+	 *
+	 * @returns {void}
 	 */
-	function refreshPage() {
+	function refreshPage( force = false ) {
+		// Bail if we're not forcing a refresh and there is a submit button on the page.
+		// This means we're requiring the submit button to refresh.
+		// If there is no submit button, we'll automatically refresh the page when a filter is changed.
+		if ( ! force && submits.length ) {
+			return;
+		}
+
 		// Get target element.
 		let target = document.getElementsByTagName( 'main' );
 			target = target.length ? target[0] : document.body;
@@ -318,7 +498,11 @@ function initLocations() {
 	}
 }
 
-// On domcontent loaded.
+/**
+ * Load the Google Maps API and run the initLocations function.
+ *
+ * @returns {void}
+ */
 document.addEventListener( 'DOMContentLoaded', function() {
 	// If we have maps, load the API.
 	if ( document.querySelectorAll( '.mailocations-map' ).length || document.querySelectorAll( '.mailocations-autocomplete' ).length ) {

@@ -22,18 +22,21 @@
 }
 
 .mailocations-autocomplete-container {
-	display: flex;
+	display: grid;
+	grid-template-columns: 1fr auto auto;
+}
+
+.mailocations-autocomplete-container:has(select) {
 	gap: 8px;
+}
+
+.mailocations-autocomplete-container select {
+	height: 100%;
 }
 
 .mailocations-autocomplete-input-container {
 	position: relative;
 	flex-grow: 1;
-}
-
-.mailocations-autocomplete-container select {
-	width: auto;
-	height: auto;
 }
 
 .mailocations-autocomplete:placeholder-shown + .mailocations-autocomplete-clear {

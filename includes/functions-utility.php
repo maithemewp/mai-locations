@@ -68,15 +68,17 @@ function mailocations_get_base() {
  *
  * @since TBD
  *
- * @param string $key
+ * @param string $key      The option key.
+ * @param mixed  $fallback Fallback value if option doesn't exist.
  *
  * @return mixed
  */
-function mailocations_get_option( $key ) {
+function mailocations_get_option( $key, $fallback = true ) {
 	$defaults = mailocations_get_options_defaults();
 	$options  = mailocations_get_options();
+	$return   = isset( $options[ $key ] ) ? $options[ $key ] : null;
 
-	return isset( $options[ $key ] ) ? $options[ $key ] : $defaults[ $key ];
+	return is_null( $return ) && $fallback ? $defaults[ $key ] : $return;
 }
 
 /**
@@ -123,7 +125,6 @@ function mailocations_get_options_defaults() {
 		'category_base'  => 'location-category',
 		'distances'      => [ 25, 50, 100, 200 ],
 		'units'          => [ 'mi' ], // Accepts mi or km.
-		'limit_state'    => false,
 		'version_first'  => '',
 		'version_db'     => '',
 	];
@@ -157,7 +158,17 @@ function mailocations_update_option( $option, $value ) {
  * @return array
  */
 function mailocations_sanitize_options( $options ) {
-	$options = wp_parse_args( $options, mailocations_get_options_defaults() );
+	// Parse.
+	$options = wp_parse_args( $options, [
+		'label_plural'    => '',
+		'label_singular'  => '',
+		'base'            => '',
+		'category_base'   => '',
+		'distances'       => [],
+		'units'           => [],
+		'version_first'   => '',
+		'version_db'      => '',
+	] );
 
 	// Sanitize.
 	$options['label_plural']   = sanitize_text_field( $options['label_plural'] );
@@ -167,7 +178,6 @@ function mailocations_sanitize_options( $options ) {
 	$options['distances']      = ! is_array( $options['distances'] ) ? explode( ',', $options['distances'] ) : $options['distances'];
 	$options['distances']      = array_map( 'absint', $options['distances'] );
 	$options['units']          = array_map( 'sanitize_key', $options['units'] );
-	$options['limit_state']    = rest_sanitize_boolean( $options['limit_state'] );
 	$options['version_first']  = esc_html( $options['version_first'] );
 	$options['version_db']     = esc_html( $options['version_db'] );
 

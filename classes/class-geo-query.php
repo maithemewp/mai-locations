@@ -23,6 +23,8 @@
 // 	]
 // );
 
+Mai_Geo_Query::instance();
+
 class Mai_Geo_Query {
 	public static function instance() {
 		static $instance = null;
@@ -195,5 +197,3 @@ class Mai_Geo_Query {
 		return $haversine;
 	}
 }
-
-Mai_Geo_Query::instance();

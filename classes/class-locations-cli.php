@@ -112,9 +112,7 @@ class Mai_Locations_CLI {
 			return;
 		}
 
-		// Get vars.
-		$body = wp_remote_retrieve_body( $response );
-		$body = json_decode( $body, true );
+		// Get code.
 		$code = wp_remote_retrieve_response_code( $response );
 
 		// Bail if response code is not 200.
@@ -130,6 +128,10 @@ class Mai_Locations_CLI {
 			WP_CLI::line( $message );
 			return;
 		}
+
+		// Get body.
+		$body = wp_remote_retrieve_body( $response );
+		$body = json_decode( $body, true );
 
 		// Get places.
 		$places = isset( $body['places'] ) ? $body['places'] : [];
@@ -323,7 +325,7 @@ class Mai_Locations_CLI {
 				// If we need an image and have a website url.
 				if ( $needs_image && $data && $data['image'] ) {
 					// Maybe upload the image.
-					$image_id = mailocations_upload_image( $website_url, 'website_url', $data['image'], $post_id );
+					$image_id = mailocations_upload_image( $data['image'], 'original_url', $data['image'], $post_id );
 
 					// If we have an image ID.
 					if ( $image_id ) {
@@ -373,7 +375,7 @@ class Mai_Locations_CLI {
 						);
 
 						// Maybe upload the image.
-						$image_id = mailocations_upload_image( $ref_uri, 'places_url', $image_url, $post_id );
+						$image_id = mailocations_upload_image( $ref_uri, 'original_url', $image_url, $post_id );
 
 						// If we have an image ID.
 						if ( $image_id ) {
@@ -515,8 +517,11 @@ class Mai_Locations_CLI {
 
 					// If no featured image, or we're forcing the update.
 					if ( ! $featured_id || rest_sanitize_boolean( $assoc_args['force_image'] ) ) {
+
+						// TODO: CLI to change all attachment `location_url` meta to `original_url` meta on PBD.
+
 						// Maybe upload the image.
-						$image_id = mailocations_upload_image( $url, 'location_url', $data['image'], $post_id );
+						$image_id = mailocations_upload_image( $data['image'], 'original_url', $data['image'], $post_id );
 
 						// If we have an image ID.
 						if ( $image_id && $image_id !== $featured_id ) {

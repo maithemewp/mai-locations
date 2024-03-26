@@ -3,7 +3,12 @@
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Locations_Count_Block {
+/**
+ * The locations filter block class.
+ *
+ * @since TBD
+ */
+class Mai_Locations_Count_Block {
 	/**
 	 * Construct the class.
 	 */
