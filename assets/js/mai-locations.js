@@ -54,7 +54,7 @@ function initLocations() {
 
 			// If we have a distance and a unit.
 			let distance = params['distance'];
-			let unit     = params['unit'];
+			let unit     = params['units'];
 
 			// If no distance, check for distance element.
 			if ( ! distance ) {
@@ -278,7 +278,7 @@ function initLocations() {
 			 * Set unit and only refresh if there is an address.
 			 */
 			unit.addEventListener( 'change', function() {
-				params['unit'] = this.value;
+				params['units'] = this.value;
 
 				if ( params['address'] ) {
 					refreshPage();

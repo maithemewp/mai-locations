@@ -251,7 +251,7 @@ add_shortcode( 'mai_location_distance', function( $atts ) {
 	$atts = shortcode_atts(
 		[
 			'before' => '',
-			'after'  => sprintf( ' %s %s', $params['unit'], __( 'away', 'mai-locations' ) ),
+			'after'  => sprintf( ' %s %s', $params['units'], __( 'away', 'mai-locations' ) ),
 			'round'  => 1,
 		],
 		$atts,

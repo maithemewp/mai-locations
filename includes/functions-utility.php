@@ -76,7 +76,7 @@ function mailocations_get_base() {
 function mailocations_get_option( $key, $fallback = true ) {
 	$defaults = mailocations_get_options_defaults();
 	$options  = mailocations_get_options();
-	$return   = isset( $options[ $key ] ) ? $options[ $key ] : null;
+	$return   = isset( $options[ $key ] ) && '' !== $options[ $key ] && ! is_null( $options[ $key ] ) ? $options[ $key ] : null;
 
 	return is_null( $return ) && $fallback ? $defaults[ $key ] : $return;
 }
@@ -95,13 +95,28 @@ function mailocations_get_options() {
 		return $cache;
 	}
 
-	// Get all options, with defaults.
+	// Get all options, with defaults if option does not exist.
 	$options = (array) get_option( 'mai_locations', mailocations_get_options_defaults() );
 
 	// Sanitize.
 	$cache = mailocations_sanitize_options( $options );
 
 	return $cache;
+}
+
+/**
+ * Gets a single option default value by key.
+ *
+ * @since TBD
+ *
+ * @param string $key The option key.
+ *
+ * @return mixed
+ */
+function mailocations_get_option_default( $key ) {
+	$defaults = mailocations_get_options_defaults();
+
+	return $defaults[ $key ];
 }
 
 /**
@@ -118,13 +133,14 @@ function mailocations_get_options_defaults() {
 		return $cache;
 	}
 
+	// Set cache.
 	$cache = [
 		'label_plural'   => __( 'Locations', 'mai-location' ),
 		'label_singular' => __( 'Location', 'mai-location' ),
 		'base'           => 'locations',
 		'category_base'  => 'location-category',
-		'distances'      => [ 25, 50, 100, 200 ],
-		'units'          => [ 'mi' ], // Accepts mi or km.
+		'distance'       => 100,
+		'units'          => 'mi',
 		'version_first'  => '',
 		'version_db'     => '',
 	];
@@ -160,14 +176,14 @@ function mailocations_update_option( $option, $value ) {
 function mailocations_sanitize_options( $options ) {
 	// Parse.
 	$options = wp_parse_args( $options, [
-		'label_plural'    => '',
-		'label_singular'  => '',
-		'base'            => '',
-		'category_base'   => '',
-		'distances'       => [],
-		'units'           => [],
-		'version_first'   => '',
-		'version_db'      => '',
+		'label_plural'   => '',
+		'label_singular' => '',
+		'base'           => '',
+		'category_base'  => '',
+		'distance'       => '',
+		'units'          => '',
+		'version_first'  => '',
+		'version_db'     => '',
 	] );
 
 	// Sanitize.
@@ -175,9 +191,8 @@ function mailocations_sanitize_options( $options ) {
 	$options['label_singular'] = sanitize_text_field( $options['label_singular'] );
 	$options['base']           = sanitize_title_with_dashes( $options['base'] );
 	$options['category_base']  = sanitize_title_with_dashes( $options['category_base'] );
-	$options['distances']      = ! is_array( $options['distances'] ) ? explode( ',', $options['distances'] ) : $options['distances'];
-	$options['distances']      = array_map( 'absint', $options['distances'] );
-	$options['units']          = array_map( 'sanitize_key', $options['units'] );
+	$options['distance']       = absint( $options['distance'] );
+	$options['units']          = esc_html( $options['units'] );
 	$options['version_first']  = esc_html( $options['version_first'] );
 	$options['version_db']     = esc_html( $options['version_db'] );
 

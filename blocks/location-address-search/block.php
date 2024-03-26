@@ -65,7 +65,7 @@ class Mai_Locations_Address_Search_Block {
 		$distances   = explode( ',', (string) get_field( 'distances' ) );
 		$distance    = $params['distance'];
 		$units       = (array) get_field( 'units' );
-		$unit        = $params['unit'];
+		$unit        = $params['units'];
 		$countries   = (array) get_field( 'countries' );
 
 		// Maybe enqueue scripts.
@@ -99,18 +99,6 @@ class Mai_Locations_Address_Search_Block {
 				// If we have multiple units.
 				$multiple = count( $units ) > 1;
 
-				// If not multiple unit options and no unit.
-				if ( ! ( $multiple && $unit ) ) {
-					// If we have unit option, use the first.
-					if ( $units ) {
-						$unit = $units[0];
-					}
-					// No unit option, default to miles.
-					else {
-						$unit = 'mi';
-					}
-				}
-
 				// If we have more than one distance.
 				if ( count( $distances ) > 1 ) {
 					// Distance selector.
@@ -139,9 +127,6 @@ class Mai_Locations_Address_Search_Block {
 				}
 				// One distance, hidden field if not preview.
 				elseif ( ! $is_preview ) {
-					$distance = $distance ?: reset( $distances );
-					$unit     = $unit ?: 'mi';
-
 					// Distance.
 					printf( '<input type="hidden" class="mailocations-autocomplete-distance" value="%s">', $distance );
 
@@ -193,21 +178,14 @@ class Mai_Locations_Address_Search_Block {
 					],
 					[
 						'label'         => __( 'Units', 'mai-locations' ),
-						'instructions'  => __( 'The distance unit options to use. If none are selected, the field will be hidden and miles will be used.', 'mai-locations' ),
+						'instructions'  => sprintf( __( 'The distance unit options to use. If none are selected, the field will be hidden and "%s" will be used.', 'mai-locations' ), mailocations_get_option_default( 'units' ) ),
 						'key'           => 'mailocations_address_search_units',
 						'name'          => 'units',
 						'type'          => 'checkbox',
-						'default_value' => [ 'mi' ],
+						'default_value' => (array) mailocations_get_option_default( 'units' ),
 						'choices'       => [
 							'mi' => __( 'Miles', 'mai-locations' ),
 							'km' => __( 'Kilometers', 'mai-locations' ),
-						],
-						'conditional_logic' => [
-							[
-								'field'    => 'mailocations_address_search_distances',
-								'operator' => '!=',
-								'value'    => '0',
-							],
 						],
 					],
 					[

@@ -85,11 +85,16 @@ function mailocations_get_query_defaults() {
 		'address'  => '',
 		'lat'      => '',
 		'lng'      => '',
-		'distance' => 100,
-		'unit'     => 'mi',
+		'distance' => mailocations_get_option( 'distance' ),
+		'units'    => mailocations_get_option( 'units' ),
 		'state'    => '',
 		'province' => '',
 	];
+
+	// Force distance.
+	if ( ! $defaults['distance'] ) {
+		$defaults['distance'] = mailocations_get_option_default( 'distance' );
+	}
 
 	// Add taxonomies.
 	foreach ( mailocations_get_location_taxonomies() as $name => $label ) {
@@ -118,7 +123,7 @@ function mailocations_get_filtered_query_args( $args = [] ) {
 	$lat      = isset( $params['lat'] ) ? $params['lat'] : '';
 	$lng      = isset( $params['lng'] ) ? $params['lng'] : '';
 	$dist     = isset( $params['distance'] ) ? $params['distance'] : $defaults['distance'];
-	$unit     = isset( $params['unit'] ) ? $params['unit'] : $defaults['unit'];
+	$unit     = isset( $params['units'] ) ? $params['units'] : $defaults['units'];
 	$taxos    = array_intersect_key( $params, mailocations_get_location_taxonomies_underscored() );
 
 	// If geo query.

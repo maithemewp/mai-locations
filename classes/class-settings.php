@@ -23,9 +23,8 @@ class Mai_Locations_Settings {
 	 * @return void
 	 */
 	function __construct() {
-		add_action( 'admin_menu',            [ $this, 'add_menu_item' ], 12 );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_script' ] );
-		add_action( 'admin_init',            [ $this, 'init' ] );
+		add_action( 'admin_menu', [ $this, 'add_menu_item' ], 12 );
+		add_action( 'admin_init', [ $this, 'init' ] );
 		add_filter( 'plugin_action_links_mai-locations/mai-locations.php', [ $this, 'add_settings_link' ], 10, 4 );
 	}
 
@@ -48,25 +47,6 @@ class Mai_Locations_Settings {
 	}
 
 	/**
-	 * Enqueue script for select2.
-	 *
-	 * @since TBD
-	 *
-	 * @return void
-	 */
-	function enqueue_script() {
-		$screen = get_current_screen();
-
-		if ( 'mai_location_page_mai-locations' !== $screen->id ) {
-			return;
-		}
-
-		// Select2 from CDN.
-		wp_enqueue_style( 'mai-locations-select2', 'https://cdn.jsdelivr.net/npm/select2/dist/css/select2.min.css' );
-		wp_enqueue_script( 'mai-locations-select2', 'https://cdn.jsdelivr.net/npm/select2/dist/js/select2.min.js' );
-	}
-
-	/**
 	 * Adds setting page content.
 	 *
 	 * @since TBD
@@ -74,7 +54,12 @@ class Mai_Locations_Settings {
 	 * @return void
 	 */
 	function add_content() {
-		$this->options = mailocations_get_options();
+		$defaults                        = mailocations_get_options_defaults();
+		$this->options                   = mailocations_get_options();
+		$this->options['label_plural']   = $this->options['label_plural'] ?: $defaults['label_plural'];
+		$this->options['label_singular'] = $this->options['label_singular'] ?: $defaults['label_singular'];
+		$this->options['base']           = $this->options['base'] ?: $defaults['base'];
+		$this->options['category_base']  = $this->options['category_base'] ?: $defaults['category_base'];
 
 		echo '<div class="wrap">';
 			printf( '<h2>%s</h2>', __( 'Mai Locations', 'mai-locations' ) );
@@ -141,16 +126,16 @@ class Mai_Locations_Settings {
 		);
 
 		add_settings_field(
-			'distances', // id
-			__( 'Distances', 'mai-locations' ), // title
-			[ $this, 'distances_callback' ], // callback
+			'distance', // id
+			__( 'Default Distance', 'mai-locations' ), // title
+			[ $this, 'distance_callback' ], // callback
 			'mai-locations-section', // page
 			'mai_locations_settings' // section
 		);
 
 		add_settings_field(
 			'units', // id
-			__( 'Units', 'mai-locations' ), // title
+			__( 'Default Units', 'mai-locations' ), // title
 			[ $this, 'units_callback' ], // callback
 			'mai-locations-section', // page
 			'mai_locations_settings' // section
@@ -234,9 +219,9 @@ class Mai_Locations_Settings {
 	 *
 	 * @return void
 	 */
-	function distances_callback() {
-		printf( '<input class="regular-text" type="text" name="mai_locations[distances]" id="distances" value="%s">', implode( ', ', $this->options['distances'] ) );
-		printf( '<p>%s</p>', __( 'Comma-separated distance options used for proximity search. Use a single value to hide field and force one distance. Use 0 to show all results, typically when limiting results by state/province below.', 'mai-locations' ) );
+	function distance_callback() {
+		printf( '<input type="number" name="mai_locations[distance]" id="distance" value="%s">', $this->options['distance'] );
+		printf( '<p>%s</p>', __( 'The default distance used for proximity search.', 'mai-locations' ) );
 	}
 
 	/**
@@ -247,22 +232,19 @@ class Mai_Locations_Settings {
 	 * @return void
 	 */
 	function units_callback() {
-		$units   = (array) $this->options['units'];
-		$options = [
+		$selected = (string) $this->options['units'];
+		$options  = [
 			'mi' => __( 'Miles', 'mai-locations' ),
 			'km' => __( 'Kilometers', 'mai-locations' ),
 		];
 
-		foreach ( $options as $key => $label ) {
-			printf(
-				'<p><label><input type="checkbox" name="mai_locations[units][]" value="%s"%s> %s</label></p>',
-				$key,
-				in_array( $key, $units ) ? ' checked' : '',
-				$label
-			);
-		}
+		echo '<select name="mai_locations[units]">';
+			foreach ( $options as $id => $label ) {
+				printf( '<option value="%s"%s>%s</option>', $id, selected( $selected, $id ), $label );
+			}
+		echo '</select>';
 
-		printf( '<p>%s</p>', __( 'The distance unit options to use. If none are selected, the field will be hidden and miles will be used.', 'mai-locations' ) );
+		printf( '<p>%s</p>', __( 'The default distance unit used for proximity search.', 'mai-locations' ) );
 	}
 
 	/**

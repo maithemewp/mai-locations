@@ -79,80 +79,81 @@ class Mai_Locations_Map_Block {
 		if ( $is_preview ) {
 			// Static image.
 			printf( '<div style="aspect-ratio:%s/%s;"><img style="display:block;height:100%%;width:100%%;position:absolute;top:0;left:0;object-fit:cover" width="%s" height="%s" src="%s/assets/images/map.png"/></div>', $width, $height, $width, $height, MAI_LOCATIONS_PLUGIN_URL );
+
+			// Bail.
+			return;
 		}
-		// Front end.
-		else {
-			global $wp_query;
 
-			// If showing all.
-			$filtered = mailocations_is_filtered_locations();
-			$show_all = false;
-			$show_all = $show_all || ( ! $filtered && $q_default && 'all' === $q_default );
-			$show_all = $show_all || ( $filtered && $q_filtered && 'all' === $q_filtered );
+		global $wp_query;
 
-			// If showing all.
-			if ( $show_all ) {
-				// Get filtered args.
-				$filtered_args = mailocations_get_filtered_query_args( $wp_query->query );
+		// If showing all.
+		$filtered = mailocations_is_filtered_locations();
+		$show_all = false;
+		$show_all = $show_all || ( ! $filtered && $q_default && 'all' === $q_default );
+		$show_all = $show_all || ( $filtered && $q_filtered && 'all' === $q_filtered );
 
-				// Add new args.
-				$filtered_args['fields']                 = 'ids';
-				$filtered_args['nopaging']               = true;
-				$filtered_args['no_found_rows']          = true;
-				$filtered_args['update_post_meta_cache'] = false;
-				$filtered_args['update_post_term_cache'] = false;
+		// If showing all.
+		if ( $show_all ) {
+			// Get filtered args.
+			$filtered_args = mailocations_get_filtered_query_args( $wp_query->query );
 
-				// Remove `posts_per_page`.
-				unset( $filtered_args['posts_per_page'] );
+			// Add new args.
+			$filtered_args['fields']                 = 'ids';
+			$filtered_args['nopaging']               = true;
+			$filtered_args['no_found_rows']          = true;
+			$filtered_args['update_post_meta_cache'] = false;
+			$filtered_args['update_post_term_cache'] = false;
 
-				// Build transient key.
-				$transient_key = 'mai_locations_markers_' . md5( serialize( $filtered_args ) );
+			// Remove `posts_per_page`.
+			unset( $filtered_args['posts_per_page'] );
 
-				// Check transient.
-				if ( false === ( $markers = get_transient( $transient_key ) ) ) {
-					// Get posts as array of ids.
-					$new   = new WP_Query( $filtered_args );
-					$posts = $new->posts;
+			// Build transient key.
+			$transient_key = 'mai_locations_markers_' . md5( serialize( $filtered_args ) );
 
-					// Get markers.
-					$markers = $this->get_markers( $posts );
-
-					// Reset post data.
-					wp_reset_postdata();
-
-					// Set transient.
-					set_transient( $transient_key, $markers, 1 * HOUR_IN_SECONDS );
-				}
-			}
-			// Use existing query.
-			else {
+			// Check transient.
+			if ( false === ( $markers = get_transient( $transient_key ) ) ) {
 				// Get posts as array of ids.
-				$posts = $wp_query->posts;
-				$posts = array_map( function( $post ) {
-					return $post->ID;
-				}, $posts );
+				$new   = new WP_Query( $filtered_args );
+				$posts = $new->posts;
 
 				// Get markers.
 				$markers = $this->get_markers( $posts );
+
+				// Reset post data.
+				wp_reset_postdata();
+
+				// Set transient.
+				set_transient( $transient_key, $markers, 1 * HOUR_IN_SECONDS );
 			}
-
-			// Open map.
-			printf( '<div style="aspect-ratio:%s/%s;" class="mailocations-map" data-zoom="%s">', $width, $height, 7 );
-
-			// If markers.
-			if ( $markers ) {
-				// Loop through and build markers.
-				foreach ( $markers as $marker ) {
-					printf( '<div style="display:none;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $marker['lat'] ), esc_html( $marker['lng'] ) );
-						printf( '<strong><a href="%s">%s</a></strong>', $marker['href'], $marker['title'] );
-						echo $marker['address'];
-					echo '</div>';
-				}
-			}
-
-			// Close map.
-			echo '</div>';
 		}
+		// Use existing query.
+		else {
+			// Get posts as array of ids.
+			$posts = (array) $wp_query->posts;
+			$posts = array_map( function( $post ) {
+				return $post->ID;
+			}, $posts );
+
+			// Get markers.
+			$markers = $this->get_markers( $posts );
+		}
+
+		// Open map.
+		printf( '<div style="aspect-ratio:%s/%s;" class="mailocations-map" data-zoom="%s">', $width, $height, 7 );
+
+		// If markers.
+		if ( $markers ) {
+			// Loop through and build markers.
+			foreach ( $markers as $marker ) {
+				printf( '<div style="display:none;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $marker['lat'] ), esc_html( $marker['lng'] ) );
+					printf( '<strong><a href="%s">%s</a></strong>', $marker['href'], $marker['title'] );
+					echo $marker['address'];
+				echo '</div>';
+			}
+		}
+
+		// Close map.
+		echo '</div>';
 	}
 
 	/**
