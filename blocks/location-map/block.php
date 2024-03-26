@@ -84,19 +84,8 @@ class Mai_Locations_Map_Block {
 		else {
 			global $wp_query;
 
-			// If current page is filtered.
-			$filtered = mailocations_is_filtered_locations();
-
-			// 		'geo_query' => [
-// 			'lat_field' => '_latitude',  // this is the name of the meta field storing latitude
-// 			'lng_field' => '_longitude', // this is the name of the meta field storing longitude
-// 			'latitude'  => 44.485261,    // this is the latitude of the point we are getting distance from
-// 			'longitude' => -73.218952,   // this is the longitude of the point we are getting distance from
-// 			'distance'  => 20,           // this is the maximum distance to search
-// 			'units'     => 'miles'       // this supports options: miles, mi, kilometers, km
-// 		],
-
 			// If showing all.
+			$filtered = mailocations_is_filtered_locations();
 			$show_all = false;
 			$show_all = $show_all || ( ! $filtered && $q_default && 'all' === $q_default );
 			$show_all = $show_all || ( $filtered && $q_filtered && 'all' === $q_filtered );
@@ -138,8 +127,7 @@ class Mai_Locations_Map_Block {
 			// Use existing query.
 			else {
 				// Get posts as array of ids.
-				// $posts = $wp_query->posts;
-				$posts = [];
+				$posts = $wp_query->posts;
 				$posts = array_map( function( $post ) {
 					return $post->ID;
 				}, $posts );
