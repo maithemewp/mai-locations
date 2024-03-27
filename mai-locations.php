@@ -229,6 +229,8 @@ final class Mai_Locations_Plugin {
 	/**
 	 * Register content types.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return  void
 	 */
 	function register_content_types() {
@@ -318,6 +320,8 @@ final class Mai_Locations_Plugin {
 	/**
 	 * Flushes transients any time a location is saved or updated.
 	 *
+	 * @since TBD
+	 *
 	 * @param int     $post_id
 	 * @param WP_Post $post
 	 * @param bool    $update
@@ -346,8 +350,16 @@ final class Mai_Locations_Plugin {
 		delete_transient( 'mailocations_locations' );
 	}
 
+	/**
+	 * Filter the no posts text.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $text
+	 *
+	 * @return string
+	 */
 	function no_results_text( $text ) {
-		ray( $text );
 		return sprintf( '%s %s %s %s',
 			__( 'Sorry, no', 'mai-locations' ),
 			strtolower( mailocations_get_plural() ),
