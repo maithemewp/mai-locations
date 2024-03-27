@@ -10,30 +10,40 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  *
  * @return void
  */
-class Mai_Locations_WooCommerce_Account_Tab {
-	/**
-	 * Tabs.
-	 *
-	 * @since TBD
-	 *
-	 * @var $tabs
-	 */
-	protected $tabs;
-
+class Mai_Locations_WooCommerce_Account_Tabs {
 	/**
 	 * Gets is started.
 	 *
 	 * @since TBD
 	 */
 	function __construct() {
+		// Hooks.
+		$this->hooks();
+	}
+
+	/**
+	 * Gets tabs.
+	 *
+	 * @since TBD
+	 *
+	 * @return array
+	 */
+	function get_tabs() {
+		// Set static tabs.
+		static $tabs = null;
+
+		// Return if cached.
+		if ( ! is_null( $tabs ) ) {
+			return $tabs;
+		}
+
 		// Default tabs.
 		$tabs = [ mailocations_get_base() => mailocations_get_plural() ];
 
 		// Set filtereable tabs.
-		$this->tabs = apply_filters( 'mai_locations_woocommerce_account_tabs', $tabs );
+		$tabs = apply_filters( 'mailocations_woocommerce_account_tabs', $tabs );
 
-		// Hooks.
-		$this->hooks();
+		return $tabs;
 	}
 
 	/**
@@ -46,15 +56,6 @@ class Mai_Locations_WooCommerce_Account_Tab {
 		add_filter( 'query_vars',                     [ $this, 'add_query_vars' ], 0 );
 		add_filter( 'mai_template-parts_config',      [ $this, 'add_content_areas' ] );
 		add_filter( 'woocommerce_account_menu_items', [ $this, 'add_menu_items' ] );
-
-		// Add endpoint content.
-		foreach ( $this->tabs as $endpoint => $label ) {
-			// Add action.
-			add_action( "woocommerce_account_{$endpoint}_endpoint", function() use ( $endpoint ) {
-				// Add action hook.
-				do_action( "mailocations_account_{$endpoint}_content" );
-			});
-		}
 	}
 
 	/**
@@ -65,8 +66,15 @@ class Mai_Locations_WooCommerce_Account_Tab {
 	 * @return void
 	 */
 	function add_endpoint() {
-		foreach ( $this->tabs as $endpoint => $label ) {
+		foreach ( $this->get_tabs() as $endpoint => $label ) {
+			// Add endpoint.
 			add_rewrite_endpoint( $endpoint, EP_ROOT | EP_PAGES );
+
+			// Add action.
+			add_action( "woocommerce_account_{$endpoint}_endpoint", function() use ( $endpoint ) {
+				// Add action hook.
+				do_action( "mailocations_account_{$endpoint}_content" );
+			});
 		}
 	}
 
@@ -80,7 +88,7 @@ class Mai_Locations_WooCommerce_Account_Tab {
 	 * @return array
 	 */
 	function add_query_vars( $vars ) {
-		foreach ( $this->tabs as $endpoint => $label ) {
+		foreach ( $this->get_tabs() as $endpoint => $label ) {
 			$vars[] = $endpoint;
 		}
 
@@ -97,7 +105,7 @@ class Mai_Locations_WooCommerce_Account_Tab {
 	 * @return array
 	 */
 	function add_content_areas( $config ) {
-		foreach ( $this->tabs as $endpoint => $label ) {
+		foreach ( $this->get_tabs() as $endpoint => $label ) {
 			// Add to config.
 			$config["woo-{$endpoint}"] = [
 				'hook'   => "mailocations_account_{$endpoint}_content",
@@ -120,7 +128,7 @@ class Mai_Locations_WooCommerce_Account_Tab {
 	 * @return array
 	 */
 	function add_menu_items( $items ) {
-		foreach ( $this->tabs as $endpoint => $label ) {
+		foreach ( $this->get_tabs() as $endpoint => $label ) {
 			// Skip if Mai Theme v2 and no template part.
 			if ( function_exists( 'mai_has_template_part' ) && ! mai_has_template_part( "woo-{$endpoint}" ) ) {
 				continue;
