@@ -49,9 +49,6 @@ function initLocations() {
 				content: pin.element,
 			});
 
-			// Add location marker.
-			map.markers.push( current );
-
 			// If we have a distance and a unit.
 			let distance = params['distance'];
 			let unit     = params['units'];
@@ -123,10 +120,13 @@ function initLocations() {
 
 		// If we have no map markers, set the center of the map.
 		if ( ! map.markers.length ) {
-			// Center coordinates of the US.
-			map.setCenter({ lat: 37.0902, lng: -95.7129 });
-			// Zoom level can be adjusted as needed.
-			map.setZoom(4);
+			// If no coordinates.
+			if ( ! ( lat && lng ) ) {
+				// Center coordinates of the US.
+				map.setCenter({ lat: 37.0902, lng: -95.7129 });
+				// Zoom level can be adjusted as needed.
+				map.setZoom(4);
+			}
 		}
 		// Handle markers.
 		else {
@@ -157,7 +157,7 @@ function initLocations() {
 				// Fit the map to the bounds
 				map.fitBounds( bounds );
 			}
-			// No radius.
+			// No radius. This shouldn't happen, but we have a fallback if it does.
 			else {
 				// Create map boundaries.
 				const bounds = new google.maps.LatLngBounds();
