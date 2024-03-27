@@ -168,8 +168,6 @@ function mailocations_get_filtered_query_args( $args = [] ) {
 		}
 	}
 
-	ray( $args );
-
 	return $args;
 }
 
