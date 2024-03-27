@@ -65,7 +65,7 @@ class Mai_Locations_Address_Search_Block {
 		$distances   = explode( ',', (string) get_field( 'distances' ) );
 		$distance    = $params['distance'];
 		$units       = (array) get_field( 'units' );
-		$unit        = $params['units'];
+		$unit        = 1 === count( $units ) ? reset( $units ) : $params['units']; // Fallback to default.
 		$countries   = (array) get_field( 'countries' );
 
 		// Maybe enqueue scripts.
@@ -125,7 +125,7 @@ class Mai_Locations_Address_Search_Block {
 						echo '</select>';
 					}
 				}
-				// One distance, hidden field if not preview.
+				// One distance, hidden field if not preview. These are for the JS to use when filtering.
 				elseif ( ! $is_preview ) {
 					// Distance.
 					printf( '<input type="hidden" class="mailocations-autocomplete-distance" value="%s">', $distance );
