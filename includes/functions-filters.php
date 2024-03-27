@@ -125,6 +125,9 @@ function mailocations_get_filtered_query_args( $args = [] ) {
 	$dist     = isset( $params['distance'] ) ? $params['distance'] : $defaults['distance'];
 	$unit     = isset( $params['units'] ) ? $params['units'] : $defaults['units'];
 	$taxos    = array_intersect_key( $params, mailocations_get_location_taxonomies_underscored() );
+	$taxos    = array_combine( array_map( function( $key ) {
+		return ltrim( $key, '_' ); // Trim lead underscore.
+	}, array_keys( $taxos ) ), $taxos );
 
 	// If geo query.
 	if ( $lat && $lng ) {
@@ -164,6 +167,8 @@ function mailocations_get_filtered_query_args( $args = [] ) {
 			$args['tax_query']['relation'] = 'AND';
 		}
 	}
+
+	ray( $args );
 
 	return $args;
 }
