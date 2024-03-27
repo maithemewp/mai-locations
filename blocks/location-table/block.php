@@ -110,8 +110,8 @@ class Mai_Locations_Table_Block {
 					],
 					[
 						// This field has to match what's in locations-table/block.php.
-						'label'        => sprintf( '%s %s', $singular, __( 'Submission Redirect', 'mai-locations' ) ),
-						'instructions' => __( 'Redirect to this URL after submission.', 'mai-locations' ),
+						'label'        => __( 'Redirect', 'mai-locations' ),
+						'instructions' => __( 'Redirect to this URL after saving.', 'mai-locations' ),
 						'key'          => 'mai_location_redirect',
 						'name'         => 'location_redirect',
 						'type'         => 'text',

@@ -144,6 +144,7 @@ final class Mai_Locations_Plugin {
 		include_once __DIR__ . '/classes/class-locations-queries.php';
 		include_once __DIR__ . '/classes/class-settings.php';
 		include_once __DIR__ . '/classes/class-upgrade.php';
+		include_once __DIR__ . '/classes/class-woocommerce-account-tab.php';
 
 		// Blocks.
 		include_once __DIR__ . '/blocks/location-address-search/block.php';
@@ -172,6 +173,22 @@ final class Mai_Locations_Plugin {
 		new Mai_Locations_Submission_Block;
 		new Mai_Locations_Table_Block;
 		new Mai_Locations_Map_Block;
+
+		add_action( 'plugins_loaded', 'mailocations_woocommerce_account_tab' );
+		/**
+		 * Adds locations table to WooCommerce account menu.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @return void
+		 */
+		function mailocations_woocommerce_account_tab() {
+			if ( ! class_exists( 'WooCommerce' ) ) {
+				return;
+			}
+
+			new Mai_Locations_WooCommerce_Account_Tab;
+		}
 	}
 
 	/**
