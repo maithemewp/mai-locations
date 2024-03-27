@@ -61,7 +61,7 @@ class Mai_Locations_CLI {
 	 * @return void
 	 */
 	function import_places( $args, $assoc_args ) {
-		$api_key = mailocations_get_google_maps_api_key();
+		$api_key = mailocations_get_option( 'google_api_key' );
 
 		// Bail if no API key.
 		if ( ! $api_key ) {

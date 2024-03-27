@@ -23,8 +23,9 @@ class Mai_Locations_Settings {
 	 * @return void
 	 */
 	function __construct() {
-		add_action( 'admin_menu', [ $this, 'add_menu_item' ], 12 );
-		add_action( 'admin_init', [ $this, 'init' ] );
+		add_action( 'admin_menu',                                          [ $this, 'add_menu_item' ], 12 );
+		add_action( 'admin_init',                                          [ $this, 'init' ] );
+		add_filter( 'acf/fields/google_map/api',                           [ $this, 'acf_google_map_api' ], 99 );
 		add_filter( 'plugin_action_links_mai-locations/mai-locations.php', [ $this, 'add_settings_link' ], 10, 4 );
 	}
 
@@ -140,6 +141,23 @@ class Mai_Locations_Settings {
 			'mai-locations-section', // page
 			'mai_locations_settings' // section
 		);
+
+		add_settings_field(
+			'google_api_key', // id
+			__( 'Google API Key', 'mai-locations' ), // title
+			[ $this, 'google_api_key_callback' ], // callback
+			'mai-locations-section', // page
+			'mai_locations_settings' // section
+		);
+
+		add_settings_field(
+			'google_api_signature', // id
+			__( 'Google API Signature', 'mai-locations' ), // title
+			[ $this, 'google_api_signature_callback' ], // callback
+			'mai-locations-section', // page
+			'mai_locations_settings' // section
+		);
+
 	}
 
 	/**
@@ -245,6 +263,78 @@ class Mai_Locations_Settings {
 		echo '</select>';
 
 		printf( '<p>%s</p>', __( 'The default distance unit used for proximity search.', 'mai-locations' ) );
+	}
+
+	/**
+	 * Setting callback.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	function google_api_key_callback() {
+		printf( '<input class="regular-text" type="password" name="mai_locations[google_api_key]" id="google_api_key" value="%s">', $this->options['google_api_key'] );
+		echo '<p>';
+			printf( '%s <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">%s</a>',
+				__( 'The Google API key for maps in ACF and the Location Map block.', 'mai-locations' ),
+				__( 'Get a key.', 'mai-locations' )
+			);
+		echo '</p>';
+	}
+
+	/**
+	 * Setting callback.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	function google_api_signature_callback() {
+		printf( '<input class="regular-text" type="password" name="mai_locations[google_api_signature]" id="google_api_signature" value="%s">', $this->options['google_api_signature'] );
+	}
+
+	/**
+	 * ACF Google Maps API.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $api The API data.
+	 *
+	 * @return array
+	 */
+	function acf_google_map_api( $api ) {
+		// Bail if not in the Dashboard.
+		if ( ! is_admin() ) {
+			return $api;
+		}
+
+		// Get the current screen.
+		$screen = get_current_screen();
+
+		// Bail if not on the Locations post type.
+		if ( ! $screen || 'mai_location' !== $screen->post_type ) {
+			return $api;
+		}
+
+		// Maybe add key.
+		if ( isset( $api['key'] ) || empty( $api['key'] ) ) {
+			$key = mailocations_get_option( 'google_api_key' );
+
+			if ( $key ) {
+				$api['key'] = $key;
+			}
+		}
+
+		// Maybe add signature.
+		if ( isset( $api['signature'] ) || empty( $api['signature'] ) ) {
+			$signature = mailocations_get_option( 'google_api_signature' );
+
+			if ( $signature ) {
+				$api['signature'] = $signature;
+			}
+		}
+
+		return $api;
 	}
 
 	/**

@@ -157,7 +157,7 @@ class Mai_Locations_Address_Search_Block {
 					[
 						'key'           => 'mailocations_address_search_message',
 						'type'          => 'message',
-						'message'       => ! mailocations_get_google_maps_api_key() ? __( 'Google Maps API key missing!', 'mailocations' ) : '',
+						'message'       => ! mailocations_get_option( 'google_api_key' ) ? __( 'Google Maps API key missing!', 'mailocations' ) : '',
 						'esc_html'      => 0,
 					],
 					[

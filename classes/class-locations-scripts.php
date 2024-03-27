@@ -40,7 +40,8 @@ class Mai_Locations_Scripts {
 		$localize = [
 			'params'     => mailocations_get_query_params(),
 			'defaults'   => mailocations_get_query_defaults(),
-			'apiKey'     => mailocations_get_google_maps_api_key(),
+			'apiKey'     => mailocations_get_option( 'google_api_key' ),
+			'apiSig'     => mailocations_get_option( 'google_api_signature' ),
 			'loadingSvg' => MAI_LOCATIONS_PLUGIN_URL . 'assets/svg/loading.svg',
 			// 'autoComplete' => [
 			// 	'fields'                => [ 'geometry', 'name' ],

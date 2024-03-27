@@ -197,7 +197,7 @@ function mailocations_create_location_from_woocommerce_user( $user_id, $args = [
  * @return void
  */
 function mailocations_update_address_from_google_map( $post_id ) {
-	$api_key = mailocations_get_google_maps_api_key();
+	$api_key = mailocations_get_option( 'google_api_key' );
 
 	// Bail if no API key.
 	if ( ! $api_key ) {
@@ -266,7 +266,7 @@ function mailocations_update_address_from_google_map( $post_id ) {
  * @return void
  */
 function mailocations_update_google_map_from_address( $post_id ) {
-	$api_key = mailocations_get_google_maps_api_key();
+	$api_key = mailocations_get_option( 'google_api_key' );
 
 	// Bail if no API key.
 	if ( ! $api_key ) {

@@ -135,14 +135,16 @@ function mailocations_get_options_defaults() {
 
 	// Set cache.
 	$cache = [
-		'label_plural'   => __( 'Locations', 'mai-location' ),
-		'label_singular' => __( 'Location', 'mai-location' ),
-		'base'           => 'locations',
-		'category_base'  => 'location-category',
-		'distance'       => 100,
-		'units'          => 'mi',
-		'version_first'  => '',
-		'version_db'     => '',
+		'label_plural'         => __( 'Locations', 'mai-location' ),
+		'label_singular'       => __( 'Location', 'mai-location' ),
+		'base'                 => 'locations',
+		'category_base'        => 'location-category',
+		'google_api_key'       => '',
+		'google_api_signature' => '',
+		'distance'             => 100,
+		'units'                => 'mi',
+		'version_first'        => '',
+		'version_db'           => '',
 	];
 
 	return $cache;
@@ -176,25 +178,29 @@ function mailocations_update_option( $option, $value ) {
 function mailocations_sanitize_options( $options ) {
 	// Parse.
 	$options = wp_parse_args( $options, [
-		'label_plural'   => '',
-		'label_singular' => '',
-		'base'           => '',
-		'category_base'  => '',
-		'distance'       => '',
-		'units'          => '',
-		'version_first'  => '',
-		'version_db'     => '',
+		'label_plural'         => '',
+		'label_singular'       => '',
+		'base'                 => '',
+		'category_base'        => '',
+		'google_api_key'       => '',
+		'google_api_signature' => '',
+		'distance'             => '',
+		'units'                => '',
+		'version_first'        => '',
+		'version_db'           => '',
 	] );
 
 	// Sanitize.
-	$options['label_plural']   = sanitize_text_field( $options['label_plural'] );
-	$options['label_singular'] = sanitize_text_field( $options['label_singular'] );
-	$options['base']           = sanitize_title_with_dashes( $options['base'] );
-	$options['category_base']  = sanitize_title_with_dashes( $options['category_base'] );
-	$options['distance']       = absint( $options['distance'] );
-	$options['units']          = esc_html( $options['units'] );
-	$options['version_first']  = esc_html( $options['version_first'] );
-	$options['version_db']     = esc_html( $options['version_db'] );
+	$options['label_plural']         = sanitize_text_field( $options['label_plural'] );
+	$options['label_singular']       = sanitize_text_field( $options['label_singular'] );
+	$options['base']                 = sanitize_title_with_dashes( $options['base'] );
+	$options['category_base']        = sanitize_title_with_dashes( $options['category_base'] );
+	$options['google_api_key']       = sanitize_text_field( $options['google_api_key'] );
+	$options['google_api_signature'] = sanitize_text_field( $options['google_api_signature'] );
+	$options['distance']             = absint( $options['distance'] );
+	$options['units']                = esc_html( $options['units'] );
+	$options['version_first']        = esc_html( $options['version_first'] );
+	$options['version_db']           = esc_html( $options['version_db'] );
 
 	return $options;
 }
@@ -249,32 +255,6 @@ function mailocations_delete_transients() {
  */
 function mailocations_post_exists( $post_id ) {
 	return is_string( get_post_status( $post_id ) );
-}
-
-/**
- * Gets ACF Google Maps API key.
- * May be set multiple ways.
- *
- * @since 0.1.0
- *
- * @link https://www.advancedcustomfields.com/blog/google-maps-api-settings/
- *
- * @return string
- */
-function mailocations_get_google_maps_api_key() {
-	static $key = null;
-
-	if ( ! is_null( $key ) ) {
-		return $key;
-	}
-
-	$key = '';
-
-	if ( function_exists( 'acf_get_setting' ) ) {
-		$key = acf_get_setting( 'google_api_key' );
-	}
-
-	return $key;
 }
 
 /**

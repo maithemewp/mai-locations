@@ -495,6 +495,10 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		const script    = document.createElement( 'script' );
 		let   src       = `https://maps.googleapis.com/maps/api/js?key=${maiLocationsVars.apiKey}`;
 		let   libraries = [ 'marker' ];
+		// If we have a signature, add it.
+		if ( maiLocationsVars.apiSig ) {
+			src += '&signature=' + maiLocationsVars.apiSig;
+		}
 
 		// If we have autocomplete, add places library.
 		if ( document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
