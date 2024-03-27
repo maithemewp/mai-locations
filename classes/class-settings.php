@@ -303,19 +303,6 @@ class Mai_Locations_Settings {
 	 * @return array
 	 */
 	function acf_google_map_api( $api ) {
-		// Bail if not in the Dashboard.
-		if ( ! is_admin() ) {
-			return $api;
-		}
-
-		// Get the current screen.
-		$screen = get_current_screen();
-
-		// Bail if not on the Locations post type.
-		if ( ! $screen || 'mai_location' !== $screen->post_type ) {
-			return $api;
-		}
-
 		// Maybe add key.
 		if ( isset( $api['key'] ) || empty( $api['key'] ) ) {
 			$key = mailocations_get_option( 'google_api_key' );
