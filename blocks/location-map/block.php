@@ -84,13 +84,15 @@ class Mai_Locations_Map_Block {
 			return;
 		}
 
+		// Get the existing query.
 		global $wp_query;
 
 		// If showing all.
-		$filtered = mailocations_is_filtered_locations();
-		$show_all = false;
-		$show_all = $show_all || ( ! $filtered && $q_default && 'all' === $q_default );
-		$show_all = $show_all || ( $filtered && $q_filtered && 'all' === $q_filtered );
+		$filtered  = mailocations_is_filtered_locations();
+		$show_all  = false;
+		$show_all  = $show_all || ( ! $filtered && $q_default && 'all' === $q_default );
+		$show_all  = $show_all || ( $filtered && $q_filtered && 'all' === $q_filtered );
+		$show_none = ! $filtered && 'none' === $q_default;
 
 		// If showing all.
 		if ( $show_all ) {
@@ -126,7 +128,12 @@ class Mai_Locations_Map_Block {
 				set_transient( $transient_key, $markers, 1 * HOUR_IN_SECONDS );
 			}
 		}
-		// Use existing query.
+		// If not showing any markers.
+		elseif ( $show_none ) {
+			// No markers.
+			$markers = [];
+		}
+		// If showing existing query.
 		else {
 			// Get posts as array of ids.
 			$posts = (array) $wp_query->posts;
@@ -214,8 +221,9 @@ class Mai_Locations_Map_Block {
 						'name'         => 'query',
 						'type'         => 'select',
 						'choices'      => [
-							''    => __( 'Current page', 'mai-locations' ),
-							'all' => __( 'All Locations', 'mai-locations' ),
+							''     => __( 'Current page', 'mai-locations' ),
+							'all'  => __( 'All Locations', 'mai-locations' ),
+							'none' => __( 'None', 'mai-locations' ),
 						],
 					],
 					[
