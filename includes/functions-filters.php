@@ -154,12 +154,20 @@ function mailocations_get_filtered_query_args( $args = [] ) {
 
 		// Loop though taxonomies.
 		foreach ( $taxos as $name => $values ) {
-			$args['tax_query'][] = [
+			// Set query args.
+			$tax_query = [
 				'taxonomy' => $name,
 				'field'    => 'slug',
 				'terms'    => $values,
-				'operator' => 'AND',
 			];
+
+			// If more than one term, add operator.
+			if ( count( $values ) > 1 ) {
+				$tax_query['operator'] = 'AND';
+			}
+
+			// Add to tax query.
+			$args['tax_query'][] = $tax_query;
 		}
 
 		// Only use relation if more than 1, according to `WP_Query` docs.
