@@ -80,13 +80,13 @@ class Mai_Locations_Location_Form {
 		$html  = '';
 		$class = 'mailocations-form';
 
+		// Add class.
 		if ( $this->args['class'] ) {
 			$class .= trim( ' ' . esc_attr( $this->args['class'] ) );
 		}
 
 		// Open form wrapper.
 		$html .= sprintf( '<div class="%s">', $class );
-
 			// Get form.
 			$form = $this->get_form();
 

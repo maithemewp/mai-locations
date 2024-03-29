@@ -69,8 +69,6 @@ class Mai_Locations_Location_Form_Submit extends Mai_Locations_Location_Form {
 			$args['html_after_fields'] .= sprintf( '<input type="hidden" name="acf[mai_location_emails]" value="%s">', esc_attr( $this->args['emails'] ) );
 		}
 
-		ray( $this->args, $args );
-
 		// Add filter.
 		$args = apply_filters( 'mailocations_acf_form_args', $args );
 
