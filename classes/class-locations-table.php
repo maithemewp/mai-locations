@@ -112,6 +112,30 @@ class Mai_Locations_Locations_Table {
 			// Disable links in the editor.
 			if ( $is_admin ) {
 				$html .= '<style>.mai-locations-table a { pointer-events: none; }</style>';
+			} else {
+				ob_start();
+				?>
+				<style>
+				.mai-location-item-title,
+				.mai-locations-table .mai-address {
+					line-height: 1.25;
+				}
+				.mai-location-item-title {
+					display: block;
+				}
+				.mai-locations-table .mai-address {
+					display: flex;
+					flex-wrap: wrap;
+					margin-top: 0.5em;
+					font-size: 0.8em;
+				}
+				.mai-locations-table .mai-address-item:not(:last-of-type)::after {
+					margin-right: 0.25em;
+					content: ',';
+				}
+				</style>
+				<?php
+				$html .= ob_get_clean();
 			}
 
 			// Table.
@@ -137,7 +161,7 @@ class Mai_Locations_Locations_Table {
 						$html .= '<tr>';
 							$html .= '<td>';
 								// Title.
-								$html .= '<span class="has-md-font-size">';
+								$html .= '<span class="mai-location-item-title">';
 									// Maybe add link.
 									if ( $is_viewable && $public ) {
 										$html .= sprintf( '<a href="%s">', get_permalink( $location_id ) );
