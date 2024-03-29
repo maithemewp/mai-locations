@@ -5,6 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Locations WooCommerce account tab.
+ * Should only be instantiated if WooCommerce is active.
  *
  * @since TBD
  *
@@ -54,8 +55,10 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	function hooks() {
 		add_action( 'init',                           [ $this, 'add_endpoint' ] );
 		add_filter( 'query_vars',                     [ $this, 'add_query_vars' ], 0 );
+		add_filter( 'woocommerce_get_query_vars',     [ $this, 'add_woo_query_vars' ] );
 		add_filter( 'mai_template-parts_config',      [ $this, 'add_content_areas' ] );
 		add_filter( 'woocommerce_account_menu_items', [ $this, 'add_menu_items' ] );
+		add_action( 'get_header',                     [ $this, 'add_acf_form_head' ] );
 	}
 
 	/**
@@ -90,6 +93,23 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	function add_query_vars( $vars ) {
 		foreach ( $this->get_tabs() as $endpoint => $label ) {
 			$vars[] = $endpoint;
+		}
+
+		return $vars;
+	}
+
+	/**
+	 * Adds WooCommerce query vars.
+	 *
+	 * @since TBD
+	 *
+	 * @param array $vars The existing query vars.
+	 *
+	 * @return array
+	 */
+	function add_woo_query_vars( $vars ) {
+		foreach ( $this->get_tabs() as $endpoint => $label ) {
+			$vars[ $endpoint ] = $endpoint;
 		}
 
 		return $vars;
@@ -139,6 +159,41 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Adds ACF form head if needed.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	function add_acf_form_head() {
+		if ( ! is_account_page() ) {
+			return;
+		}
+
+		// Loop through tabs.
+		foreach ( $this->get_tabs() as $endpoint => $label ) {
+			// Bail if not this endpoint.
+			if ( ! ( $endpoint && is_wc_endpoint_url( $endpoint ) ) ) {
+				continue;
+			}
+
+			// If Mai Theme v2.
+			if ( function_exists( 'mai_get_template_part' ) ) {
+				$content = mai_get_template_part( "woo-{$endpoint}" );
+
+				// If we have an acf form, load ACF form head.
+				if ( has_block( 'acf/mai-location-submission', $content ) || has_block( 'acf/mai-locations-table', $content ) ) {
+					acf_form_head();
+				}
+			}
+			// Not Mai Theme v2, should we always load `acf_form_head()`?
+			else {
+				acf_form_head();
+			}
+		}
 	}
 
 	/**
