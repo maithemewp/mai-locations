@@ -182,10 +182,10 @@ function initLocations() {
 
 		// If we have everything we need.
 		if ( parent && search && address ) {
-			let clear     = parent.querySelector( '.mailocations-autocomplete-clear' );
-			let countries = search.dataset.countries;
-			let options   = { fields: [ 'geometry', 'name' ] };
-			let keys      = [];
+			const clear     = parent.querySelector( '.mailocations-autocomplete-clear' );
+			const countries = search.dataset.countries;
+			const options   = { fields: [ 'geometry', 'name' ] };
+			const keys      = [];
 
 			// If we're limiting to a country, add restrictions.
 			if ( countries ) {
@@ -260,6 +260,7 @@ function initLocations() {
 
 			// If we have a clear link.
 			if ( clear ) {
+				console.log( clear );
 				/**
 				 * Clear the autocomplete field when clicking clear button.
 				 */
@@ -358,7 +359,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		}
 
 		// If we have autocomplete, add places library.
-		if ( document.querySelectorAll( '.mailocations-autocomplete' ).length ) {
+		if ( document.querySelector( '.mailocations-autocomplete' ) ) {
 			libraries.push( 'places' );
 		}
 

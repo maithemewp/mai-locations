@@ -73,7 +73,7 @@ class Mai_Locations_Filters_Block {
 	/**
 	 * Listener for generating default ads.
 	 *
-	 * @since 0.1.0
+	 * @since TBD
 	 *
 	 * @return void
 	 */
@@ -97,8 +97,8 @@ class Mai_Locations_Filters_Block {
 		// Build new url.
 		$redirect = add_query_arg( $args, $redirect );
 
-
-		wp_safe_redirect( esc_url( $redirect ) );
+		// Redirect. Don't `esc_url()` as this was screwing up the query string.
+		wp_safe_redirect( $redirect );
 		exit;
 	}
 
