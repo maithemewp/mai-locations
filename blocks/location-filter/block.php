@@ -134,7 +134,7 @@ class Mai_Locations_Filter_Block {
 		$html = sprintf( '<ul class="mailocations-filter-list"%s>', is_admin() ? ' style="list-style-type:none;margin-left:0;padding-left:0;"' : '' );
 
 		foreach ( $terms as $term ) {
-			$html .= sprintf( '<li><label><input type="%s" class="mailocations-filter" name="%s[]" data-filter="%s" value="%s"%s> %s</label></li>',
+			$html .= sprintf( '<li><label><input type="%s" class="mailocations-filter" tabindex="0" name="mailocations_filters[%s]" data-filter="%s" value="%s"%s> %s</label></li>',
 				$type,
 				$taxonomy,
 				"_{$taxonomy}",
@@ -164,7 +164,7 @@ class Mai_Locations_Filter_Block {
 	 * @return string
 	 */
 	function get_select_filter( $taxonomy, $terms, $selected ) {
-		$html = sprintf( '<select class="mailocations-filter" data-filter="%s" name="%s[]">', "_{$taxonomy}", $taxonomy );
+		$html = sprintf( '<select class="mailocations-filter" tabindex="0" data-filter="_%s" name="mailocations_filters[_%s]">', $taxonomy, $taxonomy );
 			$html .= sprintf( '<option value="">%s %s</option>', __( 'All', 'mai-locations' ), get_taxonomy( $taxonomy )->labels->name );
 
 			foreach ( $terms as $term ) {

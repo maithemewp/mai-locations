@@ -4,6 +4,7 @@
 	"description": "Filter locations by address/location. Uses Google Maps Autocomplete.",
 	"category": "widgets",
 	"keywords": [ "location", "address", "search" ],
+	"parent": [ "acf/mai-locations-filters" ],
 	"icon": "location",
 	"textdomain": "mai-locations",
 	"editorStyle": "file:./../../assets/css/mai-locations.min.css",

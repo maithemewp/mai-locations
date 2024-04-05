@@ -53,10 +53,14 @@
 	margin: 0;
 	padding: 8px;
 	background: rgba(255, 255, 255, 0.9);
-	color: red;
 	letter-spacing: .5px;
+	color: red;
 	font-variant: all-small-caps;
 	border: 0;
+}
+
+.mailocations-autocomplete-clear:focus {
+	outline: 1px solid currentColor;
 }
 
 .wp-block .mailocations-autocomplete-container,

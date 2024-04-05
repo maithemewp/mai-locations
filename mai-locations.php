@@ -152,6 +152,7 @@ final class Mai_Locations_Plugin {
 		include_once __DIR__ . '/blocks/location-filter/block.php';
 		include_once __DIR__ . '/blocks/location-filter-clear/block.php';
 		include_once __DIR__ . '/blocks/location-filter-submit/block.php';
+		include_once __DIR__ . '/blocks/location-filters/block.php';
 		include_once __DIR__ . '/blocks/location-map/block.php';
 		include_once __DIR__ . '/blocks/location-submission/block.php';
 		include_once __DIR__ . '/blocks/location-table/block.php';
@@ -170,6 +171,7 @@ final class Mai_Locations_Plugin {
 		new Mai_Locations_Filter_Block;
 		new Mai_Locations_Filter_Clear_Block;
 		new Mai_Locations_Filter_Submit_Block;
+		new Mai_Locations_Filters_Block;
 		new Mai_Locations_Submission_Block;
 		new Mai_Locations_Table_Block;
 		new Mai_Locations_Map_Block;

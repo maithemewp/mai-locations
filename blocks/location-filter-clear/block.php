@@ -52,6 +52,7 @@ class Mai_Locations_Filter_Clear_Block {
 			[
 				'name'       => 'mailocations-filter-clear',
 				'title'      => __( 'Mai Locations Clear Filters', 'mai-locations' ),
+				'parent'     => [ 'acf/mai-locations-filters' ],
 				'attributes' => [
 					'variantType' => 'mailocations-filter-clear'
 				],
@@ -89,17 +90,15 @@ class Mai_Locations_Filter_Clear_Block {
 		// Maybe load CSS.
 		$block_content = mailocations_get_stylesheet_link( 'mai-locations' ) . $block_content;
 
-		// Replace tags.
-		$block_content = str_replace( '<a ', '<button ', $block_content );
-		$block_content = str_replace( '</a>', '</button>', $block_content );
+		// Get current url without all query args.
+		$current_url = remove_query_arg( array_keys( wp_parse_args( $_GET ) ), home_url( add_query_arg( [] ) ) );
 
 		// Setup the tag processor.
 		$tags = new WP_HTML_Tag_Processor( $block_content );
 
 		// If button, modify markup.
-		while ( $tags->next_tag( 'button' ) ) {
-			// Remove href and add class.
-			$tags->remove_attribute( 'href' );
+		while ( $tags->next_tag( 'a' ) ) {
+			$tags->set_attribute( 'href', esc_url( $current_url ) );
 			$tags->add_class( 'mailocations-filter-clear' );
 		}
 

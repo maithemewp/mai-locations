@@ -48,6 +48,7 @@ class Mai_Locations_Filter_Submit_Block {
 		}
 
 		$args['attributes']['variantType'] = [ 'type' => 'string' ];
+		$args['parent']                    = [ 'acf/mai-locations-filters' ];
 		$args['variations']                = [
 			[
 				'name'       => 'mailocations-filter-submit',

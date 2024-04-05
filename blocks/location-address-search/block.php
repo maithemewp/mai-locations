@@ -82,7 +82,8 @@ class Mai_Locations_Address_Search_Block {
 				$value = ! $is_preview ? sprintf( ' value="%s"', $address ) : ''; // Can't have value attribute or React balks.
 
 				// Input field.
-				printf( '<input type="text" class="mailocations-autocomplete" data-countries="%s" placeholder="%s"%s>',
+				printf( '<input type="text" class="mailocations-autocomplete" form="%s" tabindex="0" data-countries="%s" placeholder="%s"%s>',
+					esc_attr( wp_unique_id( 'mai-random-' ) ),
 					implode( ',', $countries ),
 					$placeholder,
 					$value
@@ -94,6 +95,9 @@ class Mai_Locations_Address_Search_Block {
 				}
 			echo '</div>';
 
+			// Hidden input for $_POST data, outside of input-container for so clear button CSS hides correctly.
+			printf( '<input type="hidden" class="mailocations-address" name="mailocations_address" value="%s">', $address );
+
 			// If we have distances.
 			if ( $distances ) {
 				// If we have multiple units.
@@ -102,7 +106,7 @@ class Mai_Locations_Address_Search_Block {
 				// If we have more than one distance.
 				if ( count( $distances ) > 1 ) {
 					// Distance selector.
-					echo '<select class="mailocations-autocomplete-distance">';
+					echo '<select class="mailocations-autocomplete-distance" tabindex="0">';
 						foreach ( $distances as $value ) {
 							$label    = $multiple ? $value : $value . ' ' . $unit;
 							$selected = ! $is_preview && (int) $value === (int) $distance ? ' selected' : '';
@@ -114,7 +118,7 @@ class Mai_Locations_Address_Search_Block {
 
 					// Unit selector.
 					if ( $units && $multiple ) {
-						echo '<select class="mailocations-autocomplete-unit">';
+						echo '<select class="mailocations-autocomplete-unit" tabindex="0">';
 							foreach ( $units as $value ) {
 								$raw      = $value;
 								$value    = ! $is_preview ? sprintf( ' value="%s"', $raw ) : '';
