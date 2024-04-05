@@ -113,6 +113,8 @@ class Mai_Locations_Locations_Table {
 			if ( $is_admin ) {
 				$html .= '<style>.mai-locations-table a { pointer-events: none; }</style>';
 			} else {
+				// TODO: Make this a link to a stylesheet?
+				// TODO: Static var to prevent loading multiple times?
 				ob_start();
 				?>
 				<style>
