@@ -260,7 +260,6 @@ function initLocations() {
 
 			// If we have a clear link.
 			if ( clear ) {
-				console.log( clear );
 				/**
 				 * Clear the autocomplete field when clicking clear button.
 				 */

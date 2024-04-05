@@ -206,6 +206,21 @@ function mailocations_sanitize_options( $options ) {
 }
 
 /**
+ * Gets the current URL without query strings.
+ *
+ * @since TBD
+ *
+ * @param array $get The $_GET array.
+ *
+ * @return string
+ */
+function mailocations_get_current_url_clean( $get = null ) {
+	$get = ! is_null( $get ) ? $get : $_GET;
+
+	return remove_query_arg( array_keys( wp_parse_args( $get ) ), home_url( add_query_arg( [] ) ) );
+}
+
+/**
  * Deletes all transient keys in the database with `mai_locations`.
  *
  * Note that this doesn't work for sites that use a persistent object

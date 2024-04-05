@@ -91,7 +91,7 @@ class Mai_Locations_Filter_Clear_Block {
 		$block_content = mailocations_get_stylesheet_link( 'mai-locations' ) . $block_content;
 
 		// Get current url without all query args.
-		$current_url = remove_query_arg( array_keys( wp_parse_args( $_GET ) ), home_url( add_query_arg( [] ) ) );
+		$current_url = mailocations_get_current_url_clean( $_GET );
 
 		// Setup the tag processor.
 		$tags = new WP_HTML_Tag_Processor( $block_content );

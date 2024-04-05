@@ -63,8 +63,9 @@ class Mai_Locations_Filters_Block {
 		printf( '<form class="mai-locations-filters" method="post" action="%s">', esc_url( admin_url( 'admin-post.php' ) ) );
 			// Hidden inputs and nonce.
 			echo '<input type="hidden" name="action" value="mailocations_filters">';
-			printf( '<input type="hidden" name="gets" value="%s">', esc_attr( json_encode( $_GET ) ) );
+			printf( '<input type="hidden" name="redirect" value="%s">', esc_attr( mailocations_get_current_url_clean() ) );
 			wp_nonce_field( 'mailocations_filters', 'mailocations_filters_nonce' );
+
 			// Inner blocks.
 			printf( '<InnerBlocks template="%s" />', esc_attr( wp_json_encode( $this->get_template() ) ) );
 		echo '</form>';
@@ -83,16 +84,12 @@ class Mai_Locations_Filters_Block {
 			return;
 		}
 
-		// Get the current url, includes query params.
-		$redirect = wp_get_referer();
-
 		// Get existing query strings and new values.
-		$gets    = isset( $_POST['gets'] ) ? (array) json_decode( stripslashes( $_POST['gets'] ), true ) : [];
-		$filters = isset( $_POST['mailocations_filters'] ) ? (array) $_POST['mailocations_filters'] : [];
-		$address = isset( $_POST['mailocations_address'] ) ? (array) json_decode( stripslashes( $_POST['mailocations_address'] ), true ) : [];
-
-		// Build new query strings, merging or overriding existing.
-		$args = array_merge( $gets, $filters, $address );
+		$filters  = isset( $_POST['mailocations_filters'] ) ? (array) $_POST['mailocations_filters'] : [];
+		$address  = isset( $_POST['mailocations_address'] ) ? (array) json_decode( stripslashes( $_POST['mailocations_address'] ), true ) : [];
+		$redirect = isset( $_POST['redirect'] ) ? esc_url_raw( $_POST['redirect'] ) : '';
+		$args     = array_merge( $filters, $address );
+		$args     = array_filter( $args );
 
 		// Build new url.
 		$redirect = add_query_arg( $args, $redirect );
