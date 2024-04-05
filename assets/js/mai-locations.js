@@ -6,6 +6,18 @@ function initLocations() {
 	const maps   = document.querySelectorAll( '.mailocations-map' );
 	const forms  = document.querySelectorAll( '.mai-locations-filters' );
 	let   mapId  = 0;
+	let distance = params['distance'];
+	let unit     = params['units'];
+
+	// If no distance, check for distance element.
+	if ( ! distance ) {
+		distance = getDefaultValue( '.mailocations-autocomplete-distance', 100 );
+	}
+
+	// If no unit, check for unit element.
+	if ( ! unit ) {
+		unit = getDefaultValue( '.mailocations-autocomplete-unit', 'mi' );
+	}
 
 	// Loop through map elements.
 	for ( const mapEl of maps ) {
@@ -42,20 +54,6 @@ function initLocations() {
 				map: map,
 				content: pin.element,
 			});
-
-			// If we have a distance and a unit.
-			let distance = params['distance'];
-			let unit     = params['units'];
-
-			// If no distance, check for distance element.
-			if ( ! distance ) {
-				distance = getDefaultValue( '.mailocations-autocomplete-distance', null );
-			}
-
-			// If no unit, check for unit element.
-			if ( ! unit ) {
-				unit = getDefaultValue( '.mailocations-autocomplete-unit', 'mi' );
-			}
 
 			// If we have a distance, convert distance to meters.
 			if ( distance ) {
@@ -248,9 +246,11 @@ function initLocations() {
 				}
 
 				// Set values.
-				values['address'] = search.value;
-				values['lat']     = lat;
-				values['lng']     = lng;
+				values['address']  = search.value;
+				values['lat']      = lat;
+				values['lng']      = lng;
+				values['distance'] = distance;
+				values['unit']     = unit;
 
 				// If we have hidden address field, updated it with values.
 				if ( address ) {

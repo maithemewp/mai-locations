@@ -62,6 +62,8 @@ class Mai_Locations_Address_Search_Block {
 		$placeholder = get_field( 'placeholder' );
 		$placeholder = $placeholder ?: __( 'Enter your address', 'mai-locations' );
 		$address     = $params['address'];
+		$lat         = $params['lat'];
+		$lng         = $params['lng'];
 		$distances   = explode( ',', (string) get_field( 'distances' ) );
 		$distance    = $params['distance'];
 		$units       = (array) get_field( 'units' );
@@ -95,8 +97,19 @@ class Mai_Locations_Address_Search_Block {
 				}
 			echo '</div>';
 
+			// Encode the address.
+			$address_encoded = wp_json_encode(
+				[
+					'address'  => $address,
+					'lat'      => $lat,
+					'lng'      => $lng,
+					'distance' => $distance,
+					'unit'     => $unit,
+				]
+			);
+
 			// Hidden input for $_POST data, outside of input-container for so clear button CSS hides correctly.
-			printf( '<input type="hidden" class="mailocations-address" name="mailocations_address" value="%s">', $address );
+			printf( '<input type="hidden" class="mailocations-address" name="mailocations_address" value="%s">', esc_attr( $address_encoded ) );
 
 			// If we have distances.
 			if ( $distances ) {
@@ -106,7 +119,7 @@ class Mai_Locations_Address_Search_Block {
 				// If we have more than one distance.
 				if ( count( $distances ) > 1 ) {
 					// Distance selector.
-					echo '<select class="mailocations-autocomplete-distance" tabindex="0">';
+					echo '<select class="mailocations-autocomplete-distance" name="mailocations_distance" tabindex="0">';
 						foreach ( $distances as $value ) {
 							$label    = $multiple ? $value : $value . ' ' . $unit;
 							$selected = ! $is_preview && (int) $value === (int) $distance ? ' selected' : '';
@@ -118,7 +131,7 @@ class Mai_Locations_Address_Search_Block {
 
 					// Unit selector.
 					if ( $units && $multiple ) {
-						echo '<select class="mailocations-autocomplete-unit" tabindex="0">';
+						echo '<select class="mailocations-autocomplete-unit" name="mailocations_unit" tabindex="0">';
 							foreach ( $units as $value ) {
 								$raw      = $value;
 								$value    = ! $is_preview ? sprintf( ' value="%s"', $raw ) : '';
@@ -132,10 +145,10 @@ class Mai_Locations_Address_Search_Block {
 				// One distance, hidden field if not preview. These are for the JS to use when filtering.
 				elseif ( ! $is_preview ) {
 					// Distance.
-					printf( '<input type="hidden" class="mailocations-autocomplete-distance" value="%s">', $distance );
+					printf( '<input type="hidden" class="mailocations-autocomplete-distance" name="mailocations_distance" value="%s">', $distance );
 
 					// Unit.
-					printf( '<input type="hidden" class="mailocations-autocomplete-unit" value="%s">', $unit );
+					printf( '<input type="hidden" class="mailocations-autocomplete-unit" name="mailocations_unit" value="%s">', $unit );
 				}
 			}
 		echo '</div>';
