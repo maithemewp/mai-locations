@@ -87,18 +87,28 @@ class Mai_Locations_Filters_Block {
 		// Get existing query strings and new values.
 		$redirect = isset( $_POST['redirect'] ) ? esc_url_raw( $_POST['redirect'] ) : '';
 		$filters  = isset( $_POST['mailocations_filters'] ) ? (array) $_POST['mailocations_filters'] : [];
-		$address  = isset( $_POST['mailocations_address'] ) ? (array) json_decode( stripslashes( $_POST['mailocations_address'] ), true ) : [];
+		$location = isset( $_POST['mailocations_address'] ) ? (array) json_decode( stripslashes( $_POST['mailocations_address'] ), true ) : [];
+		$address  = isset( $location['address'] ) && $location['address'] ? $location['address'] : '';
+		$lat      = isset( $location['lat'] ) && $location['lat'] ? $location['lat'] : '';
+		$lng      = isset( $location['lng'] ) && $location['lng'] ? $location['lng'] : '';
 		$distance = isset( $_POST['mailocations_distance'] ) ? absint( $_POST['mailocations_distance'] ) : 100;
 		$unit     = isset( $_POST['mailocations_unit'] ) ? sanitize_text_field( $_POST['mailocations_unit'] ) : 'mi';
-		$args     = array_merge( $filters, $address );
+		$args     = $filters;
 
 		// Bail if no redirect.
 		if ( ! $redirect ) {
 			return;
 		}
 
-		// If address, add distance and unit.
+		// If address, add it.
 		if ( $address ) {
+			$args['address']  = $address;
+		}
+
+		// If address, lat, and lng, add it all.
+		if ( $address && $lat && $lng ) {
+			$args['lat']      = $lat;
+			$args['lng']      = $lng;
 			$args['distance'] = $distance;
 			$args['unit']     = $unit;
 		}
