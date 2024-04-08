@@ -23,9 +23,24 @@
 // 	]
 // );
 
+/**
+ * Set up the Geo Query class instance.
+ *
+ * @since 0.1.0
+ *
+ * @return Mai_Geo_Query
+ */
 Mai_Geo_Query::instance();
 
+/**
+ * Class Mai_Geo_Query
+ */
 class Mai_Geo_Query {
+	/**
+	 * Instance of this class.
+	 *
+	 * @var null
+	 */
 	public static function instance() {
 		static $instance = null;
 
@@ -36,6 +51,11 @@ class Mai_Geo_Query {
 		return $instance;
 	}
 
+	/**
+	 * Constructor.
+	 *
+	 * @since 0.1.0
+	 */
 	private function __construct() {
 		add_filter( 'posts_fields',  [ $this, 'posts_fields' ], 10, 2 );
 		add_filter( 'posts_join',    [ $this, 'posts_join' ], 10, 2 );
@@ -43,7 +63,44 @@ class Mai_Geo_Query {
 		add_filter( 'posts_orderby', [ $this, 'posts_orderby' ], 10, 2 );
 	}
 
-	// add a calculated "distance" parameter to the sql query, using a haversine formula
+	/**
+	 * Get the distance from a post object.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param WP_Post $post_obj The post object.
+	 * @param bool    $round    Whether to round the distance.
+	 *
+	 * @return float
+	 */
+	public static function get_distance( $post_obj = null, $round = false ) {
+		global $post;
+
+		$post_obj = $post_obj ?: $post;
+
+		if ( ! property_exists( $post_obj, 'geo_query_distance' ) ) {
+			return false;
+		}
+
+		$distance = $post_obj->geo_query_distance;
+
+		if ( false !== $round ) {
+			$distance = round( $distance, (int) $round );
+		}
+
+		return $distance;
+	}
+
+	/**
+	 * Add a calculated "distance" parameter to the sql query, using a haversine formula
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string   $sql   The SELECT clause of the query.
+	 * @param WP_Query $query The WP_Query instance.
+	 *
+	 * @return string
+	 */
 	public function posts_fields( $sql, $query ) {
 		global $wpdb;
 
@@ -62,6 +119,16 @@ class Mai_Geo_Query {
 		return $sql;
 	}
 
+	/**
+	 * Join the postmeta table twice, once for latitude and once for longitude
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string   $sql   The JOIN clause of the query.
+	 * @param WP_Query $query The WP_Query instance.
+	 *
+	 * @return string
+	 */
 	public function posts_join( $sql, $query ) {
 		global $wpdb;
 
@@ -81,7 +148,16 @@ class Mai_Geo_Query {
 		return $sql;
 	}
 
-	// match on the right metafields, and filter by distance
+	/**
+	 * Add a WHERE clause to the query to filter by distance
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string   $sql   The WHERE clause of the query.
+	 * @param WP_Query $query The WP_Query instance.
+	 *
+	 * @return string
+	 */
 	public function posts_where( $sql, $query ) {
 		global $wpdb;
 
@@ -125,7 +201,16 @@ class Mai_Geo_Query {
 		return $sql;
 	}
 
-	// handle ordering
+	/**
+	 * Order the sql query by distance.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string   $sql   The ORDER BY clause of the query.
+	 * @param WP_Query $query The WP_Query instance.
+	 *
+	 * @return string
+	 */
 	public function posts_orderby( $sql, $query ) {
 		$geo_query = $query->get( 'geo_query' );
 
@@ -143,35 +228,29 @@ class Mai_Geo_Query {
 		return $sql;
 	}
 
-	public static function get_distance( $post_obj = null, $round = false ) {
-		global $post;
-
-		$post_obj = $post_obj ?: $post;
-
-		if ( ! property_exists( $post_obj, 'geo_query_distance' ) ) {
-			return false;
-		}
-
-		$distance = $post_obj->geo_query_distance;
-
-		if ( false !== $round ) {
-			$distance = round( $distance, (int) $round );
-		}
-
-		return $distance;
-	}
-
+	/**
+	 * Calculate the haversine term for a given query
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $geo_query The geo query array.
+	 *
+	 * @return string
+	 */
 	private function haversine_term( $geo_query ) {
 		global $wpdb;
 
 		$units = 'miles';
 
+		// Maybe set units.
 		if ( ! empty( $geo_query['units'] ) ) {
 			$units = strtolower( $geo_query['units'] );
 		}
 
+		// Radius in miles.
 		$radius = 3959;
 
+		// Radius in kilometers.
 		if ( in_array( $units, array( 'km', 'kilometers' ) ) ) {
 			$radius = 6371;
 		}
@@ -181,14 +260,17 @@ class Mai_Geo_Query {
 		$lat       = 0;
 		$lng       = 0;
 
+		// Maybe add latitude.
 		if ( isset( $geo_query['latitude'] ) ) {
 			$lat = $geo_query['latitude' ];
 		}
 
+		// Maybe add longitude.
 		if ( isset( $geo_query['longitude'] ) ) {
 			$lng = $geo_query['longitude'];
 		}
 
+		// Build the haversine formula.
 		$haversine  = "( " . $radius . " * ";
 		$haversine .=     "acos( cos( radians(%f) ) * cos( radians( " . $lat_field . " ) ) * ";
 		$haversine .=     "cos( radians( " . $lng_field . " ) - radians(%f) ) + ";
