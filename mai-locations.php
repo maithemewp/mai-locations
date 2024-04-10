@@ -180,7 +180,7 @@ final class Mai_Locations_Plugin {
 		/**
 		 * Adds locations table to WooCommerce account menu.
 		 *
-		 * @since 0.1.0
+		 * @since TBD
 		 *
 		 * @return void
 		 */
