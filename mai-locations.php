@@ -386,12 +386,19 @@ final class Mai_Locations_Plugin {
 			return $text;
 		}
 
-		return sprintf( '%s %s %s %s',
+		// Set text.
+		$text = sprintf( '%s %s %s',
 			__( 'Sorry, no', 'mai-locations' ),
 			strtolower( mailocations_get_plural() ),
 			__( 'found.', 'mai-locations' ),
-			__( 'Please adjust your search criteria and try again.', 'mai-locations' )
 		);
+
+		// If filtering.
+		if ( mailocations_is_filtered_locations() ) {
+			$text .= ' ' . __( 'Please adjust your search criteria and try again.', 'mai-locations' );
+		}
+
+		return $text;
 	}
 
 	/**
