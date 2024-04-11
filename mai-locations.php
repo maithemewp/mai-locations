@@ -379,6 +379,13 @@ final class Mai_Locations_Plugin {
 	 * @return string
 	 */
 	function no_results_text( $text ) {
+		global $wp_query;
+
+		// Bail if not for locations.
+		if ( ! $wp_query || 'mai_location' !== $wp_query->get( 'post_type' ) ) {
+			return $text;
+		}
+
 		return sprintf( '%s %s %s %s',
 			__( 'Sorry, no', 'mai-locations' ),
 			strtolower( mailocations_get_plural() ),
