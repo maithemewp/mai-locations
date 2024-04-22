@@ -121,6 +121,7 @@ class Mai_Locations_Filter_Submit_Block {
 
 		// If button, modify markup.
 		while ( $tags->next_tag( [ 'tag_name' => 'button', 'class_name' => 'wp-block-button__link' ] ) ) {
+			$tags->set_attribute( 'type', 'submit' );
 			$tags->add_class( 'mailocations-filter-submit' );
 			break;
 		}
