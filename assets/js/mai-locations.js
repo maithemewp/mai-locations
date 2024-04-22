@@ -283,11 +283,11 @@ function initLocations() {
 		// If we have a submit button.
 		if ( submit ) {
 			/**
-			 * Add loader icon when a submit button is clicked.
+			 * Add loader icon when the form is submitted.
 			 */
-			submit.addEventListener( 'click', function() {
+			formEl.addEventListener( 'submit', function(e) {
 				// Add loading spinner.
-				this.innerHTML = `&nbsp;<svg class="mailocations-loading-svg" width="36" height="12" viewBox="0 0 36 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+				submit.innerHTML = `&nbsp;<svg class="mailocations-loading-svg" width="36" height="12" viewBox="0 0 36 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
 					<style>
 					.mailocations-loading-svg {
 						position: absolute;

@@ -166,36 +166,44 @@ class Mai_Locations_Filters_Block {
 			[
 				'core/buttons',
 				[
-					'variantType' => 'mailocations-filter-submit',
+					'layout' => [
+						'type'           => 'flex',
+						'orientation'    => 'vertical',
+						'justifyContent' => 'center',
+					]
 				],
 				[
 					[
 						'core/button',
 						[
-							'text'  => __( 'Search/Filter', 'mai-locations' ),
-							'width' => 100,
+							'maiLocationsFilterSubmit' => true,
+							'text'                     => __( 'Search/Filter', 'mai-locations' ),
+							'width'                    => 100,
+							'metadata'                 => [
+								'bindings' => [
+									'url' => [
+										'source' => 'mai/locations',
+										'args'   => [
+											'key' => 'filterSubmit',
+										],
+									],
+								],
+							],
+							'lock'                     => [
+								'move'   => false,
+								'remove' => true,
+							],
 						],
 						[],
 					],
-				],
-			],
-			[
-				'core/buttons',
-				[
-					'variantType' => 'mailocations-filter-clear',
-					'layout'      => [
-						'type'           => 'flex',
-						'justifyContent' => 'center',
-					],
-				],
-				[
 					[
 						'core/button',
 						[
-							'text'      => __( 'Clear Filters', 'mai-locations' ),
-							'fontSize'  => 'sm',
-							'className' => 'is-style-link',
-							'style'     => [
+							'maiLocationsFilterClear' => true,
+							'text'                    => __( 'Clear Filters', 'mai-locations' ),
+							'className'               => 'is-style-link',
+							'fontSize'                => 'sm',
+							'style'                   => [
 								'color' => [
 									'text' => '#ff0000'
 								],
@@ -206,6 +214,20 @@ class Mai_Locations_Filters_Block {
 										],
 									],
 								],
+							],
+							'metadata'               => [
+								'bindings' => [
+									'url' => [
+										'source' => 'mai/locations',
+										'args'   => [
+											'key' => 'filterClear',
+										],
+									],
+								],
+							],
+							'lock'     => [
+								'move'   => false,
+								'remove' => true,
 							],
 						],
 						[],

@@ -24,12 +24,13 @@ class Mai_Locations_Filter_Submit_Block {
 	 * @return void
 	 */
 	function hooks() {
-		add_filter( 'register_block_type_args',  [ $this, 'render_filter_submit_button_variation' ], 10, 2 );
-		add_filter( 'render_block_core/buttons', [ $this, 'render_filter_submit_button_block' ], 10, 3 );
+		add_filter( 'register_block_type_args',  [ $this, 'add_block_attribute' ], 10, 2 );
+		add_filter( 'get_block_type_variations', [ $this, 'add_block_variation' ], 10, 2 );
+		add_filter( 'render_block_core/button',  [ $this, 'render_block_variation' ], 10, 3 );
 	}
 
 	/**
-	 * Registers Mai Locations Clear Filters button variation.
+	 * Registers custom block attribute.
 	 *
 	 * @since TBD
 	 *
@@ -38,32 +39,61 @@ class Mai_Locations_Filter_Submit_Block {
 	 *
 	 * @return array
 	 */
-	function render_filter_submit_button_variation( $args, $block_type ) {
+	function add_block_attribute( $args, $block_type ) {
 		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 			return $args;
 		}
 
-		if ( 'core/buttons' !== $block_type ) {
+		if ( 'core/button' !== $block_type ) {
 			return $args;
 		}
 
-		$args['attributes']['variantType'] = [ 'type' => 'string' ];
-		$args['parent']                    = [ 'acf/mai-locations-filters' ];
-		$args['variations']                = [
-			[
-				'name'       => 'mailocations-filter-submit',
-				'title'      => __( 'Mai Locations Filter Submit', 'mai-locations' ),
-				'attributes' => [
-					'variantType' => 'mailocations-filter-submit'
-				],
-			]
-		];
+		$args['attributes']['maiLocationsFilterSubmit'] = [ 'type' => 'boolean' ];
 
 		return $args;
 	}
 
 	/**
-	 * Convert the <a> tag to <button> and modify attributes.
+	 * Registers block variation.
+	 *
+	 * @since TBD
+	 *
+	 * @link https://developer.wordpress.org/news/2024/03/14/how-to-register-block-variations-with-php/
+	 *
+	 * @param array  $variations
+	 * @param string $block_type
+	 *
+	 * @return array
+	 */
+	function add_block_variation( $variations, $block_type ) {
+		if ( 'core/button' !== $block_type->name ) {
+			return $variations;
+		}
+
+		$variations[] = [
+			'title'      => __( 'Mai Locations Filter Submit', 'mai-locations' ),
+			'name'       => 'mailocations-filter-submit',
+			'isActive'   => [ 'maiLocationsFilterSubmit' ],
+			'attributes' => [
+				'maiLocationsFilterSubmit' => true,
+				'metadata'                 => [
+					'bindings' => [
+						'url' => [
+							'source' => 'mai/locations',
+							'args'   => [
+								'key' => 'filterSubmit',
+							],
+						],
+					],
+				],
+			],
+		];
+
+		return $variations;
+	}
+
+	/**
+	 * Replace the button with an input submit.
 	 *
 	 * @since TBD
 	 *
@@ -73,32 +103,31 @@ class Mai_Locations_Filter_Submit_Block {
 	 *
 	 * @return string
 	 */
-	function render_filter_submit_button_block( $block_content, $parsed_block, $wp_block ) {
+	function render_block_variation( $block_content, $parsed_block, $wp_block ) {
 		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 			return $block_content;
 		}
 
-		if ( ! isset( $parsed_block['attrs']['variantType'] ) || 'mailocations-filter-submit' !== $parsed_block['attrs']['variantType'] ) {
+		// Bail if not our block variation.
+		if ( ! isset( $parsed_block['attrs']['maiLocationsFilterSubmit'] ) || ! $parsed_block['attrs']['maiLocationsFilterSubmit'] ) {
 			return $block_content;
 		}
 
-		// Maybe load CSS.
-		$block_content = mailocations_get_stylesheet_link( 'mai-locations' ) . $block_content;
-
-		// Replace tags.
-		$block_content = str_replace( '<a ', '<button ', $block_content );
-		$block_content = str_replace( '</a>', '</button>', $block_content );
+		// Replace `<a>` with `<button>`.
+		$block_content = preg_replace( '/<a\b([^>]*)>(.*?)<\/a>/i', '<button$1>$2</button>', $block_content );
 
 		// Setup the tag processor.
-		$tags = new WP_HTML_Tag_Processor( $block_content );
+		$tags  = new WP_HTML_Tag_Processor( $block_content );
 
 		// If button, modify markup.
-		while ( $tags->next_tag( 'button' ) ) {
-			// Remove href and add class.
-			$tags->remove_attribute( 'href' );
+		while ( $tags->next_tag( [ 'tag_name' => 'button', 'class_name' => 'wp-block-button__link' ] ) ) {
 			$tags->add_class( 'mailocations-filter-submit' );
+			break;
 		}
 
-		return $tags->get_updated_html();
+		// Save the updated HTML.
+		$block_content = $tags->get_updated_html();
+
+		return $block_content;
 	}
 }

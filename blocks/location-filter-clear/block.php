@@ -24,12 +24,13 @@ class Mai_Locations_Filter_Clear_Block {
 	 * @return void
 	 */
 	function hooks() {
-		add_filter( 'register_block_type_args',  [ $this, 'render_clear_filters_button_variation' ], 10, 2 );
-		add_filter( 'render_block_core/buttons', [ $this, 'render_clear_filters_button_block' ], 10, 3 );
+		add_filter( 'register_block_type_args',  [ $this, 'add_block_attribute' ], 10, 2 );
+		add_filter( 'get_block_type_variations', [ $this, 'add_block_variation' ], 10, 2 );
+		add_filter( 'render_block_core/button',  [ $this, 'render_block_variation' ], 10, 3 );
 	}
 
 	/**
-	 * Registers Mai Locations Clear Filters button variation.
+	 * Registers custom block attribute.
 	 *
 	 * @since TBD
 	 *
@@ -38,32 +39,62 @@ class Mai_Locations_Filter_Clear_Block {
 	 *
 	 * @return array
 	 */
-	function render_clear_filters_button_variation( $args, $block_type ) {
+	function add_block_attribute( $args, $block_type ) {
 		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 			return $args;
 		}
 
-		if ( 'core/buttons' !== $block_type ) {
+		// if ( 'core/buttons' !== $block_type ) {
+		if ( 'core/button' !== $block_type ) {
 			return $args;
 		}
 
-		$args['attributes']['variantType'] = [ 'type' => 'string' ];
-		$args['variations']                = [
-			[
-				'name'       => 'mailocations-filter-clear',
-				'title'      => __( 'Mai Locations Clear Filters', 'mai-locations' ),
-				'parent'     => [ 'acf/mai-locations-filters' ],
-				'attributes' => [
-					'variantType' => 'mailocations-filter-clear'
-				],
-			]
-		];
+		$args['attributes']['maiLocationsFilterClear'] = [ 'type' => 'boolean' ];
 
 		return $args;
 	}
 
 	/**
-	 * Convert the <a> tag to <button> and modify attributes.
+	 * Registers block variation.
+	 *
+	 * @since TBD
+	 *
+	 * @link https://developer.wordpress.org/news/2024/03/14/how-to-register-block-variations-with-php/
+	 *
+	 * @param array  $variations
+	 * @param string $block_type
+	 *
+	 * @return array
+	 */
+	function add_block_variation( $variations, $block_type ) {
+		if ( 'core/button' !== $block_type->name ) {
+			return $variations;
+		}
+
+		$variations[] = [
+			'title'      => __( 'Mai Locations Filter Clear', 'mai-locations' ),
+			'name'       => 'mailocations-filter-clear',
+			'isActive'   => [ 'maiLocationsFilterClear' ],
+			'attributes' => [
+				'maiLocationsFilterClear' => true,
+				'metadata'                => [
+					'bindings' => [
+						'url' => [
+							'source' => 'mai/locations',
+							'args'   => [
+								'key' => 'filterClear',
+							],
+						],
+					],
+				],
+			],
+		];
+
+		return $variations;
+	}
+
+	/**
+	 * Modifies the url of the button to clear filters.
 	 *
 	 * @since TBD
 	 *
@@ -73,12 +104,13 @@ class Mai_Locations_Filter_Clear_Block {
 	 *
 	 * @return string
 	 */
-	function render_clear_filters_button_block( $block_content, $parsed_block, $wp_block ) {
+	function render_block_variation( $block_content, $parsed_block, $wp_block ) {
 		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 			return $block_content;
 		}
 
-		if ( ! isset( $parsed_block['attrs']['variantType'] ) || 'mailocations-filter-clear' !== $parsed_block['attrs']['variantType'] ) {
+		// Bail if not our block variation.
+		if ( ! isset( $parsed_block['attrs']['maiLocationsFilterClear'] ) || ! $parsed_block['attrs']['maiLocationsFilterClear'] ) {
 			return $block_content;
 		}
 
