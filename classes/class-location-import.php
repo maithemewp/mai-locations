@@ -168,6 +168,10 @@ class Mai_Locations_Location_Import {
 	 * @return array
 	 */
 	function load_roles( $field ) {
+		if ( ! is_admin() ) {
+			return $field;
+		}
+
 		$field['choices'] = [];
 		$roles            = array_reverse( wp_roles()->roles );
 
@@ -199,6 +203,10 @@ class Mai_Locations_Location_Import {
 	 * @return array
 	 */
 	function load_statuses( $field ) {
+		if ( ! is_admin() ) {
+			return $field;
+		}
+
 		$field['choices']       = get_post_statuses();
 		$field['default_value'] = 'publish';
 

@@ -156,6 +156,10 @@ class Mai_Locations_Location_Fields {
 	 * @return array
 	 */
 	function load_location_fields_choices( $field ) {
+		if ( ! is_admin() ) {
+			return $field;
+		}
+
 		// Get currently selected fields, so they are first. Combine so we can use the keys as values.
 		$field['choices'] = array_combine( (array) $field['value'], (array) $field['value'] );
 

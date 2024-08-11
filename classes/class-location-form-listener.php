@@ -330,12 +330,12 @@ class Mai_Locations_Location_Form_Listener {
 		$pending_url  = sprintf( '%s/wp-admin/edit.php?post_status=pending&post_type=%s', $base_url, $post_type );
 		$draft_url    = sprintf( '%s/wp-admin/edit.php?post_status=draft&post_type=%s', $base_url, $post_type );
 		$publish_url  = sprintf( '%s/wp-admin/edit.php?post_status=publish&post_type=%s', $base_url, $post_type );
-		$message      = sprintf( 'There is a new submission from %s.', $name ) . PHP_EOL . PHP_EOL;
-		$message     .= sprintf( 'View the pending post: %s', get_permalink( $post_id ) ) . PHP_EOL . PHP_EOL;
-		$message     .= sprintf( 'Edit post: %s', $edit_url ) . PHP_EOL . PHP_EOL;
-		$message     .= sprintf( 'View all pending %s: %s', $plural, $pending_url ) . PHP_EOL;
-		$message     .= sprintf( 'View all draft %s: %s', $plural, $draft_url ) . PHP_EOL;
-		$message     .= sprintf( 'View all published %s: %s', $plural, $publish_url ) . PHP_EOL;
+		$message      = sprintf( 'There is a new submission from %s.', $name ) . "\r\n\r\n";
+		$message     .= sprintf( 'View the pending post: %s', get_permalink( $post_id ) ) . "\r\n\r\n";
+		$message     .= sprintf( 'Edit post: %s', $edit_url ) . "\r\n\r\n";
+		$message     .= sprintf( 'View all pending %s: %s', $plural, $pending_url ) . "\r\n";
+		$message     .= sprintf( 'View all draft %s: %s', $plural, $draft_url ) . "\r\n";
+		$message     .= sprintf( 'View all published %s: %s', $plural, $publish_url ) . "\r\n";
 
 		// Send email.
 		wp_mail( $to, $subject, $message );
@@ -357,8 +357,8 @@ class Mai_Locations_Location_Form_Listener {
 		$singular  = mailocations_get_singular();
 		$to        = get_the_author_meta( 'user_email', $post->post_author );
 		$subject   = sprintf( '%s %s %s %s', __( 'Your', 'mai-locations' ), untrailingslashit( home_url() ), $singular, __( 'has been published!', 'mai-locations' ) );
-		$message   = __( 'Thank you for your submission!', 'mai-locations' ) . PHP_EOL . PHP_EOL;
-		$message  .= sprintf( 'View your %s here: %s', $singular, get_permalink( $post->ID ) ) . PHP_EOL . PHP_EOL;
+		$message   = __( 'Thank you for your submission!', 'mai-locations' ) . "\r\n\r\n";
+		$message  .= sprintf( 'View your %s here: %s', $singular, get_permalink( $post->ID ) ) . "\r\n\r\n";
 
 		// Send email.
 		wp_mail( $to, $subject, $message );

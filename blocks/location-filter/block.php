@@ -250,6 +250,10 @@ class Mai_Locations_Filter_Block {
 	 * @return array
 	 */
 	function load_locations_filter_field( $field ) {
+		if ( ! is_admin() ) {
+			return $field;
+		}
+
 		$field['choices'] = mailocations_get_location_taxonomies();
 
 		return $field;
