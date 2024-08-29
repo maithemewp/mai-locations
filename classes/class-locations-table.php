@@ -71,14 +71,6 @@ class Mai_Locations_Locations_Table {
 		// Get user locations for front end.
 		if ( ! $is_admin ) {
 			$locations = mailocation_get_user_locations( $this->args['post_type'] );
-
-			ray( $this->args['post_type'] );
-			// $meta = get_user_meta( $this->user_id, 'user_locations', true );
-			// foreach ( $meta as $location_id ) {
-			// 	$author = get_post_field( 'post_author', $location_id );
-			// 	ray( $this->user_id . ' | ' . $author );
-			// }
-
 		}
 		// Get first 2 locations for admin.
 		else {
