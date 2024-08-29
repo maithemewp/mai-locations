@@ -82,19 +82,22 @@
 }
 
 .mailocations-form .acf-taxonomy-field .acf-checkbox-list {
-	column-count: 2;
+	-moz-column-count: 2;
+	     column-count: 2;
 	padding: 0;
 }
 
 @media only screen and (min-width: 600px) {
 	.mailocations-form .acf-taxonomy-field .acf-checkbox-list {
-		column-count: 3;
+		-moz-column-count: 3;
+		     column-count: 3;
 	}
 }
 
 @media only screen and (min-width: 800px) {
 	.mailocations-form .acf-taxonomy-field .acf-checkbox-list {
-		column-count: 4;
+		-moz-column-count: 4;
+		     column-count: 4;
 	}
 }
 
@@ -179,3 +182,80 @@
 .mailocations-form #message.updated {
 	--mailocations-form-message-background: var(--color-success);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

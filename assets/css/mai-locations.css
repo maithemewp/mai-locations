@@ -39,6 +39,10 @@
 	flex-grow: 1;
 }
 
+.mailocations-autocomplete:-moz-placeholder-shown + .mailocations-autocomplete-clear {
+	display: none;
+}
+
 .mailocations-autocomplete:placeholder-shown + .mailocations-autocomplete-clear {
 	display: none;
 }
@@ -68,3 +72,79 @@
 .wp-block .mailocations-filter-list {
 	pointer-events: none;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
