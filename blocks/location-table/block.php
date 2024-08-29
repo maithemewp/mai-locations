@@ -69,6 +69,9 @@ class Mai_Locations_Table_Block {
 			'align'      => isset( $attributes['align'] ) ? esc_html( $attributes['align'] ) : '',
 		];
 
+		// Force default post type if none.
+		$args['post_type'] = $args['post_type'] ?: 'mai_location';
+
 		echo mailocations_get_locations_table( $args );
 	}
 
