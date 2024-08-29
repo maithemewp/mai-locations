@@ -18,6 +18,7 @@ class Mai_Locations_Location_Form {
 			[
 				'location_id' => 0,
 				'fields'      => [],
+				'post_type'   => 'mai_location',
 				'status'      => 'pending',
 				'redirect'    => '',
 				'emails'      => '',
@@ -29,6 +30,7 @@ class Mai_Locations_Location_Form {
 		// Sanitize.
 		$args['location_id'] = (int) $args['location_id'];
 		$args['fields']      = (array) $args['fields'];
+		$args['post_type']   = sanitize_key( $args['post_type'] );
 		$args['status']      = sanitize_key( $args['status'] );
 		$args['redirect']    = $args['redirect'] ? esc_url( $args['redirect'] ) : '';
 		$args['emails']      = $args['emails'] ? sanitize_text_field( $args['emails'] ) : '';

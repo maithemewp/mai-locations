@@ -12,13 +12,13 @@ class Mai_Locations_Locations_Table {
 	 *
 	 * @since TBD
 	 *
-	 * @param int   $user_id The user ID.
-	 * @param array $args    The table/form args.
+	 * @param array $args The table/form args.
 	 */
-	function __construct( $user_id = 0, $args = [] ) {
-		$this->user_id = (int) $user_id ?: get_current_user_id();
+	function __construct( $args = [] ) {
+		$this->user_id = get_current_user_id();
 		$args          = shortcode_atts(
 			[
+				'post_type'  => 'mai_location',
 				'title'      => sprintf( '%s %s', __( 'My', 'mai-locations' ), mailocations_get_plural() ),
 				'header'     => mailocations_get_plural(),
 				'no_results' => __( 'Sorry, no locations available.', 'mai-locations' ),
@@ -32,6 +32,7 @@ class Mai_Locations_Locations_Table {
 
 		// Sanitize.
 		$args = [
+			'post_type'  => sanitize_key( $args['post_type'] ),
 			'title'      => esc_html( $args['title'] ),
 			'header'     => esc_html( $args['header'] ),
 			'no_results' => sanitize_text_field( $args['no_results'] ),
@@ -62,17 +63,17 @@ class Mai_Locations_Locations_Table {
 
 		// Set vars.
 		$is_admin    = is_admin();
-		$is_viewable = is_post_type_viewable( 'mai_location' );
+		$is_viewable = is_post_type_viewable( $this->args['post_type'] );
 
 		// Get user locations for front end.
 		if ( ! $is_admin ) {
-			$locations = mailocation_get_user_locations( $this->user_id );
+			$locations = mailocation_get_user_locations( $this->args['post_type'] );
 		}
 		// Get first 2 locations for admin.
 		else {
 			$query = new WP_Query(
 				[
-					'post_type'              => 'mai_location',
+					'post_type'              => $this->args['post_type'],
 					'posts_per_page'         => 2,
 					'post_status'            => [ 'publish', 'pending' ],
 					'no_found_rows'          => true,
@@ -82,11 +83,10 @@ class Mai_Locations_Locations_Table {
 				]
 			);
 			$locations = $query->posts;
-			wp_reset_postdata();
 
 			// No locations message.
 			if ( ! $locations ) {
-				$plural                   = strtolower( mailocations_get_plural() );
+				$plural                   = strtolower( mailocations_get_plural_label( $this->args['post_type'] ) );
 				$message                  = sprintf( __( 'No %s exist. Add new %s to display them here.', 'mai-locations' ), $plural, $plural );
 				$message                  = sprintf( '<table><tr><th><em>%s</em></th></tr></table>', $message );
 				$this->args['no_results'] = $message;
@@ -95,7 +95,10 @@ class Mai_Locations_Locations_Table {
 
 		// Bail if no locations.
 		if ( ! $locations ) {
-			return wpautop( $this->args['no_results'] );
+			$return  = $this->args['title'] ? sprintf( '<h2>%s</h2>%s', $this->args['title'], PHP_EOL ) : '';
+			$return .= wpautop( $this->args['no_results'] );
+
+			return $return;
 		}
 
 		// Set up HTML.
@@ -222,6 +225,22 @@ class Mai_Locations_Locations_Table {
 					}
 				$html .= '</tbody>';
 			$html .= '</table> ';
+		}
+
+		// If admin, check fields.
+		if ( $is_admin ) {
+			// Get fields.
+			$group_fields = mailocations_get_field_group_fields( $this->args['post_type'] );
+			$group_fields = wp_list_pluck( $group_fields, 'label', 'key' );
+
+			// Add notice for fields not in the group.
+			foreach ( $this->args['fields'] as $index => $field ) {
+				if ( isset( $group_fields[ $field ] ) ) {
+					continue;
+				}
+
+				$html .= sprintf( '<p style="padding:16px;border:1px solid red;">%s: %s</p>', $field, __( 'Field not available on selected post type', 'mai-locations' ) );
+			}
 		}
 
 		return $html;

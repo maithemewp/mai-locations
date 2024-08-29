@@ -24,8 +24,9 @@ class Mai_Locations_Table_Block {
 	 * @return void
 	 */
 	function hooks() {
-		add_action( 'acf/init', [ $this, 'register_block' ] );
-		add_action( 'acf/init', [ $this, 'register_field_group' ] );
+		add_action( 'acf/init',                               [ $this, 'register_block' ] );
+		add_action( 'acf/init',                               [ $this, 'register_field_group' ] );
+		add_filter( 'acf/load_field/key=field_6071bfebbddbg', [ $this, 'load_post_type_choices' ] );
 	}
 
 	/**
@@ -58,6 +59,7 @@ class Mai_Locations_Table_Block {
 	 */
 	function render_block( $attributes, $content, $is_preview, $post_id, $block ) {
 		$args = [
+			'post_type'  => get_field( 'locations_table_post_type' ),
 			'title'      => get_field( 'locations_table_title' ),
 			'header'     => get_field( 'locations_table_header' ),
 			'no_results' => get_field( 'locations_no_results' ),
@@ -67,7 +69,7 @@ class Mai_Locations_Table_Block {
 			'align'      => isset( $attributes['align'] ) ? esc_html( $attributes['align'] ) : '',
 		];
 
-		echo mailocations_get_locations_table( 0, $args );
+		echo mailocations_get_locations_table( $args );
 	}
 
 	/**
@@ -78,9 +80,6 @@ class Mai_Locations_Table_Block {
 	 * @return void
 	 */
 	function register_field_group() {
-		$plural   = mailocations_get_plural();
-		$singular = mailocations_get_singular();
-
 		// Locations Table block.
 		acf_add_local_field_group(
 			[
@@ -88,18 +87,24 @@ class Mai_Locations_Table_Block {
 				'key'    => 'mailocations_locations_table_field_group',
 				'fields' => [
 					[
+						'label'       => __( 'Post Type', 'mai-locations' ),
+						'key'         => 'field_6071bfebbddbg',
+						'name'        => 'locations_table_post_type',
+						'type'        => 'select',
+					],
+					[
 						'label'       => __( 'Title', 'mai-locations' ),
 						'key'         => 'field_6071bfebbfdab',
 						'name'        => 'locations_table_title',
 						'type'        => 'text',
-						'placeholder' => sprintf( '%s %s', __( 'My', 'mai-locations' ), $plural ),
+						'placeholder' => __( 'My Location', 'mai-locations' ),
 					],
 					[
 						'label'       => __( 'Table Header', 'mai-location' ),
 						'key'         => 'field_6071c00cbfdac',
 						'name'        => 'locations_table_header',
 						'type'        => 'text',
-						'placeholder' => $plural,
+						'placeholder' => __( 'Locations', 'mai-locations' ),
 					],
 					[
 						'label' => __( 'No Results Message', 'mai-location' ),
@@ -118,7 +123,7 @@ class Mai_Locations_Table_Block {
 					],
 					[
 						// This field has to match what's in location-submission/block.php.
-						'label'         => sprintf( '%s %s', $singular, __( 'Edit Form Fields', 'mai-locations' ) ),
+						'label'         => __( 'Edit Form Fields', 'mai-locations' ),
 						'instructions'  => __( 'Allow editing of these fields.', 'mai-locations' ),
 						'key'           => 'mai_location_fields',
 						'name'          => 'location_fields',
@@ -145,5 +150,26 @@ class Mai_Locations_Table_Block {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Load the post type choices.
+	 *
+	 * @since TBD
+	 *
+	 * @param array $field
+	 *
+	 * @return array
+	 */
+	function load_post_type_choices( $field ) {
+		if ( ! is_admin() ) {
+			return $field;
+		}
+
+		$field['choices'] = array_map( function( $name ) {
+			return $name['plural'];
+		}, mailocations_get_location_post_types() );
+
+		return $field;
 	}
 }

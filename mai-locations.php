@@ -178,7 +178,9 @@ final class Mai_Locations_Plugin {
 		new Mai_Locations_Table_Block;
 		new Mai_Locations_Map_Block;
 
-		add_action( 'plugins_loaded', 'mailocations_woocommerce_account_tab' );
+		// Disabled for now. The menu item(s) need to be conditionally added.
+		// We need to think this through more.
+		// add_action( 'plugins_loaded', 'mailocations_woocommerce_account_tab' );
 		/**
 		 * Adds locations table to WooCommerce account menu.
 		 *
@@ -203,8 +205,8 @@ final class Mai_Locations_Plugin {
 	 */
 	function hooks() {
 		add_action( 'plugins_loaded',         [ $this, 'updater' ] );
-		add_action( 'init',                   [ $this, 'register_content_types' ] );
-		add_action( 'save_post_mai_location', [ $this, 'save_post' ], 10, 3 );
+		add_action( 'init',                   [ $this, 'register_content_types' ], 4 ); // Before ACF's priority of 5, so the post type is available.
+		add_action( 'save_post',              [ $this, 'save_post' ], 10, 3 );
 		add_filter( 'genesis_noposts_text',   [ $this, 'no_results_text' ] );
 
 		register_activation_hook( __FILE__, [ $this, 'activate' ] );
@@ -298,7 +300,7 @@ final class Mai_Locations_Plugin {
 				'show_in_rest'       => true,
 				'show_ui'            => true,
 				'rewrite'            => [ 'slug' => $base, 'with_front' => false ],
-				'supports'           => [ 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'page-attributes', 'genesis-cpt-archives-settings', 'mai-archive-settings', 'mai-single-settings' ],
+				'supports'           => [ 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'page-attributes', 'mai-locations', 'genesis-cpt-archives-settings', 'mai-archive-settings', 'mai-single-settings' ],
 				'taxonomies'         => [ 'mai_location_cat' ],
 			]
 		) );
@@ -365,10 +367,18 @@ final class Mai_Locations_Plugin {
 			return;
 		}
 
+		// Get post types that support locations.
+		$post_types = mailocations_get_location_post_types();
+
+		// Bail if not a location.
+		if ( ! isset( $post_types[ $post->post_type ] ) ) {
+			return;
+		}
+
 		// TODO: Only flush if any address/locations fields were update.
 
 		// Flush transients.
-		delete_transient( 'mailocations_locations' );
+		mailocations_delete_transients();
 	}
 
 	/**
@@ -383,15 +393,19 @@ final class Mai_Locations_Plugin {
 	function no_results_text( $text ) {
 		global $wp_query;
 
+		// Get post types that support locations.
+		$post_types = mailocations_get_location_post_types();
+		$post_type  = $wp_query->get( 'post_type' );
+
 		// Bail if not for locations.
-		if ( ! $wp_query || 'mai_location' !== $wp_query->get( 'post_type' ) ) {
+		if ( ! $wp_query || ! $post_type || ! isset( $post_types[ $post_type ] ) ) {
 			return $text;
 		}
 
 		// Set text.
 		$text = sprintf( '%s %s %s',
 			__( 'Sorry, no', 'mai-locations' ),
-			strtolower( mailocations_get_plural() ),
+			strtolower( $post_types[ $post_type ]['plural'] ),
 			__( 'found.', 'mai-locations' ),
 		);
 

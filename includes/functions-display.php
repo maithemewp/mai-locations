@@ -11,13 +11,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  *
  * @since 0.1.0
  *
- * @param int   $user_id The user ID.
- * @param array $args    The table/form args.
+ * @param array $args The table/form args.
  *
  * @return string
  */
-function mailocations_get_locations_table( $user_id = 0, $args = [] ) {
-	$table = new Mai_Locations_Locations_Table( $user_id, $args );
+function mailocations_get_locations_table( $args = [] ) {
+	$table = new Mai_Locations_Locations_Table( $args );
 	return $table->get();
 }
 

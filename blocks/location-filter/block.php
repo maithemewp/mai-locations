@@ -101,8 +101,8 @@ class Mai_Locations_Filter_Block {
 		echo mailocations_get_stylesheet_link( 'mai-locations' );
 
 		// Get any selected items.
-		$trimmed  = "_{$taxonomy}";
-		$selected = isset( $_GET[ $trimmed ] ) && ! empty( $_GET[ $trimmed ] ) ? $_GET[ $trimmed ] : [];
+		$prefixed = "_{$taxonomy}";
+		$selected = isset( $_GET[ $prefixed ] ) && ! empty( $_GET[ $prefixed ] ) ? $_GET[ $prefixed ] : [];
 		$selected = $selected ? array_flip( array_filter( explode( ',', $selected ) ) ) : $selected;
 
 		switch ( $type ) {
@@ -134,10 +134,10 @@ class Mai_Locations_Filter_Block {
 		$html = sprintf( '<ul class="mailocations-filter-list"%s>', is_admin() ? ' style="list-style-type:none;margin-left:0;padding-left:0;"' : '' );
 
 		foreach ( $terms as $term ) {
-			$html .= sprintf( '<li><label><input type="%s" class="mailocations-filter" tabindex="0" name="mailocations_filters[%s]" data-filter="%s" value="%s"%s> %s</label></li>',
+			$html .= sprintf( '<li><label><input type="%s" class="mailocations-filter" tabindex="0" name="mailocations_filters[_%s]" data-filter="_%s" value="%s"%s> %s</label></li>',
 				$type,
 				$taxonomy,
-				"_{$taxonomy}",
+				$taxonomy,
 				$term->slug,
 				$selected && isset( $selected[ $term->slug ] ) ? ' checked' : '',
 				$term->name

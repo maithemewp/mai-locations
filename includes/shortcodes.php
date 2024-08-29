@@ -300,5 +300,5 @@ add_shortcode( 'mai_locations_table', 'mailocation_location_table_shortcode' );
  * @return string
  */
 function mailocation_location_table_shortcode( $atts ) {
-	return mailocations_get_locations_table( 0, $atts );
+	return mailocations_get_locations_table( $atts );
 }

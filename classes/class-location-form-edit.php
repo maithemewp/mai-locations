@@ -19,7 +19,7 @@ class Mai_Locations_Location_Form_Edit extends Mai_Locations_Location_Form {
 
 		// Get it started.
 		$html     = '';
-		$singular = mailocations_get_singular();
+		$singular = mailocations_get_singular_label( get_post_type( $this->args['location_id'] ) );
 		$referrer = isset( $GET['referrer'] ) ? sanitize_text_field( $GET['referrer'] ) : '';
 
 		// Maybe add back link.
@@ -27,17 +27,33 @@ class Mai_Locations_Location_Form_Edit extends Mai_Locations_Location_Form {
 			$html .= sprintf( '<p><a href="%s">← %s</a></p>', esc_url( $referrer ), __( 'Back', 'mai-locations' ) );
 		}
 
+		// Get fields.
+		$group_fields = mailocations_get_field_group_fields( get_post_type( $this->args['location_id'] ) );
+		$group_fields = wp_list_pluck( $group_fields, 'label', 'key' );
+
+		// Remove fields not in the group.
+		foreach ( $this->args['fields'] as $index => $field ) {
+			if ( ! isset( $group_fields[ $field ] ) ) {
+				unset( $this->args['fields'][ $index ] );
+			}
+		}
+
 		// Add filter to load location values. These are not stored as custom meta, so we need to load them manually.
 		add_filter( 'acf/load_value/key=mai_location_title',   [ $this, 'load_location_title_value' ], 10, 3 );
 		add_filter( 'acf/load_value/key=mai_location_excerpt', [ $this, 'load_location_excerpt_value' ], 10, 3 );
 		add_filter( 'acf/load_value/key=mai_location_image',   [ $this, 'load_location_image_value' ], 10, 3 );
+
+		// Get post status.
+		$post_status  = get_post_status( $this->args['location_id'] );
+		$submit_value = 'publish' !== $post_status ? __( 'Publish', 'mai-locations' ) : __( 'Update', 'mai-locations' );
+		$submit_value = sprintf( '%s %s', $submit_value, $singular );
 
 		// Form args.
 		$args = [
 			'id'              => 'mailocations-form',
 			'post_id'         => $this->args['location_id'],
 			'fields'          => $this->args['fields'],
-			'submit_value'    => sprintf( '%s %s', __( 'Update', 'mai-locations' ), $singular ),
+			'submit_value'    => $submit_value,
 			'updated_message' => sprintf( __( '%s successfully updated.', 'mai-locations' ), $singular ),
 			'uploader'        => 'basic',
 			// 'uploader'        => 'wp', // Not working, needs capabilities.

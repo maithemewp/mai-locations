@@ -725,3 +725,35 @@ function mailocations_get_country_choices() {
 
 	return $choices;
 }
+
+/**
+ * Gets field group fields.
+ *
+ * @since TBD
+ *
+ * @return array
+ */
+function mailocations_get_field_group_fields( $post_type = '' ) {
+	static $fields = [];
+
+	if ( $fields ) {
+		if ( $post_type ) {
+			return isset( $fields[ $post_type ] ) ? $fields[ $post_type ] : [];
+		}
+
+		return $fields['all'];
+	}
+
+	$core          = array_merge( acf_get_fields( 'mai_locations_core_field_group' ), acf_get_fields( 'mai_locations_location_field_group' ) );
+	$fields        = [ 'all' => $core ];
+	$post_types    = array_keys( mailocations_get_location_post_types() );
+
+	foreach ( $post_types as $name ) {
+		$one             = array_filter( acf_get_fields( "mai_locations_core_{$name}_field_group" ) );
+		$two             = array_filter( acf_get_fields( "mai_locations_{$name}_field_group" ) );
+		$fields[ $name ] = array_merge( $core, $one, $two );
+		$fields['all']   = array_merge( $fields['all'], $one, $two );
+	}
+
+	return $post_type ? ( isset( $fields[ $post_type ] ) ? $fields[ $post_type ] : [] ) : $fields['all'];
+}

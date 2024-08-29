@@ -76,6 +76,8 @@ class Mai_Locations_Location_Import {
 		// Example download link.
 		$download_link = sprintf( '<a href="%sassets/csv/mai-locations-import-template.csv" target="_blank" download">%s</a>', MAI_LOCATIONS_PLUGIN_URL, __( 'Download example CSV file', 'mai-locations' ) );
 
+		// TODO: Add field for post type.
+
 		acf_add_local_field_group(
 			[
 				'key'    => 'mailocations_location_import_field_group',

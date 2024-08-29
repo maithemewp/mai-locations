@@ -21,8 +21,9 @@ class Mai_Locations_Location_Form_Submit extends Mai_Locations_Location_Form {
 		}
 
 		// Get single name and group data.
-		$singular     = mailocations_get_singular();
-		$group_fields = array_merge( acf_get_fields( 'mai_locations_core_field_group' ), acf_get_fields( 'mai_locations_location_field_group' ) );
+		$post_type    = $this->args['post_type'] ? $this->args['post_type'] : 'mai_location';
+		$singular     = mailocations_get_singular_label( $post_type );
+		$group_fields = mailocations_get_field_group_fields( $post_type );
 		$group_fields = wp_list_pluck( $group_fields, 'label', 'key' );
 
 		// If preview or in admin. Sometimes is_preview was showing false in the editor. Hmmm.
@@ -32,6 +33,7 @@ class Mai_Locations_Location_Form_Submit extends Mai_Locations_Location_Form {
 
 				foreach ( $this->args['fields'] as $field ) {
 					if ( ! isset( $group_fields[ $field ] ) ) {
+						$html .= sprintf( '<p><label>%s</label><input style="border:1px solid red;" type="text" placeholder="%s"></p>', $field, __( 'Field not available on selected post type', 'mai-locations' ) );
 						continue;
 					}
 
@@ -47,7 +49,7 @@ class Mai_Locations_Location_Form_Submit extends Mai_Locations_Location_Form {
 			'id'                => 'mailocations-form',
 			'post_id'           => 'new_post',
 			'new_post'          => [
-				'post_type'   => 'mai_location',
+				'post_type'   => $post_type,
 				'post_status' => $this->args['status'] ? $this->args['status'] : 'pending',
 				'post_author' => get_current_user_id(), // Returns zero if not logged in.
 			],

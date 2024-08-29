@@ -24,8 +24,9 @@ class Mai_Locations_Submission_Block {
 	 * @return void
 	 */
 	function hooks() {
-		add_action( 'acf/init', [ $this, 'register_block' ] );
-		add_action( 'acf/init', [ $this, 'register_field_group' ] );
+		add_action( 'acf/init',                                  [ $this, 'register_block' ] );
+		add_action( 'acf/init',                                  [ $this, 'register_field_group' ] );
+		add_filter( 'acf/load_field/key=mai_location_post_type', [ $this, 'load_post_type_choices' ] );
 	}
 
 	/**
@@ -59,12 +60,13 @@ class Mai_Locations_Submission_Block {
 	 */
 	function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
 		$args = [
-			'fields'   => array_filter( (array) get_field( 'location_fields' ) ),
-			'status'   => get_field( 'location_status' ),
-			'redirect' => get_field( 'location_redirect' ),
-			'emails'   => get_field( 'location_emails' ),
-			'class'    => isset( $attributes['className'] ) && ! empty( $attributes['className'] ) ? $attributes['className'] : '',
-			'preview'  => $is_preview,
+			'fields'    => array_filter( (array) get_field( 'location_fields' ) ),
+			'post_type' => get_field( 'location_post_type' ),
+			'status'    => get_field( 'location_status' ),
+			'redirect'  => get_field( 'location_redirect' ),
+			'emails'    => get_field( 'location_emails' ),
+			'class'     => isset( $attributes['className'] ) && ! empty( $attributes['className'] ) ? $attributes['className'] : '',
+			'preview'   => $is_preview,
 		];
 
 		echo mailocations_get_location_submission_form( $args );
@@ -78,32 +80,36 @@ class Mai_Locations_Submission_Block {
 	 * @return void
 	 */
 	function register_field_group() {
-		$plural   = mailocations_get_plural();
-		$singular = mailocations_get_singular();
-
+		// Register the field group.
 		acf_add_local_field_group(
 			[
 				'title'  => __( 'Locations Table', 'mai-locations' ),
 				'key'    => 'mai_location_submission_field_group',
 				'fields' => [
 					[
+						'label'    => __( 'Location Post Type', 'mai-locations'),
+						'key'      => 'mai_location_post_type',
+						'name'     => 'location_post_type',
+						'type'     => 'select',
+						'choices'  => '', // Added via filter because it's too early to get the post types.
+					],
+					[
 						'label'    => __( 'Location Status', 'mai-locations'),
 						'key'      => 'mai_location_status',
 						'name'     => 'location_status',
 						'type'     => 'select',
-						'required' => 1,
 						'choices'  => get_post_statuses(),
 					],
 					[
 						// This field has to match what's in locations-table/block.php.
-						'label'        => sprintf( '%s %s', $singular, __( 'Submission Redirect', 'mai-locations' ) ),
+						'label'        => __( 'Submission Redirect', 'mai-locations' ),
 						'instructions' => __( 'Redirect to this URL after submission.', 'mai-locations' ),
 						'key'          => 'mai_location_redirect',
 						'name'         => 'location_redirect',
 						'type'         => 'text',
 					],
 					[
-						'label'        => sprintf( '%s %s', $singular, __( 'Submission Notifications', 'mai-locations' ) ),
+						'label'        => __( 'Submission Notifications', 'mai-locations' ),
 						'instructions' => __( 'Send notificaiton of submission the following comma-separated email addresses.', 'mai-locations' ),
 						'key'          => 'mai_location_emails',
 						'name'         => 'location_emails',
@@ -111,7 +117,7 @@ class Mai_Locations_Submission_Block {
 					],
 					[
 						// This field has to match what's in locations-table/block.php.
-						'label'         => sprintf( '%s %s', $singular, __( 'Submission Form Fields', 'mai-locations' ) ),
+						'label'         => __( 'Submission Form Fields', 'mai-locations' ),
 						'instructions'  => __( 'Allow editing of these fields.', 'mai-locations' ),
 						'key'           => 'mai_location_fields',
 						'name'          => 'location_fields',
@@ -138,5 +144,26 @@ class Mai_Locations_Submission_Block {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Load the post type choices.
+	 *
+	 * @since TBD
+	 *
+	 * @param array $field
+	 *
+	 * @return array
+	 */
+	function load_post_type_choices( $field ) {
+		if ( ! is_admin() ) {
+			return $field;
+		}
+
+		$field['choices'] = array_map( function( $name ) {
+			return $name['plural'];
+		}, mailocations_get_location_post_types() );
+
+		return $field;
 	}
 }

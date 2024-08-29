@@ -9,50 +9,46 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  *
  * @since 0.1.0
  *
- * @param int  $user_id The user ID.
- * @param bool $admin   If displaying table in admin.
+ * @param string $post_type The location post type.
  *
  * @return array Array of post IDs.
  */
-function mailocation_get_user_locations( $user_id = 0 ) {
+function mailocation_get_user_locations( $post_type = 'mai_location' ) {
+	// Setup cache.
+	static $all_locations = [];
+
+	// Maybe return cache.
+	if ( isset( $all_locations[ $post_type ] ) ) {
+		return $all_locations[ $post_type ];
+	}
+
 	// Get current user.
-	$user_id = (int) $user_id ?: get_current_user_id();
+	$user_id = get_current_user_id();
 
 	// Bail if no user.
 	if ( ! $user_id ) {
-		return [];
+		$all_locations[ $post_type ] = [];
+		return $all_locations[ $post_type ];
 	}
 
-	// Setup cache.
-	static $all_locations = null;
-
-	// Maybe return cache.
-	if ( is_array( $all_locations ) && isset( $all_locations[ $user_id ] ) ) {
-		return $all_locations[ $user_id ];
-	}
-
-	// Set as array.
-	$all_locations = is_array( $all_locations ) ? $all_locations : [];
-
-	// Get locations.
-	$locations = (array) get_user_meta( $user_id, 'user_locations', true );
-	$locations = array_unique( $locations );
-	$locations = array_filter( $locations );
-
-	if ( $locations ) {
-		foreach ( $locations as $index => $location_id ) {
-			if ( mailocations_post_exists( $location_id ) ) {
-				continue;
-			}
-
-			unset( $locations[ $index ] );
-		}
-	}
+	// Get user locations.
+	$query = new WP_Query(
+		[
+			'post_type'              => $post_type,
+			'author'                 => $user_id,
+			'post_status'            => [ 'publish', 'pending' ], // Can't do 'any' because trash is included. What about draft? I think those should remain hidden.
+			'fields'                 => 'ids',
+			'posts_per_page'         => 500,
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		]
+	);
 
 	// Add to cache.
-	$all_locations[ $user_id ] = $locations;
+	$all_locations[ $post_type ] = $query->posts;
 
-	return $all_locations[ $user_id ];
+	return $all_locations[ $post_type ];
 }
 
 /**
@@ -69,7 +65,7 @@ function mailocation_get_user_locations( $user_id = 0 ) {
 function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
 	$post_args = wp_parse_args( $post_args,
 		[
-			'post_status' => 'public',
+			'post_status' => 'publish',
 		]
 	);
 
@@ -540,37 +536,136 @@ function mailocations_get_google_maps_result( $url ) {
 }
 
 /**
- * Gets all taxonomies registered to locations.
+ * Gets the singular label for a post type.
+ *
+ * @since TBD
+ *
+ * @param string $post_type The post type.
+ *
+ * @return string
+ */
+function mailocations_get_singular_label( $post_type ) {
+	$labels = mailocations_get_location_post_types();
+
+	return isset( $labels[ $post_type ]['singular'] ) ? $labels[ $post_type ]['singular'] : '';
+}
+
+/**
+ * Gets the plural label for a post type.
+ *
+ * @since TBD
+ *
+ * @param string $post_type The post type.
+ *
+ * @return string
+ */
+function mailocations_get_plural_label( $post_type ) {
+	$labels = mailocations_get_location_post_types();
+
+	return isset( $labels[ $post_type ]['plural'] ) ? $labels[ $post_type ]['plural'] : '';
+}
+
+/**
+ * Gets the post type names that support Mai Locations.
  *
  * @since TBD
  *
  * @return array
  */
-function mailocations_get_location_taxonomies() {
-	static $taxonomies = null;
+function mailocations_get_location_post_types() {
+	static $cache = null;
 
-	if ( ! is_null( $taxonomies ) ) {
-		return $taxonomies;
+	if ( ! is_null( $cache ) ) {
+		return $cache;
 	}
 
-	// Set vars.
-	$taxonomies = is_array( $taxonomies ) ? $taxonomies : [];
-	$objects    = get_object_taxonomies( 'mai_location' );
+	$cache      = [];
+	$post_types = get_post_types(
+		[
+			'public'   => true,
+			'_builtin' => false,
+		],
+		'objects'
+	);
 
-	if ( $objects ) {
-		foreach ( $objects as $name ) {
-			$taxonomy = get_taxonomy( $name );
+	// Loop post types and check support.
+	foreach ( $post_types as $name => $post_type ) {
+		if ( ! post_type_supports( $name, 'mai-locations' ) ) {
+			continue;
+		}
 
-			if ( $taxonomy ) {
-				$taxonomies[ $name ] = $taxonomy->label;
+		// Build labels.
+		switch ( $name ) {
+			case 'mai_location':
+				$plural   = mailocations_get_plural();
+				$singular = mailocations_get_singular();
+			break;
+			default:
+				$plural   = $post_type->labels->name;
+				$singular = $post_type->labels->singular_name;
+		}
+
+		// Store post type.
+		$cache[ $name ] = [
+			'plural'   => $plural,
+			'singular' => $singular,
+		];
+	}
+
+	return $cache;
+}
+
+/**
+ * Gets all taxonomies registered to locations.
+ *
+ * @since TBD
+ *
+ * @param string $post_type The post type to get taxonomies for.
+ *
+ * @return array
+ */
+function mailocations_get_location_taxonomies( $post_type = '' ) {
+	static $taxonomies = [];
+
+	if ( $taxonomies ) {
+		if ( $post_type ) {
+			return isset( $taxonomies[ $post_type ] ) ? $taxonomies[ $post_type ] : [];
+		}
+
+		return $taxonomies[ '_all_' ];
+	}
+
+	$post_types = mailocations_get_location_post_types();
+
+	foreach ( $post_types as $type => $labels ) {
+		$objects = get_object_taxonomies( $type );
+
+		if ( $objects ) {
+			foreach ( $objects as $taxonomy ) {
+				// Skip elasticpress taxonomy. Not sure how this kept showing up.
+				if ( 'ep_custom_result' === $taxonomy ) {
+					continue;
+				}
+
+				$object = get_taxonomy( $taxonomy );
+
+				if ( $object ) {
+					// Add to post type.
+					$taxonomies[ $type ][ $taxonomy ] = $object->label;
+
+					// Add to all.
+					$taxonomies[ '_all_' ]              = isset( $taxonomies[ '_all_' ] ) ? $taxonomies[ '_all_' ] : [];
+					$taxonomies[ '_all_' ][ $taxonomy ] = $object->label;
+				}
 			}
 		}
 	}
 
-	// Elasticpress was adding this taxonomy somehow.
-	unset( $taxonomies['ep_custom_result'] );
+	if ( $post_type ) {
+		return isset( $taxonomies[ $post_type ] ) ? $taxonomies[ $post_type ] : [];
+	}
 
-	return $taxonomies;
+	return $taxonomies[ '_all_' ];
 }
 
 /**

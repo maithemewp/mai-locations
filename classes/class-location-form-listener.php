@@ -66,11 +66,6 @@ class Mai_Locations_Location_Form_Listener {
 			return;
 		}
 
-		// Bail if no locations.
-		if ( ! mailocation_get_user_locations() ) {
-			return;
-		}
-
 		// Check if has locations table block or shortcode or is Woo account page.
 		$has_block     = has_blocks() && has_block( 'acf/mai-locations-table' );
 		$has_shortcode = has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'mai_locations_table' );
@@ -110,6 +105,18 @@ class Mai_Locations_Location_Form_Listener {
 
 		// Setup data.
 		$data = [];
+
+		// Check post ID.
+		if ( isset( $_POST['_acf_post_id'] ) && is_numeric( $_POST['_acf_post_id'] ) ) {
+			// Get post and status.
+			$post   = get_post( $_POST['_acf_post_id'] );
+			$status = $post ? get_post_status( $post ) : '';
+
+			// If status is not public, make it public.
+			if ( $status && 'publish' !== $status ) {
+				$data['status'] = 'publish';
+			}
+		}
 
 		// Title.
 		if ( isset( $_POST['acf']['mai_location_title'] ) ) {
@@ -195,6 +202,9 @@ class Mai_Locations_Location_Form_Listener {
 			// Loop through data.
 			foreach ( $data as $key => $value ) {
 				switch ( $key ) {
+					case 'status':
+						$postarr['post_status'] = $value;
+					break;
 					case 'title':
 						$postarr['post_title'] = $value;
 					break;
@@ -320,8 +330,8 @@ class Mai_Locations_Location_Form_Listener {
 
 		// Get data.
 		$post_type    = get_post_type( $post_id );
-		$singular     = mailocations_get_singular();
-		$plural       = mailocations_get_plural();
+		$singular     = mailocations_get_singular_label( $post_type );
+		$plural       = mailocations_get_plural_label( $post_type );
 		$name         = $data['author'] ? get_the_author_meta( 'display_name', $data['author'] ) : 'N/A';
 		$to           = $emails;
 		$subject      = sprintf( '%s %s %s %s %s', __( 'New', 'mai-locations' ), $singular, __( 'submission', 'mai-locations' ), __( 'from', 'mai-locations' ), $name );
@@ -349,12 +359,14 @@ class Mai_Locations_Location_Form_Listener {
 	 * @param WP_Post $post Post object.
 	 */
 	function send_published_email( $post ) {
-		// Bail if not a location.
-		if ( 'mai_location' !== $post->post_type ) {
+		$post_types = mailocations_get_location_post_types();
+
+		// Bail if not a supported post type.
+		if ( ! isset( $post_types[ $post->post_type ] ) ) {
 			return;
 		}
 
-		$singular  = mailocations_get_singular();
+		$singular  = mailocations_get_singular_label( $post_type );
 		$to        = get_the_author_meta( 'user_email', $post->post_author );
 		$subject   = sprintf( '%s %s %s %s', __( 'Your', 'mai-locations' ), untrailingslashit( home_url() ), $singular, __( 'has been published!', 'mai-locations' ) );
 		$message   = __( 'Thank you for your submission!', 'mai-locations' ) . "\r\n\r\n";
@@ -386,7 +398,9 @@ class Mai_Locations_Location_Form_Listener {
 			return false;
 		}
 
-		if ( ! is_numeric( $post_id ) || 'mai_location' !== get_post_type( $post_id ) ) {
+		$post_types = mailocations_get_location_post_types();
+
+		if ( ! is_numeric( $post_id ) || ! isset( $post_types[ get_post_type( $post_id ) ] ) ) {
 			return false;
 		}
 

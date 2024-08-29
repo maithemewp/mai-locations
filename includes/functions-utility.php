@@ -260,19 +260,6 @@ function mailocations_delete_transients() {
 }
 
 /**
- * Determines if a post exists in the DB.
- *
- * @since 0.1.0
- *
- * @param int $post_id The post ID.
- *
- * @return bool True if the post exists; otherwise, false.
- */
-function mailocations_post_exists( $post_id ) {
-	return is_string( get_post_status( $post_id ) );
-}
-
-/**
  * If user can edit a location by ID.
  *
  * @since 0.1.0
@@ -282,17 +269,7 @@ function mailocations_post_exists( $post_id ) {
  * @return bool
  */
 function mailocations_user_can_edit( $location_id ) {
-	if ( ! is_user_logged_in() ) {
-		return;
-	}
-
-	$locations = mailocation_get_user_locations();
-
-	if ( ! $locations ) {
-		return;
-	}
-
-	return in_array( $location_id, $locations );
+	return is_user_logged_in() && get_current_user_id() === (int) get_post_field( 'post_author', $location_id );
 }
 
 /**

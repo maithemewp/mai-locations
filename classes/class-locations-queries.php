@@ -43,7 +43,7 @@ class Mai_Locations_Queries {
 		}
 
 		// Bail if not a location archive page.
-		if ( ! ( is_post_type_archive( 'mai_location' ) || is_tax( array_keys( mailocations_get_location_taxonomies() ) ) ) ) {
+		if ( ! mailocations_is_archive() ) {
 			return;
 		}
 
@@ -81,8 +81,13 @@ class Mai_Locations_Queries {
 	 * @return array
 	 */
 	function mai_post_grid_query( $query_args, $args ) {
-		// Bail if not a location.
-		if ( ! in_array( 'mai_location', (array) $query_args['post_type'] ) ) {
+		// Check if post types intersect.
+		$post_types = mailocations_get_location_post_types();
+		$post_types = array_keys( $post_types );
+		$post_types = array_intersect( $post_types, (array) $query_args['post_type'] );
+
+		// Bail if no post types.
+		if ( ! $post_types ) {
 			return $query_args;
 		}
 

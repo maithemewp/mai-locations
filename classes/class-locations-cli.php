@@ -49,6 +49,7 @@ class Mai_Locations_CLI {
 	 * Imports locations from google places search.
 	 *
 	 * Usage: wp mailocations import_places --post_status=pending --search='Birth Centers in Myrtle Beach SC' --set_cats="Birth Centers" --max=20
+	 * Usage: wp mailocations import_places --post_type=practitioner --post_status=pending --search='Rock Climbing Gym Myrtle Beach SC" --max=20
 	 *
 	 * @link https://developers.google.com/maps/documentation/places/web-service/?apix=true
 	 * @link https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places/searchText
@@ -73,6 +74,7 @@ class Mai_Locations_CLI {
 		$assoc_args = wp_parse_args(
 			$assoc_args,
 			[
+				'post_type'   => 'mai_location',
 				'search'      => '',
 				'fields'      => '*',
 				'region'      => 'US',
@@ -167,14 +169,14 @@ class Mai_Locations_CLI {
 
 			// Build post data.
 			$post_data = [
-				'post_type'   => 'mai_location',
+				'post_type'   => $assoc_args['post_type'],
 				'post_title'  => $title,
 			];
 
 			// Get post with a meta key of place_id and meta value of the $place_id.
 			$existing_ids = get_posts(
 				[
-					'post_type'    => 'mai_location',
+					'post_type'    => $assoc_args['post_type'],
 					'post_status'  => 'any',
 					'meta_key'     => 'place_id',
 					'meta_value'   => $place_id,
@@ -304,6 +306,8 @@ class Mai_Locations_CLI {
 					$cats = explode( ',', $assoc_args['set_cats'] );
 					$cats = array_map( 'trim', $cats );
 
+					// TODO: Check taxonomy of post type?
+
 					// Append to existing categories.
 					wp_set_object_terms( $post_id, $cats, 'mai_location_cat', $assoc_args['append_cats'] );
 				}
@@ -426,6 +430,7 @@ class Mai_Locations_CLI {
 		$assoc_args = wp_parse_args(
 			$assoc_args,
 			[
+				'post_type'      => 'mai_location',
 				'post_status'    => 'any',
 				'posts_per_page' => 50,
 				'offset'         => 0,
@@ -437,7 +442,7 @@ class Mai_Locations_CLI {
 		// Get query.
 		$query = new WP_Query(
 			[
-				'post_type'              => 'mai_location',
+				'post_type'              => $assoc_args['post_type'],
 				'post_status'            => $assoc_args['post_status'],
 				'posts_per_page'         => $assoc_args['posts_per_page'],
 				'offset'                 => $assoc_args['offset'],
