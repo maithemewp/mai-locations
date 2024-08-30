@@ -35,7 +35,7 @@ class Mai_Locations_Locations_Table {
 			'post_type'  => sanitize_key( $args['post_type'] ),
 			'title'      => esc_html( $args['title'] ),
 			'header'     => esc_html( $args['header'] ),
-			'no_results' => sanitize_text_field( $args['no_results'] ),
+			'no_results' => wp_kses_post( $args['no_results'] ),
 			'redirect'   => $args['redirect'] ? esc_url( $args['redirect'] ) : '',
 			'fields'     => array_map( 'sanitize_text_field', $args['fields'] ),
 			'class'      => esc_attr( $args['class'] ),

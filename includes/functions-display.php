@@ -59,6 +59,9 @@ function mailocations_get_location_submission_form( $args ) {
  * @return string
  */
 function mailocations_get_address( $args = [], $post_id = 0 ) {
+
+	// TODO: Add before/after args?
+
 	// Atts.
 	$args = shortcode_atts(
 		[
