@@ -31,16 +31,19 @@ function mailocation_location_phone_shortcode( $atts ) {
 			'after'  => '',
 			'link'   => true,
 			'style'  => '',
+			'phone'  => 1,
 		],
 		$atts,
 		'mai_location_phone'
 	);
 
 	// Get data.
-	$atts['before'] = sanitize_text_field( $atts['before'] ); // Don't trim(). We want spaces.
-	$atts['after']  = sanitize_text_field( $atts['after'] ); // Don't trim(). We want spaces.
+	$atts['before'] = esc_html( $atts['before'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
+	$atts['after']  = esc_html( $atts['after'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
 	$atts['link']   = rest_sanitize_boolean( $atts['link'] );
-	$phone          = esc_html( get_post_meta( get_the_ID(), 'location_phone', true ) );
+	$atts['phone']  = absint( $atts['phone'] );
+	$phone_key      = 2 === $atts['phone'] ? 'location_phone_2' : 'location_phone';
+	$phone          = esc_html( get_post_meta( get_the_ID(), $phone_key, true ) );
 	$country        = esc_html( get_post_meta( get_the_ID(), 'address_country', true ) );
 	$country        = $country ?: '';
 
