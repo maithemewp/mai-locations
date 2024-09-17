@@ -116,8 +116,8 @@ function mailocation_location_url_shortcode( $atts ) {
 	);
 
 	$atts['style']  = esc_attr( $atts['style'] );
-	$atts['before'] = sanitize_text_field( $atts['before'] ); // Don't trim(). We want spaces.
-	$atts['after']  = sanitize_text_field( $atts['after'] ); // Don't trim(). We want spaces.
+	$atts['before'] = esc_html( $atts['before'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
+	$atts['after']  = esc_html( $atts['after'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
 	$url            = get_post_meta( get_the_ID(), 'location_url', true );
 
 	if ( ! $url ) {
@@ -166,8 +166,8 @@ function mailocation_location_email_shortcode( $atts ) {
 	);
 
 	$atts['style']  = esc_attr( $atts['style'] );
-	$atts['before'] = sanitize_text_field( $atts['before'] ); // Don't trim(). We want spaces.
-	$atts['after']  = sanitize_text_field( $atts['after'] ); // Don't trim(). We want spaces.
+	$atts['before'] = esc_html( $atts['before'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
+	$atts['after']  = esc_html( $atts['after'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
 	$email          = get_post_meta( get_the_ID(), 'location_email', true );
 	$email          = sanitize_email( $email );
 	$email          = antispambot( $email );
@@ -225,8 +225,8 @@ function mailocation_location_place_shortcode( $atts ) {
 	);
 
 	$atts['style']  = esc_attr( $atts['style'] );
-	$atts['before'] = sanitize_text_field( $atts['before'] ); // Don't trim(). We want spaces.
-	$atts['after']  = sanitize_text_field( $atts['after'] ); // Don't trim(). We want spaces.
+	$atts['before'] = esc_html( $atts['before'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
+	$atts['after']  = esc_html( $atts['after'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
 	$atts['text']   = sanitize_text_field( $atts['text'] );
 
 	return sprintf( '<div class="mai-location-place">%s<a target="_blank" href="https://www.google.com/maps/place/?q=place_id:%s">%s</a>%s</div>',
