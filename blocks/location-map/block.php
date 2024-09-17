@@ -153,8 +153,9 @@ class Mai_Locations_Map_Block {
 			// Loop through and build markers.
 			foreach ( $markers as $marker ) {
 				printf( '<div style="display:none;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $marker['lat'] ), esc_html( $marker['lng'] ) );
-					printf( '<strong><a href="%s">%s</a></strong>', $marker['href'], $marker['title'] );
+					printf( '<strong style="display:block;margin-bottom:4px;"><a href="%s" target="_blank" rel="nofollow">%s</a></strong>', $marker['href'], $marker['title'] );
 					echo $marker['address'];
+					printf( '<p style="display:block;margin-top:4px;"><a href="%s" target="_blank" ref="nofollow">%s</a></p>', $marker['directions'], __( 'Get Directions', 'mai-locations' ) );
 				echo '</div>';
 			}
 		}
@@ -187,11 +188,12 @@ class Mai_Locations_Map_Block {
 
 			// Add to data array.
 			$data[] = [
-				'lat'     => $lat,
-				'lng'     => $lng,
-				'href'    => get_permalink( $post_id ),
-				'title'   => get_the_title( $post_id ),
-				'address' => mailocations_get_address( [], $post_id ),
+				'lat'        => $lat,
+				'lng'        => $lng,
+				'href'       => get_permalink( $post_id ),
+				'title'      => get_the_title( $post_id ),
+				'address'    => mailocations_get_address( [], $post_id ),
+				'directions' => "https://www.google.com/maps/dir/?api=1&destination={$lat},$lng"
 			];
 		}
 
