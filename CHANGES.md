@@ -1,6 +1,7 @@
 # Changelog
 
-## 0.6.0 (TBD)
+## 1.0.0 (12/5/24)
+* Major rewrite adding Google Maps integration, location finder, a ton of blocks, etc.
 
 ## 0.5.0 (6/8/22)
 * Added: `[mai_location_phone]`, `[mai_location_url]`, and `[mai_location_email]` shortcodes.
