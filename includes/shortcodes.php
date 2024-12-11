@@ -108,6 +108,8 @@ function mailocation_location_url_shortcode( $atts ) {
 	$atts = shortcode_atts(
 		[
 			'style'  => '',
+			'target' => '_blank',
+			'rel'    => 'noopener nofollow',
 			'before' => '',
 			'after'  => '',
 		],
@@ -116,6 +118,8 @@ function mailocation_location_url_shortcode( $atts ) {
 	);
 
 	$atts['style']  = esc_attr( $atts['style'] );
+	$atts['target'] = esc_attr( $atts['target'] );
+	$atts['rel']    = esc_attr( $atts['rel'] );
 	$atts['before'] = esc_html( $atts['before'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
 	$atts['after']  = esc_html( $atts['after'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
 	$url            = get_post_meta( get_the_ID(), 'location_url', true );
@@ -129,16 +133,40 @@ function mailocation_location_url_shortcode( $atts ) {
 
 		$parsed = wp_parse_url( $url, PHP_URL_HOST );
 
+		// Format url.
 		if ( $parsed ) {
 			$formatted = ltrim( $parsed, 'www.' );
 		} else {
 			$formatted = $url;
 		}
 
-		$html .= sprintf( '<a href="%s">%s</a>', esc_url( $url ), $formatted );
+		// Set default attributes.
+		$attr = [
+			'href' => esc_url( $url ),
+		];
+
+		// If target.
+		if ( $atts['target'] ) {
+			$attr['target'] = $atts['target'];
+		}
+
+		// If rel.
+		if ( $atts['rel'] ) {
+			$attr['rel'] = $atts['rel'];
+		}
+
+		// Start the attributes string.
+		$attr_string = '';
+
+		// Build the attributes string.
+		foreach ( $attr as $key => $value ) {
+			$attr_string .= sprintf( ' %s="%s"', $key, $value );
+		}
+
+		// Build the link.
+		$html .= sprintf( '<a%s>%s</a>', $attr_string, $formatted );
 
 		$html .= $atts['after'];
-
 	$html .= '</div>';
 
 	return $html;

@@ -153,9 +153,9 @@ class Mai_Locations_Map_Block {
 			// Loop through and build markers.
 			foreach ( $markers as $marker ) {
 				printf( '<div style="display:none;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $marker['lat'] ), esc_html( $marker['lng'] ) );
-					printf( '<strong style="display:block;margin-bottom:4px;"><a href="%s" target="_blank" rel="nofollow">%s</a></strong>', $marker['href'], $marker['title'] );
+					printf( '<strong style="display:block;margin-bottom:4px;"><a href="%s" target="_blank" rel="noopener nofollow">%s</a></strong>', $marker['href'], $marker['title'] );
 					echo $marker['address'];
-					printf( '<p style="display:block;margin-top:4px;"><a href="%s" target="_blank" ref="nofollow">%s</a></p>', $marker['directions'], __( 'Get Directions', 'mai-locations' ) );
+					printf( '<p style="display:block;margin-top:4px;"><a href="%s" target="_blank" ref="noopener nofollow">%s</a></p>', $marker['directions'], __( 'Get Directions', 'mai-locations' ) );
 				echo '</div>';
 			}
 		}
