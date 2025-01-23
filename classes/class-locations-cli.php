@@ -114,8 +114,10 @@ class Mai_Locations_CLI {
 			return;
 		}
 
-		// Get code.
+		// Get code and body.
 		$code = wp_remote_retrieve_response_code( $response );
+		$body = wp_remote_retrieve_body( $response );
+		$body = json_decode( $body, true );
 
 		// Bail if response code is not 200.
 		if ( 200 !== $code ) {
@@ -130,10 +132,6 @@ class Mai_Locations_CLI {
 			WP_CLI::line( $message );
 			return;
 		}
-
-		// Get body.
-		$body = wp_remote_retrieve_body( $response );
-		$body = json_decode( $body, true );
 
 		// Get places.
 		$places = isset( $body['places'] ) ? $body['places'] : [];
