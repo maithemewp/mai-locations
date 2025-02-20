@@ -665,7 +665,7 @@ function mailocations_get_location_taxonomies( $post_type = '' ) {
 		return isset( $taxonomies[ $post_type ] ) ? $taxonomies[ $post_type ] : [];
 	}
 
-	return (array) $taxonomies[ '_all_' ];
+	return isset( $taxonomies[ '_all_' ] ) ? (array) $taxonomies[ '_all_' ] : [];
 }
 
 /**
