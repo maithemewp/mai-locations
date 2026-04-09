@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.0 (4/8/26)
+* Added: Google Map ID setting for advanced markers (required for vector maps).
+* Changed: Migrated Places Autocomplete to PlaceAutocompleteElement (new Google Maps API).
+* Changed: Replaced Laravel Mix with @wordpress/scripts for build tooling.
+* Changed: JS assets now output to `build/` with content-hash versioning via `.asset.php`.
+* Changed: Bumped ACF block apiVersion to 3 for all blocks.
+* Updated: MarkerClusterer library from v2.1.4 to v2.6.2 (fixes gmp-click deprecation).
+* Updated: Composer dependencies (libphonenumber v9.0, plugin-update-checker v5.6).
+* Fixed: Marker click events now use gmp-click for AdvancedMarkerElement compatibility.
+
 ## 1.0.0 (12/5/24)
 * Major rewrite adding Google Maps integration, location finder, a ton of blocks, etc.
 

@@ -1,4 +1,5 @@
 {
+	"apiVersion": 3,
 	"name": "acf/mai-locations-filters",
 	"title": "Mai Locations Filters",
 	"description": "Filter locations.",

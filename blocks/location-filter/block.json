@@ -1,4 +1,5 @@
 {
+	"apiVersion": 3,
 	"name": "acf/mai-locations-filter",
 	"title": "Mai Locations Filter",
 	"description": "Filter locations. Companion block for Mai Location Proximity Search.",

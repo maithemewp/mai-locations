@@ -1,4 +1,5 @@
 {
+	"apiVersion": 3,
 	"name": "acf/mai-locations-address-search",
 	"title": "Mai Locations Address Search",
 	"description": "Filter locations by address/location. Uses Google Maps Autocomplete.",

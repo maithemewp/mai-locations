@@ -31,24 +31,27 @@ class Mai_Locations_Scripts {
 	 * @return void
 	 */
 	function register_scripts() {
-		$suffix = mailocations_get_suffix();
-		wp_register_style( 'mai-locations-form', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations-form{$suffix}.css", [], MAI_LOCATIONS_VERSION );
-		wp_register_style( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/css/mai-locations{$suffix}.css", [], MAI_LOCATIONS_VERSION );
-		wp_register_script( 'mai-locations-markerclusterer', MAI_LOCATIONS_PLUGIN_URL . "assets/js/markerclusterer{$suffix}.js", [], '2.1.4', true );
-		wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . "assets/js/mai-locations{$suffix}.js", [], MAI_LOCATIONS_VERSION, true );
+		// Asset data for cache busting.
+		$locations_asset       = mailocations_get_asset( 'mai-locations' );
+		$locations_style_asset = mailocations_get_asset( 'mai-locations-styles' );
+		$form_style_asset      = mailocations_get_asset( 'mai-locations-form-styles' );
+		$clusterer_asset       = mailocations_get_asset( 'markerclusterer' );
+
+		// Styles.
+		wp_register_style( 'mai-locations-form', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations-form-styles.css', [], $form_style_asset['version'] );
+		wp_register_style( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations-styles.css', [], $locations_style_asset['version'] );
+
+		// Scripts — no defer on map scripts due to Google Maps callback timing.
+		wp_register_script( 'mai-locations-markerclusterer', MAI_LOCATIONS_PLUGIN_URL . 'build/markerclusterer.js', $clusterer_asset['dependencies'], $clusterer_asset['version'], [ 'in_footer' => true ] );
+		wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations.js', $locations_asset['dependencies'], $locations_asset['version'], [ 'in_footer' => true ] );
 
 		$localize = [
 			'params'     => mailocations_get_query_params(),
 			'defaults'   => mailocations_get_query_defaults(),
 			'apiKey'     => mailocations_get_option( 'google_api_key' ),
 			'apiSig'     => mailocations_get_option( 'google_api_signature' ),
+			'mapId'      => mailocations_get_option( 'google_map_id' ),
 			'loadingSvg' => MAI_LOCATIONS_PLUGIN_URL . 'assets/svg/loading.svg',
-			// 'autoComplete' => [
-			// 	'fields'                => [ 'geometry', 'name' ],
-			// 	'strictBounds'          => false,
-			// 	'componentRestrictions' => [ 'country' => 'us' ],
-			// 	'types'                 => [ 'establishment' ],
-			// ],
 		];
 
 		// Allow filtering of script data.
@@ -66,7 +69,9 @@ class Mai_Locations_Scripts {
 	 * @return void
 	 */
 	function enqueue_sortable() {
-		wp_enqueue_script( 'mai-locations-sortable', MAI_LOCATIONS_PLUGIN_URL . 'assets/js/mai-locations-sortable.js', [ 'jquery', 'jquery-ui-sortable', 'acf-input' ], MAI_LOCATIONS_VERSION, true );
-		wp_enqueue_style( 'mai-locations-sortable', MAI_LOCATIONS_PLUGIN_URL . 'assets/css/mai-locations-sortable.css', [], MAI_LOCATIONS_VERSION );
+		$sortable_asset       = mailocations_get_asset( 'mai-locations-sortable' );
+		$sortable_style_asset = mailocations_get_asset( 'mai-locations-sortable-styles' );
+		wp_enqueue_script( 'mai-locations-sortable', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations-sortable.js', array_merge( [ 'jquery', 'jquery-ui-sortable', 'acf-input' ], $sortable_asset['dependencies'] ), $sortable_asset['version'], [ 'strategy' => 'defer', 'in_footer' => true ] );
+		wp_enqueue_style( 'mai-locations-sortable', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations-sortable-styles.css', [], $sortable_style_asset['version'] );
 	}
 }

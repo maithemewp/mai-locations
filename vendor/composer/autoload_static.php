@@ -8,34 +8,34 @@ class ComposerStaticInit15a83dc919f8db61c7a4325dc93d224e
 {
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
-        '256558b1ddf2fa4366ea7d7602798dd1' => __DIR__ . '/..' . '/yahnis-elsts/plugin-update-checker/load-v5p5.php',
+        'f6d4f6bcee7247df6b777884c3e22f98' => __DIR__ . '/..' . '/yahnis-elsts/plugin-update-checker/load-v5p6.php',
     );
 
     public static $prefixLengthsPsr4 = array (
-        'l' => 
+        'l' =>
         array (
             'libphonenumber\\' => 15,
         ),
-        'S' => 
+        'S' =>
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
         ),
-        'G' => 
+        'G' =>
         array (
             'Giggsey\\Locale\\' => 15,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'libphonenumber\\' => 
+        'libphonenumber\\' =>
         array (
             0 => __DIR__ . '/..' . '/giggsey/libphonenumber-for-php/src',
         ),
-        'Symfony\\Polyfill\\Mbstring\\' => 
+        'Symfony\\Polyfill\\Mbstring\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
-        'Giggsey\\Locale\\' => 
+        'Giggsey\\Locale\\' =>
         array (
             0 => __DIR__ . '/..' . '/giggsey/locale/src',
         ),

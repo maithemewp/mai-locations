@@ -1,4 +1,5 @@
 {
+	"apiVersion": 3,
 	"name": "acf/mai-locations-table",
 	"title": "Mai Locations Table",
 	"description": "Display a users locations with view and edit buttons.",

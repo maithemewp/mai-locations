@@ -1,4 +1,5 @@
 {
+	"apiVersion": 3,
 	"name": "acf/mai-location-submission",
 	"title": "Mai Location Submission Form",
 	"description": "Creates a new location submission form.",

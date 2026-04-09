@@ -158,6 +158,14 @@ class Mai_Locations_Settings {
 			'mai_locations_settings' // section
 		);
 
+		add_settings_field(
+			'google_map_id', // id
+			__( 'Google Map ID', 'mai-locations' ), // title
+			[ $this, 'google_map_id_callback' ], // callback
+			'mai-locations-section', // page
+			'mai_locations_settings' // section
+		);
+
 	}
 
 	/**
@@ -291,6 +299,23 @@ class Mai_Locations_Settings {
 	 */
 	function google_api_signature_callback() {
 		printf( '<input class="regular-text" type="password" name="mai_locations[google_api_signature]" id="google_api_signature" value="%s">', $this->options['google_api_signature'] );
+	}
+
+	/**
+	 * Setting callback.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	function google_map_id_callback() {
+		printf( '<input class="regular-text" type="text" name="mai_locations[google_map_id]" id="google_map_id" value="%s">', $this->options['google_map_id'] );
+		echo '<p>';
+			printf( '%s <a href="https://console.cloud.google.com/google/maps-apis/studio/maps" target="_blank">%s</a>',
+				__( 'The Map ID from Google Cloud Console. Required for advanced markers.', 'mai-locations' ),
+				__( 'Create a Map ID.', 'mai-locations' )
+			);
+		echo '</p>';
 	}
 
 	/**

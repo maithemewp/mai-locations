@@ -141,6 +141,7 @@ function mailocations_get_options_defaults() {
 		'category_base'        => 'location-category',
 		'google_api_key'       => '',
 		'google_api_signature' => '',
+		'google_map_id'        => '',
 		'distance'             => 100,
 		'units'                => 'mi',
 		'version_first'        => '',
@@ -184,6 +185,7 @@ function mailocations_sanitize_options( $options ) {
 		'category_base'        => '',
 		'google_api_key'       => '',
 		'google_api_signature' => '',
+		'google_map_id'        => '',
 		'distance'             => '',
 		'units'                => '',
 		'version_first'        => '',
@@ -197,6 +199,7 @@ function mailocations_sanitize_options( $options ) {
 	$options['category_base']        = sanitize_title_with_dashes( $options['category_base'] );
 	$options['google_api_key']       = sanitize_text_field( $options['google_api_key'] );
 	$options['google_api_signature'] = sanitize_text_field( $options['google_api_signature'] );
+	$options['google_map_id']        = sanitize_text_field( $options['google_map_id'] );
 	$options['distance']             = absint( $options['distance'] );
 	$options['units']                = esc_html( $options['units'] );
 	$options['version_first']        = esc_html( $options['version_first'] );
@@ -291,19 +294,24 @@ function mailocations_get_stylesheet_link( $filename ) {
 		return;
 	}
 
-	$suffix              = mailocations_get_suffix();
-	$loaded[ $filename ] = MAI_LOCATIONS_PLUGIN_URL . "assets/css/{$filename}{$suffix}.css";
+	$asset_name          = "{$filename}-styles";
+	$asset               = mailocations_get_asset( $asset_name );
+	$loaded[ $filename ] = MAI_LOCATIONS_PLUGIN_URL . "build/{$asset_name}.css";
 
-	return sprintf( '<link rel="stylesheet" href="%s" />', $loaded[ $filename ] );
+	return sprintf( '<link rel="stylesheet" href="%s?ver=%s" />', $loaded[ $filename ], $asset['version'] );
 }
 
 /**
- * Gets suffix for scripts.
+ * Gets asset data from wp-scripts build.
  *
- * @since TBD
+ * @since 1.1.0
  *
- * @return string
+ * @param string $name The asset name (without extension).
+ *
+ * @return array
  */
-function mailocations_get_suffix() {
-	return defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+function mailocations_get_asset( $name ) {
+	$file = MAI_LOCATIONS_PLUGIN_DIR . "build/{$name}.asset.php";
+
+	return file_exists( $file ) ? require $file : [ 'dependencies' => [], 'version' => MAI_LOCATIONS_VERSION ];
 }

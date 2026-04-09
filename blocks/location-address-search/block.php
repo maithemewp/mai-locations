@@ -81,20 +81,12 @@ class Mai_Locations_Address_Search_Block {
 		// Build HTML.
 		echo '<div class="mailocations-autocomplete-container">';
 			echo '<div class="mailocations-autocomplete-input-container">';
-				$value = ! $is_preview ? sprintf( ' value="%s"', $address ) : ''; // Can't have value attribute or React balks.
-
-				// Input field.
-				printf( '<input type="text" class="mailocations-autocomplete" form="%s" tabindex="0" data-countries="%s" placeholder="%s"%s>',
-					esc_attr( wp_unique_id( 'mai-random-' ) ),
+				// Autocomplete container — PlaceAutocompleteElement is appended here via JS.
+				printf( '<div class="mailocations-autocomplete" data-countries="%s" data-placeholder="%s" data-value="%s"></div>',
 					implode( ',', $countries ),
-					$placeholder,
-					$value
+					esc_attr( $placeholder ),
+					! $is_preview ? esc_attr( $address ) : ''
 				);
-
-				// Clear button.
-				if ( ! $is_preview  ) {
-					printf( '<button class="mailocations-autocomplete-clear">%s</button>', __( 'Clear', 'mai-locations' ) );
-				}
 			echo '</div>';
 
 			// Encode the address.
