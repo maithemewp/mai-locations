@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '21940a2ffb63bafb1e69b8174dde745ca10e16b0',
+        'reference' => '55f4ea400326c9d55319b8be609df10452985e39',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,16 +13,16 @@
         '__root__' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '21940a2ffb63bafb1e69b8174dde745ca10e16b0',
+            'reference' => '55f4ea400326c9d55319b8be609df10452985e39',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
         'giggsey/libphonenumber-for-php' => array(
-            'pretty_version' => '9.0.27',
-            'version' => '9.0.27.0',
-            'reference' => '7973753b3efe38fb57dc949a6014a4d1cfce0ffd',
+            'pretty_version' => '9.0.30',
+            'version' => '9.0.30.0',
+            'reference' => '585ce999a2d404ed48bf5b37a22ba369a885f2b9',
             'type' => 'library',
             'install_path' => __DIR__ . '/../giggsey/libphonenumber-for-php',
             'aliases' => array(),
@@ -31,7 +31,7 @@
         'giggsey/libphonenumber-for-php-lite' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => '9.0.27',
+                0 => '9.0.30',
             ),
         ),
         'giggsey/locale' => array(
@@ -44,9 +44,9 @@
             'dev_requirement' => false,
         ),
         'symfony/polyfill-mbstring' => array(
-            'pretty_version' => 'v1.33.0',
-            'version' => '1.33.0.0',
-            'reference' => '6d857f4d76bd4b343eac26d6b539585d2bc56493',
+            'pretty_version' => 'v1.37.0',
+            'version' => '1.37.0.0',
+            'reference' => '6a21eb99c6973357967f6ce3708cd55a6bec6315',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/polyfill-mbstring',
             'aliases' => array(),

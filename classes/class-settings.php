@@ -362,10 +362,11 @@ class Mai_Locations_Settings {
 	 * @return array associative array of plugin action links
 	 */
 	function add_settings_link( $actions, $plugin_file, $plugin_data, $context ) {
-		$url                 = esc_url( admin_url( 'edit.php?post_type=mai_location' ) );
-		$link                = sprintf( '<a href="%s">%s</a>', $url, __( 'Settings', 'mai-locations' ) );
-		$actions['settings'] = $link;
+		$url    = esc_url( admin_url( 'edit.php?post_type=mai_location&page=mai-locations' ) );
+		$custom = [
+			'settings' => sprintf( '<a href="%s">%s</a>', $url, __( 'Settings', 'mai-locations' ) ),
+		];
 
-		return $actions;
+		return array_merge( $custom, $actions );
 	}
 }
