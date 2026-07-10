@@ -51,6 +51,10 @@ package-lock.json
 /vendor/*
 !/vendor/autoload.php
 !/vendor/composer/
+# vendor/composer/installed.php regenerates with the current git ref (churns after
+# every commit) and is never read at runtime, so do not track it. installed.json is
+# the stable committed record.
+/vendor/composer/installed.php
 !/vendor/giggsey/
 !/vendor/symfony/
 !/vendor/yahnis-elsts/
