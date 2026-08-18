@@ -87,6 +87,7 @@ class En_61
         61487 => 'Telstra',
         61488 => 'Telstra',
         61495 => 'Optus',
+        614201 => 'Pivotel Satellite',
         614400 => 'Aazad distribution discretionary trust',
         614444 => 'Telstra',
         614445 => 'Telstra',
@@ -122,9 +123,6 @@ class En_61
         6142002 => 'Dialogue Communications',
         6142003 => 'MessageBird',
         6142004 => 'Symbio Networks',
-        6142010 => 'Pivotel Satellite',
-        6142011 => 'Compatel Limited',
-        6142012 => 'Soul Pattinson',
         6148984 => 'Victorian Rail Track',
         6148985 => 'MessageBird',
     ];
