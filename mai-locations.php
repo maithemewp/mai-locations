@@ -5,6 +5,7 @@
  * Plugin URI:        https://bizbudding.com
  * Description:       A custom post type with info/address/map fields to manage locations.
  * Version:           1.1.0
+ * Requires PHP:      8.1
  * Requires at least: 6.9
  * Author:            BizBudding
  * Author URI:        https://bizbudding.com
