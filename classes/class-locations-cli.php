@@ -572,7 +572,7 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
 
 	// Bail if error. 403 is a valid response, but sometimes we were blocked.
 	if ( ! in_array( $code, [ 200, 403 ] ) ) {
-		return $key ? $data['key'] : $data;
+		return $key ? $data[ $key ] : $data;
 	}
 
 	// Get body.
@@ -581,7 +581,7 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
 
 	// Bail if no body.
 	if ( ! $body ) {
-		return $key ? $data['key'] : $data;
+		return $key ? $data[ $key ] : $data;
 	}
 
 	// Set up tag processor.
@@ -624,7 +624,7 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
 			}
 
 			// Try for name.
-			switch ( $property ) {
+			switch ( $name ) {
 				case 'twitter:description':
 					$data['desc'] = $data['desc'] ?: (string) $tags->get_attribute( 'content' );
 					break;
