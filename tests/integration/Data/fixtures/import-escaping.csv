@@ -1,0 +1,2 @@
+location_name,address_city,location_url,location_email,location_phone,not_a_field,location_description
+Ichabod & Co,Sleepy <Hollow>,https://example.com/?a=1&b=2,Info@Example.com,555 & 1234,ignored,<p>Long text</p>

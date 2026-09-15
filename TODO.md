@@ -1,6 +1,6 @@
 # Mai Locations rework
 
-*Started September 14, 2026*
+*Started September 14, 2026. Updated September 15, 2026.*
 
 Mike's calls, September 14, 2026:
 
@@ -8,39 +8,112 @@ Mike's calls, September 14, 2026:
 - **No release until the whole rework is done.** Work lands on `develop` in steps; nothing is tagged or shipped midway.
 - **PHP floor 8.2, or 8.3.** Raise `Requires PHP` and `composer.json` together as the last step before the release.
 - **Started September 15, 2026, earlier than first planned.** Mike brought it forward while Visit Sleepy Hollow waits on SiteGround SSH.
+- **The plugin runs on many sites, so be careful.** Mike, September 15, 2026. Every name another site could depend on stays working: functions, classes, hooks, shortcodes, block names, option and meta keys, query params, the CLI command. `tests/integration/PublicApi/PublicNamesTest.php` pins the full list and fails if any disappears. Drop a name only as a deliberate, changelogged decision.
 
 ## Resume here
 
-A fresh session should read this file first, then `README.md`, then `CHANGES.md`. The test harness is in (September 15, 2026): `composer test-setup`, `composer test`, `composer stan`, setup in the README's Tests section. The next step is characterisation tests. Visit Sleepy Hollow (`~/Herd/visitsleepyhollow`, symlinked to this folder) is a real site using the plugin: 141 locations, the `update_locations_from_website` CLI command, the facts block in its theme, and archive shortcodes `[mai_location_address]` and `[mai_location_phone]`. Use it as a manual check that nothing it relies on changes.
+A fresh session should read this file first, then `README.md`, then `CHANGES.md`. The harness and the characterisation tests are in (September 15, 2026): 578 tests, passing in default and random order. Run `composer test` and `composer stan`; setup is in the README's Tests section. The next step is the PSR-4 autoload and moving classes one at a time.
+
+Visit Sleepy Hollow (`~/Herd/visitsleepyhollow`, symlinked to this folder) is a real site using the plugin: 141 locations, the `update_locations_from_website` CLI command, `mailocations_get_data_from_website()` from its own scripts, `mailocations_get_address()` in its theme's facts block, the `mailocations_general_fields` filter, and archive shortcodes `[mai_location_address]` and `[mai_location_phone]`. Use it as a manual check that nothing it relies on changes.
 
 Follow `wp-plugin-scaffold` for layout and the global modern PHP rules: `declare(strict_types=1)`, namespaces, typed everything, enums, `match`, cast at the boundary.
 
+## How the tests work
+
+- **They pin today's behaviour, bugs included.** A test named `test_pins_bug_...` asserts the buggy output and says in a comment what correct looks like. Fixing the bug means changing that test in the same commit.
+- **One folder per area** under `tests/integration/`: `Registration`, `Fields`, `Display`, `Data` (CLI, importer, location functions), `Blocks` (blocks and front-end forms), `PublicApi`.
+- **Static caches are the biggest obstacle.** Labels, base, options, field lists, post type and taxonomy lists, query defaults, "is filtered" and user locations are all cached in `static` variables for the whole request. Filters added after boot do nothing, so the filter paths (including `mailocations_general_fields`, which Sleepy Hollow uses) cannot be tested in-process. `Registration/ScenarioRunner.php` works around it by booting WordPress in a child process with the filter already in place. The rework should make these caches resettable or drop them.
+- **ACF block data filters are lost after the first test.** The Blocks tests re-add them in `set_up()` with `restore_acf_local_meta_filters()`.
+- **Paths untested because they need a Google API key or a real request:** `import_places`, the two Google Maps address functions, the edit-form listener, and the import confirmation notice (both read `filter_input()`, which is empty on the command line).
+
 ## Bugs found
 
-- [x] `mailocations_get_data_from_website()` returned `$data['key']` instead of `$data[ $key ]` on a failed request or empty body, so a caller asking for one key got null and a warning. `classes/class-locations-cli.php`. Patched September 14, 2026.
-- [x] The Twitter card fallback in the same function switched on `$property` instead of `$name`, so `twitter:image` and `twitter:description` were never read. Patched September 14, 2026.
-- [ ] `mailocations_upload_image()` re-downloads the saved image through the site's own uploads URL with `download_url()`. That fails on local sites with self-signed certificates (`cURL error 60` on Herd) and is a needless round trip everywhere. Sideload from the fetched bytes instead.
-- [ ] `mailocations_upload_image()` saves every image as `md5(url).jpg`, whatever its real type, so a PNG or WebP gets a `.jpg` name.
-- [ ] `update_locations_from_website` overwrites nothing, but it always sets the excerpt from `og:description` on a location without one, with no way to turn that off. Add a flag or split the image and excerpt jobs.
-- [ ] `mailocations_get_data_from_website()` uses WordPress's default user agent and a 5 second timeout. Many hotel and chain sites return nothing to it but answer a browser user agent. Seen on Visit Sleepy Hollow: 44 of 106 sites gave no image until retried.
+Every item below was confirmed in code or by a test. Unless marked otherwise, a `test_pins_bug_` test holds the current behaviour.
 
-Found by PHPStan when the harness went in, each confirmed by reading the code. All sit in `tests/phpstan-baseline.neon` until fixed.
+### Crashes
 
-- [ ] The location edit form reads `$GET['referrer']` instead of `$_GET['referrer']`, so its Back link never shows. `classes/class-location-form-edit.php:23`.
-- [ ] `send_published_email()` passes an undefined `$post_type` to `mailocations_get_singular_label()` instead of `$post->post_type`, so the "has been published" email gets the wrong label and a warning. `classes/class-location-form-listener.php:369`.
-- [ ] The importer looks up a per-field escaping callback in `$allowed`, which is never defined, so every imported meta value goes through `esc_html()`. `classes/class-location-import.php:457`. Decide whether to define the map or delete the lookup.
+- [ ] A failed image re-download crashes `update_locations_from_website`. `wp_delete_file()` gets a `WP_Error` and `unlink()` throws a `TypeError`. `classes/class-locations-cli.php:733`. This is the re-download that fails on Herd's certificate.
+- [ ] `[mai_location_phone]` throws an uncaught `NumberParseException` when a country is set and the phone text cannot be parsed, such as "Call us". `includes/shortcodes.php:62`.
+- [ ] One blank line in an import CSV stops the import with a `ValueError`. `classes/class-location-import.php:303`.
+- [ ] `no_results_text()` fatals on a null `$wp_query`, because `->get()` runs before the null check, and throws a `TypeError` on an array `post_type`. `mai-locations.php:399`.
+- [ ] `add_acf_form_head()` in the WooCommerce tabs class calls `is_account_page()` without checking WooCommerce is active. Not live today, since the class is not instantiated.
+
+### Wrong output on the front end
+
+- [ ] `[mai_location_url]` strips every leading "w", so `www.washingtonirving.org` shows as `ashingtonirving.org`. `ltrim()` takes a character list. `includes/shortcodes.php:138`.
+- [ ] `[mai_location_phone]` with no country links to `tel://914` for `914-631-8200`, because `(int)` stops at the first dash. `includes/shortcodes.php:77`.
 - [ ] `[mai_location_phone]` leaves `$tel` and `$formatted` undefined when a country is set but the number is not valid for it, giving warnings and an empty link. `includes/shortcodes.php:82`.
-- [ ] `acf_google_map_api()` tests `isset( $api['key'] ) || empty( $api['key'] )`, which is always true, so the plugin's key always replaces whatever key ACF already had. `classes/class-settings.php:332`.
-- [ ] `mailocations_upload_image()` passes a `WP_Error` to `wp_delete_file()` when the download fails. `classes/class-locations-cli.php:733`. Goes away with the sideload fix above.
-- [ ] `Mai_Locations_Queries::mai_post_grid_query()` calls `mailocations_get_geo_query_args()`, which does not exist. Its hook is commented out, so it is dead code today. Delete it during the move.
-- [ ] Several functions document `@return void` but return a value (`mailocations_get_distance()`, `mailocations_add_location_to_user()`), and `[mai_location_distance]` uses that value. Docblocks only, fix while typing the functions.
+- [ ] `[mai_location_email link="false"]` still links, because the string "false" is truthy. `includes/shortcodes.php:190`.
+- [ ] `[mai_location_distance]` loses the spaces in `before` and `after` (`3.1mi away`), returns a float when `after` is empty, and prints nothing for a distance that rounds to 0. `includes/shortcodes.php:294`.
+- [ ] `mailocations_get_address()` with `hide="country"` on a non-US record shows the US state field, not the international one. `includes/functions-display.php:88`.
+- [ ] An address with only a country prints an empty `mai-address-item` div. `includes/functions-display.php:106`.
+- [ ] A geo query with no distance limit drops a location sitting exactly at the search point, because the WHERE clause treats a distance of 0 as false. `classes/class-geo-query.php:191`.
+- [ ] The geo query order fallback never applies, because concatenation runs before `?:`. `classes/class-geo-query.php:225`.
+- [ ] A filter latitude of `0` counts as no geo query. `includes/functions-filters.php:133`.
+- [ ] The location edit form reads `$GET['referrer']` instead of `$_GET['referrer']`, so its Back link never shows. `classes/class-location-form-edit.php:23`.
+- [ ] A custom form class runs into the default one (`mailocations-formextra`). `classes/class-location-form.php:87`.
+- [ ] The locations table puts its `<h2>` inside `<table>`, never prints its `class` arg, and does not URL-encode the referrer in Edit links. `classes/class-locations-table.php:152`.
+- [ ] An empty locations table block passes null to `wp_kses_post()` and loses its title, header and no-results defaults. `classes/class-locations-table.php:38`.
+- [ ] The table block's settings show the submission block's labels, because both field groups use the keys `mai_location_redirect` and `mai_location_fields` and ACF keeps the first.
+- [ ] The count block ignores its field defaults and renders `0  0`.
+- [ ] The map's directions link uses `ref=` instead of `rel=`. The map's "All locations" setting queries regular posts on any page that is not a location archive.
+- [ ] The submit button variation keeps the link's `href` on the `<button>`. Distance options keep a leading space (`value=" 20"`).
+- [ ] The "District of Colombia" state label is misspelled. `includes/functions-fields.php:415`.
+
+### Wrong data saved
+
+- [ ] The CSV importer runs every meta value through `esc_html()`, so URLs are stored with `&amp;`. `$allowed` is never defined. `classes/class-location-import.php:457`.
+- [ ] The importer's default status is `public`, which is not a post status (`:279`). Its failed count can never rise, because `wp_insert_post()` is called without `$wp_error` (`includes/functions-locations.php:82`). The shipped template CSV repeats `address_street`, so the second line overwrites the street.
+- [ ] `mailocations_create_location()` lets field defaults override `meta_input` passed in, so an explicit `CA` becomes `US`. `includes/functions-locations.php:74`.
+- [ ] `mailocations_add_location_to_user()` adds duplicates.
+- [ ] The Google geocoding address never includes country or state, because it tests `$countries[ $key ]` instead of the value. `includes/functions-locations.php:291`. Read in code only.
+- [ ] Saving an empty settings form stores a distance of 0; units are not limited to `mi` and `km`; unknown keys are kept unsanitised.
+- [ ] Both upgrade routines run on every hook: `includes/upgrade.php` and `classes/class-upgrade.php`. A fresh install writes the version option four times, and migrated values are saved unsanitised. Delete one copy.
+
+### CLI and website data
+
+- [x] `mailocations_get_data_from_website()` returned `$data['key']` instead of `$data[ $key ]` on a failed request or empty body. Patched September 14, 2026.
+- [ ] **The Twitter card fallback still never runs.** The September 14 patch fixed the `$property`/`$name` switch, but the fallback sits behind `! array_values( $data )`, which is always false because the array always has two keys. The same check at `:479` means locations with no data are never skipped. `classes/class-locations-cli.php:612`. Corrected September 15, 2026; it was wrongly marked fixed.
+- [ ] A failed sideload is logged as "Image updated": `mailocations_upload_image()` returns a `WP_Error`, the check at `:527` treats it as success, and `set_post_thumbnail()` gets the error.
+- [ ] `mailocations_upload_image()` fetches with `file_get_contents()` (no timeout, no user agent, warns on failure), then re-downloads the saved copy through the site's own uploads URL with `download_url()`. That fails on local sites with self-signed certificates (`cURL error 60` on Herd). Sideload from the fetched bytes instead. `:685`.
+- [ ] `mailocations_upload_image()` stages every image as `md5(url).jpg`. WordPress renames a PNG on sideload, but the staging name is still wrong.
+- [ ] `update_locations_from_website` always sets the excerpt from `og:description` on a location without one, with no way to turn that off. Add a flag or split the image and excerpt jobs.
+- [ ] `mailocations_get_data_from_website()` uses WordPress's default user agent and a 5 second timeout. Many hotel and chain sites answer only a browser user agent. Seen on Visit Sleepy Hollow: 44 of 106 sites gave no image until retried. An unknown `$key` warns and returns null.
+
+### Settings page
+
+- [ ] `acf_google_map_api()` tests `isset( $api['key'] ) || empty( $api['key'] )`, always true, so the plugin's key always replaces ACF's. The signature check has the same bug. `classes/class-settings.php:332`.
+- [ ] The units dropdown prints `selected='selected'` outside the tag, because `selected()` echoes inside `printf()`. `classes/class-settings.php:269`.
+- [ ] Settings values go into `value=""` unescaped, so a label with a double quote breaks the field. `classes/class-settings.php:197`.
+- [ ] `mailocations_get_option()` returns stale values after `mailocations_update_option()` in the same request, and warns on an unknown key.
+- [ ] Labels and base are sanitised only on first call; later calls return the raw filtered value. The filtered base uses `sanitize_html_class()`, the saved one `sanitize_title_with_dashes()`.
+
+### Security
+
+- [ ] `[mai_location_phone]` prints `style` unescaped (`includes/shortcodes.php:56`). `[mai_location_place]` prints `place_id` unescaped (`:262`).
+- [ ] `mailocations_get_query_params()` escapes the value and then overwrites it with the raw `$_GET` value. `includes/functions-filters.php:61`.
+
+### Smaller
+
+- [ ] `send_published_email()` uses an undefined `$post_type`, so the email reads "Your http://example.org  has been published!". `classes/class-location-form-listener.php:369`.
+- [ ] The block binding source warns on a missing `postId` context for `filterSubmit` and `filterClear`, and returns nothing for location meta. `classes/class-block-bindings.php:61`.
+- [ ] `mailocations_user_can_edit()` is true only for the post author, not administrators. Decide whether that is intended.
+- [ ] `mailocations_delete_transients()` prefix-matches, so it also deletes transients like `mai_locationsother`.
+- [ ] The taxonomy is hierarchical but its rewrite is not, so child term URLs get no rule.
+- [ ] The map script does not list the marker clusterer as a dependency. The settings link hook hardcodes the folder name `mai-locations`.
+- [ ] Field group titles keep the `{SINGULAR}` placeholder on real screens, because ACF caches the group before a post exists.
+- [ ] The excerpt field keeps only the Visual tab, the opposite of its docblock; the method name is misspelled `prepare_location_exerpt_field`.
+- [ ] PHP 8.4 deprecations: `str_getcsv()` without `$escape` (`class-location-import.php:300`), `get_page_by_title()` (`:463`). Users are created without a password (`:361`).
+- [ ] Typos: `File (.csv]` label (`:96`), stray quote in the download link (`:77`), text domain `mai-location` in two places.
+- [ ] Wrong docblocks: `mailocations_get_distance()` and `mailocations_add_location_to_user()` say void but return values; `Mai_Geo_Query::get_distance()` says float but returns false; `should_update()` can return null; the rule-match screen is an array, not `WP_Screen`.
+- [ ] Dead code: `Mai_Locations_Queries::mai_post_grid_query()` is unhooked and calls `mailocations_get_geo_query_args()`, which does not exist. `mailocations_get_social_fields()` returns `[]` on its first line, so social fields and their filter are off. Decide whether social fields come back or go.
 
 ## Steps
 
 - [x] Test harness: PHPUnit 9.6 with the WordPress 7.1 test suite and ACF Pro loaded, plus PHPStan level 6 with WordPress, WP-CLI and ACF Pro stubs and a baseline of 224 existing errors. September 15, 2026.
-- [ ] Characterisation tests for the post type, taxonomy, settings, fields, import, CLI commands and blocks as they behave today.
+- [x] Characterisation tests for the post type, taxonomy, settings, fields, import, CLI commands, blocks, forms and the public names. 578 tests. September 15, 2026.
 - [ ] Composer PSR-4 autoload under a namespace, following `wp-plugin-scaffold`.
-- [ ] Move classes one at a time behind the tests, keeping public function names working until the release.
-- [ ] Fix the open bugs above, each with a test.
+- [ ] Move classes one at a time behind the tests, keeping public function names working until the release. Make the static caches resettable as each file moves.
+- [ ] Fix the open bugs above, each by flipping its pinned test.
 - [ ] Raise the PHP floor and write the changelog.
 - [ ] Release.

@@ -1,0 +1,22 @@
+{
+	"results": [
+		{
+			"address_components": [
+				{ "long_name": "150", "short_name": "150", "types": [ "street_number" ] },
+				{ "long_name": "Broadway", "short_name": "Broadway", "types": [ "route" ] },
+				{ "long_name": "Sleepy Hollow", "short_name": "Sleepy Hollow", "types": [ "locality", "political" ] },
+				{ "long_name": "New York", "short_name": "NY", "types": [ "administrative_area_level_1", "political" ] },
+				{ "long_name": "United States", "short_name": "US", "types": [ "country", "political" ] },
+				{ "long_name": "10591", "short_name": "10591", "types": [ "postal_code" ] }
+			],
+			"formatted_address": "150 Broadway, Sleepy Hollow, NY 10591, USA",
+			"geometry": { "location": { "lat": 41.0857, "lng": -73.8587 } },
+			"place_id": "ChIJfirst"
+		},
+		{
+			"formatted_address": "Second result",
+			"place_id": "ChIJsecond"
+		}
+	],
+	"status": "OK"
+}
