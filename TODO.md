@@ -40,7 +40,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 
 ### Wrong output on the front end
 
-- [ ] `[mai_location_url]` strips every leading "w", so `www.washingtonirving.org` shows as `ashingtonirving.org`. `ltrim()` takes a character list. `includes/shortcodes.php:138`.
+- [x] `[mai_location_url]` stripped every leading "w", so `www.washingtonirving.org` showed as `ashingtonirving.org`. `ltrim()` takes a character list, not a prefix. Now `preg_replace( '#^www\.#i', ... )`. `includes/shortcodes.php:138`. Fixed September 15, 2026 on Mike's call, with the pinned test flipped and cases added for a host starting with "w" and for an uppercase WWW.
 - [ ] `[mai_location_phone]` with no country links to `tel://914` for `914-631-8200`, because `(int)` stops at the first dash. `includes/shortcodes.php:77`.
 - [ ] `[mai_location_phone]` leaves `$tel` and `$formatted` undefined when a country is set but the number is not valid for it, giving warnings and an empty link. `includes/shortcodes.php:82`.
 - [ ] `[mai_location_email link="false"]` still links, because the string "false" is truthy. `includes/shortcodes.php:190`.

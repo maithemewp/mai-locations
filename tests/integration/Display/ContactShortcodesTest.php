@@ -56,12 +56,30 @@ final class ContactShortcodesTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_url_label_strips_leading_w_characters(): void {
+	public function test_url_label_drops_only_the_www_prefix(): void {
 		$this->use_location( [ 'location_url' => 'https://www.washingtonirving.org' ] );
 
-		// Correct would be washingtonirving.org. ltrim() takes a character list, not a prefix.
+		// Fixed September 15, 2026. ltrim() took a character list, so it ate the w of washington too.
 		$this->assertSame(
-			'<div class="mai-location-url"><a href="https://www.washingtonirving.org" target="_blank" rel="noopener nofollow">ashingtonirving.org</a></div>',
+			'<div class="mai-location-url"><a href="https://www.washingtonirving.org" target="_blank" rel="noopener nofollow">washingtonirving.org</a></div>',
+			do_shortcode( '[mai_location_url]' )
+		);
+	}
+
+	public function test_url_label_keeps_a_host_that_starts_with_w(): void {
+		$this->use_location( [ 'location_url' => 'https://westchester.com' ] );
+
+		$this->assertSame(
+			'<div class="mai-location-url"><a href="https://westchester.com" target="_blank" rel="noopener nofollow">westchester.com</a></div>',
+			do_shortcode( '[mai_location_url]' )
+		);
+	}
+
+	public function test_url_label_drops_the_www_prefix_whatever_its_case(): void {
+		$this->use_location( [ 'location_url' => 'https://WWW.Westchester.com' ] );
+
+		$this->assertSame(
+			'<div class="mai-location-url"><a href="https://WWW.Westchester.com" target="_blank" rel="noopener nofollow">Westchester.com</a></div>',
 			do_shortcode( '[mai_location_url]' )
 		);
 	}

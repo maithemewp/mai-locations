@@ -135,7 +135,9 @@ function mailocation_location_url_shortcode( $atts ) {
 
 		// Format url.
 		if ( $parsed ) {
-			$formatted = ltrim( $parsed, 'www.' );
+			// preg_replace, not ltrim(). ltrim() takes a character list, so it also ate the
+			// first letter of any host starting with w, turning www.example.org into ample.org.
+			$formatted = (string) preg_replace( '#^www\.#i', '', $parsed );
 		} else {
 			$formatted = $url;
 		}
