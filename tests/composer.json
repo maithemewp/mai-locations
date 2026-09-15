@@ -1,0 +1,28 @@
+{
+  "name": "maithemewp/mai-locations-tests",
+  "description": "Test-only dependencies for mai-locations. Installed into tests/vendor/ so the plugin's committed vendor/ autoloader is never regenerated with dev entries. wp-phpunit and roots/wordpress-no-content track together; move them only via `composer update -d tests`.",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": "^8.2",
+    "phpunit/phpunit": "^9.6",
+    "yoast/phpunit-polyfills": "^4.0",
+    "wp-phpunit/wp-phpunit": "^7.0",
+    "roots/wordpress-no-content": "^7.0",
+    "phpstan/phpstan": "^2.1",
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "php-stubs/wp-cli-stubs": "^2.11",
+    "php-stubs/acf-pro-stubs": "^6.0"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Mai\\Locations\\Tests\\": ""
+    }
+  },
+  "minimum-stability": "stable",
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "roots/wordpress-core-installer": false
+    }
+  }
+}

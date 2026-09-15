@@ -1,0 +1,1315 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method Mai_Locations_Address_Search_Block\:\:render_block\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-address-search/block.php
+
+		-
+			message: '#^Method Mai_Locations_Address_Search_Block\:\:render_block\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-address-search/block.php
+
+		-
+			message: '#^Method Mai_Locations_Count_Block\:\:render_block\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-count/block.php
+
+		-
+			message: '#^Method Mai_Locations_Count_Block\:\:render_block\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-count/block.php
+
+		-
+			message: '#^Cannot access property \$name on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Clear_Block\:\:add_block_attribute\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Clear_Block\:\:add_block_attribute\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Clear_Block\:\:add_block_variation\(\) has parameter \$variations with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Clear_Block\:\:add_block_variation\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Clear_Block\:\:render_block_variation\(\) has parameter \$parsed_block with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Clear_Block\:\:render_block_variation\(\) has parameter \$wp_block with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$block$#'
+			identifier: parameter.notFound
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$instance$#'
+			identifier: parameter.notFound
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''a'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: ../blocks/location-filter-clear/block.php
+
+		-
+			message: '#^Cannot access property \$name on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: ../blocks/location-filter-submit/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Submit_Block\:\:add_block_attribute\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter-submit/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Submit_Block\:\:add_block_attribute\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter-submit/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Submit_Block\:\:add_block_variation\(\) has parameter \$variations with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter-submit/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Submit_Block\:\:add_block_variation\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter-submit/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Submit_Block\:\:render_block_variation\(\) has parameter \$parsed_block with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../blocks/location-filter-submit/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Submit_Block\:\:render_block_variation\(\) has parameter \$wp_block with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../blocks/location-filter-submit/block.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$block$#'
+			identifier: parameter.notFound
+			count: 1
+			path: ../blocks/location-filter-submit/block.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$instance$#'
+			identifier: parameter.notFound
+			count: 1
+			path: ../blocks/location-filter-submit/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Block\:\:get_choice_filter\(\) has parameter \$selected with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Block\:\:get_select_filter\(\) has parameter \$selected with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Block\:\:load_locations_filter_field\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Block\:\:load_locations_filter_field\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Block\:\:render_block\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filter_Block\:\:render_block\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filter/block.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: ../blocks/location-filter/block.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$type$#'
+			identifier: parameter.notFound
+			count: 1
+			path: ../blocks/location-filter/block.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: ../blocks/location-filter/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filters_Block\:\:get_template\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filters/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filters_Block\:\:render_block\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filters/block.php
+
+		-
+			message: '#^Method Mai_Locations_Filters_Block\:\:render_block\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-filters/block.php
+
+		-
+			message: '#^Left side of \|\| is always false\.$#'
+			identifier: booleanOr.leftAlwaysFalse
+			count: 1
+			path: ../blocks/location-map/block.php
+
+		-
+			message: '#^Method Mai_Locations_Map_Block\:\:get_markers\(\) has parameter \$posts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-map/block.php
+
+		-
+			message: '#^Method Mai_Locations_Map_Block\:\:get_markers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-map/block.php
+
+		-
+			message: '#^Method Mai_Locations_Map_Block\:\:render_block\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-map/block.php
+
+		-
+			message: '#^Method Mai_Locations_Map_Block\:\:render_block\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-map/block.php
+
+		-
+			message: '#^Method Mai_Locations_Submission_Block\:\:load_post_type_choices\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-submission/block.php
+
+		-
+			message: '#^Method Mai_Locations_Submission_Block\:\:load_post_type_choices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-submission/block.php
+
+		-
+			message: '#^Method Mai_Locations_Submission_Block\:\:render_block\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-submission/block.php
+
+		-
+			message: '#^Method Mai_Locations_Submission_Block\:\:render_block\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-submission/block.php
+
+		-
+			message: '#^Method Mai_Locations_Table_Block\:\:load_post_type_choices\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-table/block.php
+
+		-
+			message: '#^Method Mai_Locations_Table_Block\:\:load_post_type_choices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-table/block.php
+
+		-
+			message: '#^Method Mai_Locations_Table_Block\:\:render_block\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../blocks/location-table/block.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 3\.$#'
+			identifier: arguments.count
+			count: 1
+			path: ../classes/class-block-bindings.php
+
+		-
+			message: '#^Method Mai_Locations_Block_Bindings\:\:get_source_value\(\) has parameter \$source_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-block-bindings.php
+
+		-
+			message: '#^Method Mai_Geo_Query\:\:get_distance\(\) should return float but returns false\.$#'
+			identifier: return.type
+			count: 1
+			path: ../classes/class-geo-query.php
+
+		-
+			message: '#^Method Mai_Geo_Query\:\:haversine_term\(\) has parameter \$geo_query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-geo-query.php
+
+		-
+			message: '#^Method Mai_Geo_Query\:\:instance\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: ../classes/class-geo-query.php
+
+		-
+			message: '#^PHPDoc tag @var above a method has no effect\.$#'
+			identifier: varTag.misplaced
+			count: 1
+			path: ../classes/class-geo-query.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: ../classes/class-geo-query.php
+
+		-
+			message: '#^Cannot access offset ''post_type'' on WP_Screen\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:handle_field_group_titles\(\) has parameter \$field_group with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:handle_field_group_titles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:load_location_fields_choices\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:load_location_fields_choices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:post_type_rule_match\(\) has parameter \$field_group with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:post_type_rule_match\(\) has parameter \$rule with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:prepare_location_coordinates_field\(\) has parameter \$field with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:prepare_location_coordinates_field\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:prepare_location_exerpt_field\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:prepare_location_exerpt_field\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:prepare_location_place_id_field\(\) has parameter \$field with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Fields\:\:prepare_location_place_id_field\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-fields.php
+
+		-
+			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
+			identifier: arguments.count
+			count: 3
+			path: ../classes/class-location-form-edit.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: ../classes/class-location-form-edit.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Edit\:\:get_form\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../classes/class-location-form-edit.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Edit\:\:load_location_excerpt_value\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form-edit.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Edit\:\:load_location_image_value\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form-edit.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Edit\:\:load_location_title_value\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form-edit.php
+
+		-
+			message: '#^Undefined variable\: \$GET$#'
+			identifier: variable.undefined
+			count: 1
+			path: ../classes/class-location-form-edit.php
+
+		-
+			message: '#^Variable \$GET in isset\(\) is never defined\.$#'
+			identifier: isset.variable
+			count: 1
+			path: ../classes/class-location-form-edit.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Function is_account_page not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Listener\:\:send_emails\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Listener\:\:send_published_email\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Listener\:\:should_update\(\) should return bool but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Listener\:\:update_lat_lng_place_id_value\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Listener\:\:update_lat_lng_place_id_value\(\) has parameter \$value with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form_Listener\:\:update_lat_lng_place_id_value\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Parameter \#1 \$location_id of function mailocations_user_can_edit expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Parameter \#2 \$user_id of function get_the_author_meta expects int\|false, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Parameter \$original of method Mai_Locations_Location_Form_Listener\:\:update_lat_lng_place_id_value\(\) has invalid type JSON\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Undefined variable\: \$post_type$#'
+			identifier: variable.undefined
+			count: 1
+			path: ../classes/class-location-form-listener.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form\:\:__construct\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form\:\:get\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../classes/class-location-form.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form\:\:remove_conditions\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Form\:\:remove_conditions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-form.php
+
+		-
+			message: '#^Property Mai_Locations_Location_Form\:\:\$args has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: ../classes/class-location-form.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
+			identifier: argument.templateType
+			count: 1
+			path: ../classes/class-location-form.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Import\:\:get_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Import\:\:load_roles\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Import\:\:load_roles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Import\:\:load_statuses\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Method Mai_Locations_Location_Import\:\:load_statuses\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Property Mai_Locations_Location_Import\:\:\$create_users has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Property Mai_Locations_Location_Import\:\:\$csv has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Property Mai_Locations_Location_Import\:\:\$file_id has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Property Mai_Locations_Location_Import\:\:\$post_status has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Property Mai_Locations_Location_Import\:\:\$user_role has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Undefined variable\: \$allowed$#'
+			identifier: variable.undefined
+			count: 2
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Variable \$allowed in isset\(\) is never defined\.$#'
+			identifier: isset.variable
+			count: 1
+			path: ../classes/class-location-import.php
+
+		-
+			message: '#^Call to new Mai_Locations_CLI\(\) on a separate line has no effect\.$#'
+			identifier: new.resultUnused
+			count: 1
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^Function mailocations_get_data_from_website\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^Function mailocations_upload_image\(\) has parameter \$image_url with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^Method Mai_Locations_CLI\:\:import_places\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^Method Mai_Locations_CLI\:\:import_places\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^Method Mai_Locations_CLI\:\:update_locations_from_website\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^Method Mai_Locations_CLI\:\:update_locations_from_website\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$url$#'
+			identifier: parameter.notFound
+			count: 1
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^Parameter \#1 \$file of function wp_delete_file expects string, WP_Error given\.$#'
+			identifier: argument.type
+			count: 1
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
+			identifier: argument.templateType
+			count: 3
+			path: ../classes/class-locations-cli.php
+
+		-
+			message: '#^Function mailocations_get_geo_query_args not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: ../classes/class-locations-queries.php
+
+		-
+			message: '#^Method Mai_Locations_Queries\:\:mai_post_grid_query\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-locations-queries.php
+
+		-
+			message: '#^Method Mai_Locations_Queries\:\:mai_post_grid_query\(\) has parameter \$query_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-locations-queries.php
+
+		-
+			message: '#^Method Mai_Locations_Queries\:\:mai_post_grid_query\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-locations-queries.php
+
+		-
+			message: '#^Method Mai_Locations_Queries\:\:pre_get_posts_query\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../classes/class-locations-queries.php
+
+		-
+			message: '#^Method Mai_Locations_Locations_Table\:\:__construct\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-locations-table.php
+
+		-
+			message: '#^Method Mai_Locations_Locations_Table\:\:get\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../classes/class-locations-table.php
+
+		-
+			message: '#^Parameter \#1 \$location_id of function mailocations_user_can_edit expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: ../classes/class-locations-table.php
+
+		-
+			message: '#^Property Mai_Locations_Locations_Table\:\:\$args has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: ../classes/class-locations-table.php
+
+		-
+			message: '#^Property Mai_Locations_Locations_Table\:\:\$user_id has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: ../classes/class-locations-table.php
+
+		-
+			message: '#^Cannot assign offset ''key'' to string\.$#'
+			identifier: offsetAssign.dimType
+			count: 1
+			path: ../classes/class-settings.php
+
+		-
+			message: '#^Method Mai_Locations_Settings\:\:acf_google_map_api\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-settings.php
+
+		-
+			message: '#^Method Mai_Locations_Settings\:\:add_settings_link\(\) has parameter \$actions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-settings.php
+
+		-
+			message: '#^Method Mai_Locations_Settings\:\:add_settings_link\(\) has parameter \$plugin_data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-settings.php
+
+		-
+			message: '#^Method Mai_Locations_Settings\:\:add_settings_link\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-settings.php
+
+		-
+			message: '#^Method Mai_Locations_Settings\:\:sanitize_callback\(\) has parameter \$input with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-settings.php
+
+		-
+			message: '#^Method Mai_Locations_Settings\:\:sanitize_callback\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-settings.php
+
+		-
+			message: '#^Method Mai_Locations_Settings\:\:settings_callback\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: ../classes/class-settings.php
+
+		-
+			message: '#^Property Mai_Locations_Settings\:\:\$options has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: ../classes/class-settings.php
+
+		-
+			message: '#^Method Mai_Locations_Upgrade\:\:upgrade_0_7_0\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: ../classes/class-upgrade.php
+
+		-
+			message: '#^Method Mai_Locations_Upgrade\:\:upgrade_completed\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-upgrade.php
+
+		-
+			message: '#^Function is_account_page not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Function is_wc_endpoint_url not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:add_content_areas\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:add_content_areas\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:add_menu_items\(\) has parameter \$items with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:add_menu_items\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:add_query_vars\(\) has parameter \$vars with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:add_query_vars\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:add_woo_query_vars\(\) has parameter \$vars with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:add_woo_query_vars\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:get_tabs\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:hooks\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:insert_after\(\) has parameter \$array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:insert_after\(\) has parameter \$new with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:insert_after\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:insert_before\(\) has parameter \$array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:insert_before\(\) has parameter \$new with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Method Mai_Locations_WooCommerce_Account_Tabs\:\:insert_before\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../classes/class-woocommerce-account-tabs.php
+
+		-
+			message: '#^Function mailocations_get_address\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-display.php
+
+		-
+			message: '#^Function mailocations_get_location_edit_form\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-display.php
+
+		-
+			message: '#^Function mailocations_get_location_submission_form\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-display.php
+
+		-
+			message: '#^Function mailocations_get_locations_table\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-display.php
+
+		-
+			message: '#^Function mailocations_get_address_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_country_choices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_field_group_fields\(\) has parameter \$post_type with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_field_group_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_fields_defaults\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_fields_raw\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_fields_tabs\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_general_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_social_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_state_choices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: ../includes/functions-fields.php
+
+		-
+			message: '#^Function mailocations_get_distance\(\) with return type void returns float but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: ../includes/functions-filters.php
+
+		-
+			message: '#^Function mailocations_get_filtered_query_args\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-filters.php
+
+		-
+			message: '#^Function mailocations_get_filtered_query_args\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-filters.php
+
+		-
+			message: '#^Function mailocations_get_query_defaults\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-filters.php
+
+		-
+			message: '#^Function mailocations_get_query_params\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-filters.php
+
+		-
+			message: '#^Function mailocation_get_user_locations\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_add_location_to_user\(\) with return type void returns WP_Error but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_add_location_to_user\(\) with return type void returns true but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_create_location\(\) has parameter \$meta_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_create_location\(\) has parameter \$post_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_create_location\(\) never returns WP_Error so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_create_location_from_woocommerce_user\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_get_address_meta_from_components\(\) has parameter \$components with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_get_address_meta_from_components\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_get_google_maps_result\(\) has parameter \$url with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_get_google_maps_result\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_get_location_post_types\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_get_location_taxonomies\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_get_location_taxonomies_underscored\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Parameter \#1 \$array \(array\{\}\|list\{0\: mixed, 1\?\: mixed, 2\?\: mixed, 3\?\: mixed, 4\?\: mixed, 5\?\: mixed\}\) to function array_filter does not contain falsy values, the array will always stay the same\.$#'
+			identifier: arrayFilter.same
+			count: 1
+			path: ../includes/functions-locations.php
+
+		-
+			message: '#^Function mailocations_delete_transients\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocations_delete_transients\(\) should return array but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocations_delete_transients\(\) should return array but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocations_get_asset\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocations_get_current_url_clean\(\) has parameter \$get with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocations_get_options\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocations_get_options_defaults\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocations_get_stylesheet_link\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocations_sanitize_options\(\) has parameter \$options with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocations_sanitize_options\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$prefix$#'
+			identifier: parameter.notFound
+			count: 1
+			path: ../includes/functions-utility.php
+
+		-
+			message: '#^Function mailocation_location_address_shortcode\(\) has parameter \$atts with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocation_location_email_shortcode\(\) has parameter \$atts with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocation_location_email_shortcode\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocation_location_phone_shortcode\(\) has parameter \$atts with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocation_location_phone_shortcode\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocation_location_place_shortcode\(\) has parameter \$atts with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocation_location_place_shortcode\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocation_location_table_shortcode\(\) has parameter \$atts with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocation_location_url_shortcode\(\) has parameter \$atts with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocation_location_url_shortcode\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Result of function mailocations_get_distance \(void\) is used\.$#'
+			identifier: function.void
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Variable \$formatted might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Variable \$tel might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: ../includes/shortcodes.php
+
+		-
+			message: '#^Function mailocations_upgrade_0_7_0\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: ../includes/upgrade.php
+
+		-
+			message: '#^Function mailocations_upgrade_completed\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../includes/upgrade.php
+
+		-
+			message: '#^Inner named functions are not supported by PHPStan\. Consider refactoring to an anonymous function, class method, or a top\-level\-defined function\. See issue \#165 \(https\://github\.com/phpstan/phpstan/issues/165\) for more details\.$#'
+			identifier: function.inner
+			count: 1
+			path: ../mai-locations.php
+
+		-
+			message: '#^Static property Mai_Locations_Plugin\:\:\$instance \(Mai_Locations_Plugin\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: ../mai-locations.php

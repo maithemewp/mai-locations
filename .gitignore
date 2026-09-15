@@ -21,6 +21,10 @@ yarn-error.log
 yarn.lock
 package-lock.json
 
+# Test-only dependencies and caches. See tests/composer.json.
+/tests/vendor/
+/.phpunit.cache/
+
 # Production files (already included in dist/)
 *.map
 
