@@ -7,7 +7,11 @@ Mike's calls, September 14, 2026:
 - **Incremental.** Tests around current behaviour first, then move code into namespaces file by file, fixing bugs as the tests find them.
 - **No release until the whole rework is done.** Work lands on `develop` in steps; nothing is tagged or shipped midway.
 - **PHP floor 8.2, or 8.3.** Raise `Requires PHP` and `composer.json` together as the last step before the release.
-- **After Visit Sleepy Hollow.** Not started before that site's build is finished.
+- **Started September 15, 2026, earlier than first planned.** Mike brought it forward while Visit Sleepy Hollow waits on SiteGround SSH.
+
+## Resume here
+
+A fresh session should read this file first, then `README.md`, then `CHANGES.md`. Nothing of the rework is written yet beyond the two bug fixes below. The first step is the test harness. Visit Sleepy Hollow (`~/Herd/visitsleepyhollow`, symlinked to this folder) is a real site using the plugin: 141 locations, the `update_locations_from_website` CLI command, the facts block in its theme, and archive shortcodes `[mai_location_address]` and `[mai_location_phone]`. Use it as a manual check that nothing it relies on changes.
 
 Follow `wp-plugin-scaffold` for layout and the global modern PHP rules: `declare(strict_types=1)`, namespaces, typed everything, enums, `match`, cast at the boundary.
 
