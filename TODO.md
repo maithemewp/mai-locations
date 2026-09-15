@@ -18,6 +18,10 @@ Visit Sleepy Hollow (`~/Herd/visitsleepyhollow`, symlinked to this folder) is a 
 
 Follow `wp-plugin-scaffold` for layout and the global modern PHP rules: `declare(strict_types=1)`, namespaces, typed everything, enums, `match`, cast at the boundary.
 
+## Who else runs this plugin
+
+`docs/fleet-survey-2026-09-15.md` has the full survey. The short version: 11 fleet sites, biggest is pregnancybydesign.com with 3,655 locations. Third-party code calls `mailocations_update_google_map_from_address()` on 5 sites, `[mai_location_address]` in 4 themes, and on naturesoma.com the field filters `mailocations_general_fields` and `mailocations_address_fields`, which carry that site's whole events feature. No site has social field data. Two sites are behind, on 0.4.0 and 1.0.0, so the upgrade path from 0.4.0 has to work.
+
 ## How the tests work
 
 - **They pin today's behaviour, bugs included.** A test named `test_pins_bug_...` asserts the buggy output and says in a comment what correct looks like. Fixing the bug means changing that test in the same commit.
