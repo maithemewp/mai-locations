@@ -22,6 +22,23 @@ Follow `wp-plugin-scaffold` for layout and the global modern PHP rules: `declare
 
 `docs/fleet-survey-2026-09-15.md` has the full survey. The short version: 11 fleet sites, biggest is pregnancybydesign.com with 3,655 locations. Third-party code calls `mailocations_update_google_map_from_address()` on 5 sites, `[mai_location_address]` in 4 themes, and on naturesoma.com the field filters `mailocations_general_fields` and `mailocations_address_fields`, which it uses to hide the phone and email fields and rename a tab. No site has social field data, and naturesoma's `mailocations_social_fields` callback returns an empty array too. Two sites are behind, on 0.4.0 and 1.0.0, so the upgrade path from 0.4.0 has to work.
 
+## Agreed design, not built yet
+
+**Publishing from the front-end edit form.** Mike's call, September 15, 2026. Review this again before building it.
+
+Today any ACF save of a location forces every status but publish to publish. Two pinned tests in `tests/integration/Blocks/FormListenerTest.php` show how far that reaches: it fires on Dashboard saves, not only the front-end form the 0.4.0 changelog describes, and it sweeps up private and trashed locations along with drafts and pending ones.
+
+The design:
+
+- A Publish checkbox on the **edit form only**, added automatically whenever the location is not published. Not an optional field a site picks, so no site has to change anything and no site silently stops publishing.
+- Hidden once the location is published, so there is no way to unpublish from the front end. Same pattern as the existing `acf/prepare_field` filters.
+- Checked and saved promotes `draft` or `pending` to `publish`. Unchecked saves the edit and leaves the status alone.
+- A whitelist, never a blacklist: `private` and `trash` are never touched, and `publish` is never demoted.
+- Front-end form only. A Dashboard save leaves the status alone.
+- New submissions do not get the checkbox. The submission block already has its own Status setting (`location_status`), so the site decides what a new submission arrives as.
+
+It follows the existing pseudo-field pattern: like `mai_location_title`, `mai_location_excerpt` and `mai_location_image`, the checkbox is an ACF field the listener pulls out of `$_POST` and applies to the post rather than saving as meta.
+
 ## How the tests work
 
 - **They pin today's behaviour, bugs included.** A test named `test_pins_bug_...` asserts the buggy output and says in a comment what correct looks like. Fixing the bug means changing that test in the same commit.
