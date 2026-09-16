@@ -120,9 +120,17 @@ final class FiltersTest extends TestCase {
 		$_GET = [ 'lat' => '41.0762' ];
 		$this->assertSame( [], mailocations_get_filtered_query_args() );
 
-		$_GET = [ 'lat' => '0', 'lng' => '-73' ];
-		// A latitude of 0 counts as missing.
+		$_GET = [ 'lat' => '', 'lng' => '-73' ];
 		$this->assertSame( [], mailocations_get_filtered_query_args() );
+	}
+
+	/**
+	 * Fixed September 16, 2026. A latitude of 0 used to count as missing.
+	 */
+	public function test_filtered_args_accept_a_coordinate_of_zero(): void {
+		$_GET = [ 'lat' => '0', 'lng' => '-73' ];
+
+		$this->assertSame( '0', mailocations_get_filtered_query_args()['geo_query']['latitude'] );
 	}
 
 	public function test_filtered_args_single_term(): void {

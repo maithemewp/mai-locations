@@ -130,8 +130,9 @@ function mailocations_get_filtered_query_args( $args = [] ) {
 		return ltrim( $key, '_' ); // Trim lead underscore.
 	}, array_keys( $taxos ) ), $taxos );
 
-	// If geo query.
-	if ( $lat && $lng ) {
+	// If geo query. A latitude or longitude of 0 is a real coordinate, so check for a number
+	// rather than for truthiness. Fixed September 16, 2026.
+	if ( is_numeric( $lat ) && is_numeric( $lng ) ) {
 		// Set geo query.
 		$args['orderby']   = 'distance';
 		$args['order']     = 'ASC';

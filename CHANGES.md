@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+* Fixed: A location sitting exactly on the searched point was left out of the results when the search had no distance limit.
+* Fixed: A location search ordered by distance with no direction set produced broken SQL. The direction is also limited to ascending or descending now, rather than passed through to the database.
+* Fixed: A search on the equator or the prime meridian, where a coordinate is 0, ran as though no location had been given.
 * Fixed: `[mai_location_email link="false"]` still printed a link. `[mai_location_phone]` already handled this.
 * Fixed: `[mai_location_distance]` printed "3.1mi away" instead of "3.1 mi away". Spaces in `before` and `after` are kept now.
 * Fixed: `[mai_location_distance]` printed nothing for a location under half a unit away. It now prints "0 mi away".

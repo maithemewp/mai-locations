@@ -145,7 +145,7 @@ final class GeoQueryTest extends TestCase {
 
 		// No distance means no limit. Empty field names fall back to the plugin's meta keys.
 		$this->assertSame(
-			"( geo_query_lat.meta_key = 'location_lat' AND geo_query_lng.meta_key = 'location_lng' AND " . $this->haversine_sql( 3959 ) . ' )',
+			"( geo_query_lat.meta_key = 'location_lat' AND geo_query_lng.meta_key = 'location_lng' AND " . $this->haversine_sql( 3959 ) . ' >= 0 )',
 			$geo->posts_where( '', $query )
 		);
 	}
@@ -165,11 +165,20 @@ final class GeoQueryTest extends TestCase {
 		$this->assertSame( 'x', $geo->posts_orderby( 'x', $this->query_with( [ 'geo_query' => $this->geo(), 'orderby' => 'title' ] ) ) );
 	}
 
-	public function test_pins_bug_orderby_empty_order_never_falls_back_to_asc(): void {
+	/**
+	 * Fixed September 16, 2026. Concatenation bound before ?:, so the fallback never ran.
+	 */
+	public function test_orderby_empty_order_falls_back_to_asc(): void {
 		$geo = Mai_Geo_Query::instance();
 
-		// Correct would be "geo_query_distance ASC". Concatenation binds before ?:, so the fallback never runs.
-		$this->assertSame( 'geo_query_distance ', $geo->posts_orderby( 'x', $this->query_with( [ 'geo_query' => $this->geo(), 'orderby' => 'distance' ] ) ) );
+		$this->assertSame( 'geo_query_distance ASC', $geo->posts_orderby( 'x', $this->query_with( [ 'geo_query' => $this->geo(), 'orderby' => 'distance' ] ) ) );
+	}
+
+	public function test_orderby_takes_only_the_two_sql_keywords(): void {
+		$geo = Mai_Geo_Query::instance();
+
+		$this->assertSame( 'geo_query_distance DESC', $geo->posts_orderby( 'x', $this->query_with( [ 'geo_query' => $this->geo(), 'orderby' => 'distance', 'order' => 'desc' ] ) ) );
+		$this->assertSame( 'geo_query_distance ASC', $geo->posts_orderby( 'x', $this->query_with( [ 'geo_query' => $this->geo(), 'orderby' => 'distance', 'order' => 'ASC, (SELECT 1)' ] ) ) );
 	}
 
 	/**
@@ -223,13 +232,16 @@ final class GeoQueryTest extends TestCase {
 		$this->assertSame( [ $ids['tarrytown'], $ids['sleepy_hollow'], $ids['nyc'] ], $result );
 	}
 
-	public function test_pins_bug_no_distance_limit_excludes_location_at_exact_origin(): void {
+	/**
+	 * Fixed September 16, 2026. With no limit the WHERE used the distance itself as the
+	 * condition, and a distance of 0 is false.
+	 */
+	public function test_no_distance_limit_includes_location_at_exact_origin(): void {
 		$ids = $this->create_hudson_valley_locations();
 
 		$result = $this->run_geo_query( $this->geo( 0 ), 'DESC' );
 
-		// Correct would end with Tarrytown. With no limit the WHERE uses the distance itself as the condition, and 0 is false.
-		$this->assertSame( [ $ids['albany'], $ids['nyc'], $ids['sleepy_hollow'] ], $result );
+		$this->assertSame( [ $ids['albany'], $ids['nyc'], $ids['sleepy_hollow'], $ids['tarrytown'] ], $result );
 	}
 
 	public function test_real_query_kilometers_shrinks_the_radius(): void {

@@ -68,9 +68,9 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [x] `[mai_location_distance]` loses the spaces in `before` and `after` (`3.1mi away`), returns a float when `after` is empty, and prints nothing for a distance that rounds to 0. All three fixed September 16, 2026. `before` and `after` are escaped now instead of stripped, matching every other location shortcode. `inc/shortcodes.php`.
 - [x] `mailocations_get_address()` with `hide="country"` on a non-US record shows the US state field, not the international one. The country is read whether or not it is displayed. `inc/functions-display.php`. Fixed September 16, 2026.
 - [x] An address with only a country prints an empty `mai-address-item` div. The country has its own item below. `inc/functions-display.php`. Fixed September 16, 2026.
-- [ ] A geo query with no distance limit drops a location sitting exactly at the search point, because the WHERE clause treats a distance of 0 as false. `classes/class-geo-query.php:191`.
-- [ ] The geo query order fallback never applies, because concatenation runs before `?:`. `classes/class-geo-query.php:225`.
-- [ ] A filter latitude of `0` counts as no geo query. `includes/functions-filters.php:133`.
+- [x] A geo query with no distance limit drops a location sitting exactly at the search point, because the WHERE clause treats a distance of 0 as false. The unlimited clause is now `>= 0`. `inc/classes/Query/GeoQuery.php`. Fixed September 16, 2026.
+- [x] The geo query order fallback never applies, because concatenation runs before `?:`. Fixed September 16, 2026, and the direction is now limited to ASC or DESC, since the `order` query var went straight into the SQL. `inc/classes/Query/GeoQuery.php`.
+- [x] A filter latitude of `0` counts as no geo query. Now `is_numeric()`. `inc/functions-filters.php`. Fixed September 16, 2026.
 - [ ] The location edit form reads `$GET['referrer']` instead of `$_GET['referrer']`, so its Back link never shows. `classes/class-location-form-edit.php:23`.
 - [ ] A custom form class runs into the default one (`mailocations-formextra`). `classes/class-location-form.php:87`.
 - [ ] The locations table puts its `<h2>` inside `<table>`, never prints its `class` arg, and does not URL-encode the referrer in Edit links. `classes/class-locations-table.php:152`.

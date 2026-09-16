@@ -161,9 +161,6 @@ class GeoQuery {
 	/**
 	 * Adds a WHERE clause filtering by distance.
 	 *
-	 * TODO: with no distance set, the haversine term itself is the condition, so a location at
-	 * exactly the search point counts as false and drops out. See TODO.md.
-	 *
 	 * @since 0.1.0
 	 *
 	 * @param string    $sql   The WHERE clause of the query.
@@ -200,8 +197,11 @@ class GeoQuery {
 			$sql .= " AND ";
 		}
 
-		$haversine  = $this->haversine_term( $geo_query );
-		$additional = $distance ? ' <= %f' : '';
+		$haversine = $this->haversine_term( $geo_query );
+		// With no limit the haversine term used to be the condition on its own, and a location at
+		// exactly the search point computes to 0, which MySQL reads as false. Fixed September 16,
+		// 2026.
+		$additional = $distance ? ' <= %f' : ' >= 0';
 		$new_sql    = "( geo_query_lat.meta_key = %s AND geo_query_lng.meta_key = %s AND {$haversine}{$additional} )";
 
 		if ( $distance ) {
@@ -215,8 +215,6 @@ class GeoQuery {
 
 	/**
 	 * Orders the query by distance.
-	 *
-	 * TODO: the concatenation binds before `?:`, so the ASC fallback never applies. See TODO.md.
 	 *
 	 * @since 0.1.0
 	 *
@@ -236,7 +234,10 @@ class GeoQuery {
 		$order   = $query->get( 'order' );
 
 		if ( 'distance' === $orderby ) {
-			$sql = 'geo_query_distance ' . $order ?: 'ASC';
+			// The concatenation used to bind before ?:, so an empty order gave a trailing space
+			// instead of ASC. The direction goes straight into SQL, so only the two keywords are
+			// accepted. Fixed September 16, 2026.
+			$sql = 'geo_query_distance ' . ( 'DESC' === strtoupper( (string) $order ) ? 'DESC' : 'ASC' );
 		}
 
 		return $sql;
