@@ -22,6 +22,7 @@ abstract class TestCase extends WP_UnitTestCase {
 		parent::set_up();
 
 		mailocations_get_options( true );
+		mailocation_get_user_locations( 'mai_location', true );
 	}
 
 	/**

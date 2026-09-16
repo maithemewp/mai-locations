@@ -10,25 +10,35 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @since 0.1.0
  *
  * @param string $post_type The location post type.
+ * @param bool   $reset     Whether to drop the cached copy first.
  *
  * @return array Array of post IDs.
  */
-function mailocation_get_user_locations( $post_type = 'mai_location' ) {
+function mailocation_get_user_locations( $post_type = 'mai_location', $reset = false ) {
 	// Setup cache.
 	static $all_locations = [];
 
-	// Maybe return cache.
-	if ( isset( $all_locations[ $post_type ] ) ) {
-		return $all_locations[ $post_type ];
+	if ( $reset ) {
+		$all_locations = [];
 	}
 
 	// Get current user.
 	$user_id = get_current_user_id();
 
+	// The cache is keyed by user as well as post type. It used to be keyed by post type alone,
+	// so a second user in the same process got the first user's locations. A page serves one
+	// user, but the CLI and any loop over users do not. Fixed September 16, 2026.
+	$key = $user_id . '|' . $post_type;
+
+	// Maybe return cache.
+	if ( isset( $all_locations[ $key ] ) ) {
+		return $all_locations[ $key ];
+	}
+
 	// Bail if no user.
 	if ( ! $user_id ) {
-		$all_locations[ $post_type ] = [];
-		return $all_locations[ $post_type ];
+		$all_locations[ $key ] = [];
+		return $all_locations[ $key ];
 	}
 
 	// Get user locations.
@@ -46,9 +56,9 @@ function mailocation_get_user_locations( $post_type = 'mai_location' ) {
 	);
 
 	// Add to cache.
-	$all_locations[ $post_type ] = $query->posts;
+	$all_locations[ $key ] = $query->posts;
 
-	return $all_locations[ $post_type ];
+	return $all_locations[ $key ];
 }
 
 /**

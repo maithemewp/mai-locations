@@ -56,23 +56,31 @@ final class LocationFunctionsTest extends TestCase {
 		$publish = self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'publish' ] );
 		$pending = self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'pending' ] );
 		self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'draft' ] );
-		self::factory()->post->create( [ 'post_author' => $other, 'post_status' => 'publish' ] );
+		$other_post = self::factory()->post->create( [ 'post_author' => $other, 'post_status' => 'publish' ] );
 
 		$this->assertEqualsCanonicalizing( [ $publish, $pending ], mailocation_get_user_locations( 'post' ) );
 
-		// Static cache per post type for the whole request, whoever is logged in.
-		self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'publish' ] );
+		// The answer is cached for the rest of the request, so a location added after the first
+		// call is not seen.
+		$extra = self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'publish' ] );
+		$this->assertEqualsCanonicalizing( [ $publish, $pending ], mailocation_get_user_locations( 'post' ) );
+
+		// Fixed September 16, 2026. The cache was keyed by post type alone, so the next user in
+		// the same process got this user's locations.
 		wp_set_current_user( $other );
+		$this->assertSame( [ $other_post ], mailocation_get_user_locations( 'post' ) );
+
+		// Back to the first user, whose cached answer is still there.
+		wp_set_current_user( $user );
 		$this->assertEqualsCanonicalizing( [ $publish, $pending ], mailocation_get_user_locations( 'post' ) );
+		$this->assertNotContains( $extra, mailocation_get_user_locations( 'post' ) );
 	}
 
 	public function test_user_locations_are_empty_when_logged_out(): void {
 		wp_set_current_user( 0 );
 		$this->create_location( [], [ 'post_author' => self::factory()->user->create() ] );
 
-		// Post types no other test touches, because the static cache outlives each test.
-		$this->assertSame( [], mailocation_get_user_locations( 'mailoc_logged_out_a' ) );
-		$this->assertSame( [], mailocation_get_user_locations( 'mailoc_logged_out_b' ) );
+		$this->assertSame( [], mailocation_get_user_locations() );
 	}
 
 	/*

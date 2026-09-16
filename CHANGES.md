@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+* Fixed: Asking for a second user's locations in the same request returned the first user's. A page serves one person, so this showed up in WP-CLI runs and anything looping over users.
 * Fixed: The example import CSV used the `address_street` heading twice, so anyone following it lost the street and imported the suite number in its place.
 * Fixed: The location fields panel in the editor was titled "{SINGULAR} Info" instead of "Location Info".
 * Changed: `Mai_Locations_Location_Fields::prepare_location_exerpt_field()` is now spelled `prepare_location_excerpt_field()`. The old name still works.
