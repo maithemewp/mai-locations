@@ -108,8 +108,6 @@ class FilterSubmitBlock {
 	/**
 	 * Replaces the link with a submit button.
 	 *
-	 * TODO: the link's href survives onto the button element. See TODO.md.
-	 *
 	 * @since TBD
 	 *
 	 * @param string               $block_content The block content.
@@ -138,6 +136,9 @@ class FilterSubmitBlock {
 		while ( $tags->next_tag( [ 'tag_name' => 'button', 'class_name' => 'wp-block-button__link' ] ) ) {
 			$tags->set_attribute( 'type', 'submit' );
 			$tags->add_class( 'mailocations-filter-submit' );
+			// The link's href came through the swap and stayed on the button, where it means
+			// nothing. Fixed September 16, 2026.
+			$tags->remove_attribute( 'href' );
 			break;
 		}
 

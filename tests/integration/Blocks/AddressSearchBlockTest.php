@@ -62,8 +62,8 @@ final class AddressSearchBlockTest extends TestCase {
 		$expected = '<div class="mailocations-autocomplete-container">'
 			. '<div class="mailocations-autocomplete-input-container"><div class="mailocations-autocomplete" data-countries="US,CA" data-placeholder="Where?" data-value=""></div></div>'
 			. '<input type="hidden" class="mailocations-address" name="mailocations_address" value="{&quot;address&quot;:&quot;&quot;,&quot;lat&quot;:&quot;&quot;,&quot;lng&quot;:&quot;&quot;,&quot;distance&quot;:100,&quot;unit&quot;:&quot;mi&quot;}">'
-			// Distances are not trimmed after exploding, so " 20" keeps its leading space.
-			. '<select class="mailocations-autocomplete-distance" name="mailocations_distance" tabindex="0"><option  value="10">10</option><option  value=" 20"> 20</option></select>'
+			// Each distance is trimmed, so "10, 20" gives 20 and not " 20". Fixed September 16, 2026.
+			. '<select class="mailocations-autocomplete-distance" name="mailocations_distance" tabindex="0"><option  value="10">10</option><option  value="20">20</option></select>'
 			. '<select class="mailocations-autocomplete-unit" name="mailocations_unit" tabindex="0"><option  value="mi" selected>mi</option><option  value="km">km</option></select>'
 			. '</div>';
 
@@ -82,7 +82,7 @@ final class AddressSearchBlockTest extends TestCase {
 
 		$this->assertStringContainsString( 'data-value="Tarrytown, NY"', $html );
 		$this->assertStringContainsString( 'value="{&quot;address&quot;:&quot;Tarrytown, NY&quot;,&quot;lat&quot;:&quot;41.07&quot;,&quot;lng&quot;:&quot;-73.86&quot;,&quot;distance&quot;:&quot;50&quot;,&quot;unit&quot;:&quot;km&quot;}"', $html );
-		$this->assertStringContainsString( '<option  value="25">25 km</option><option  value=" 50" selected> 50 km</option>', $html );
+		$this->assertStringContainsString( '<option  value="25">25 km</option><option  value="50" selected>50 km</option>', $html );
 		$this->assertStringNotContainsString( 'mailocations-autocomplete-unit', $html );
 	}
 

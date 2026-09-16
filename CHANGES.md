@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+* Fixed: The filter submit button kept the link address it was built from, on an element that cannot use one.
+* Fixed: Distance options written the natural way, "10, 20", searched a distance of " 20" with a leading space.
 * Fixed: A map set to show all locations showed none on any page that is not a locations archive, because it looked up regular posts.
 * Fixed: The Get Directions link in a map marker wrote `ref` where it meant `rel`, so it opened without the usual link protections.
 * Fixed: A locations count block added without changing its settings printed "0  0" instead of "Showing 0 of 0 Locations". Clearing a setting on purpose still leaves it out, without the double space it used to print.

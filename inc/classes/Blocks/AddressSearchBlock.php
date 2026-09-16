@@ -54,9 +54,6 @@ class AddressSearchBlock {
 	/**
 	 * Renders the block.
 	 *
-	 * TODO: distance options keep the space from a "10, 20" setting, so one option's value is
-	 * " 20". See TODO.md.
-	 *
 	 * @since TBD
 	 *
 	 * @param array<string, mixed> $attributes The block attributes.
@@ -75,7 +72,9 @@ class AddressSearchBlock {
 		$address     = $params['address'];
 		$lat         = $params['lat'];
 		$lng         = $params['lng'];
-		$distances   = explode( ',', (string) get_field( 'distances' ) );
+		// Trim each one. A setting written the natural way, "10, 20", used to give the second
+		// option the value " 20". Fixed September 16, 2026.
+		$distances   = array_map( 'trim', explode( ',', (string) get_field( 'distances' ) ) );
 		$distance    = $params['distance'];
 		$units       = (array) get_field( 'units' );
 		$unit        = 1 === count( $units ) ? reset( $units ) : $params['units']; // Fallback to default.

@@ -76,10 +76,13 @@ final class FilterSubmitBlockTest extends TestCase {
 		$this->assertSame( [ 'Attempt to read property "name" on string' ], $errors );
 	}
 
+	/**
+	 * The href used to come through the swap and stay on the button. Fixed September 16, 2026.
+	 */
 	public function test_turns_the_link_into_a_submit_button(): void {
-		// The href attribute is carried over onto the button element.
 		$this->assertSame(
-			'<div class="wp-block-button"><button type="submit" class="wp-block-button__link wp-element-button mailocations-filter-submit" href="http://x">Go</button></div>',
+			// WP_HTML_Tag_Processor leaves a space where the href was.
+			'<div class="wp-block-button"><button type="submit" class="wp-block-button__link wp-element-button mailocations-filter-submit" >Go</button></div>',
 			do_blocks( '<!-- wp:button {"maiLocationsFilterSubmit":true} --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="http://x">Go</a></div><!-- /wp:button -->' )
 		);
 	}
