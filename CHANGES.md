@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+* Fixed: The location fields panel in the editor was titled "{SINGULAR} Info" instead of "Location Info".
+* Changed: `Mai_Locations_Location_Fields::prepare_location_exerpt_field()` is now spelled `prepare_location_excerpt_field()`. The old name still works.
 * Fixed: A location category nested under another had no working URL. Visit Settings > Permalinks and press Save once after updating.
 * Fixed: The map's marker grouping script was not declared as a requirement of the map script, so it only happened to load in time.
 * Fixed: The Settings link on the Plugins page was missing on any site where the plugin folder had been renamed.

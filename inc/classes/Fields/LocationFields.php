@@ -41,7 +41,7 @@ class LocationFields {
 		add_filter( 'acf/prepare_field/key=mai_location_lat',                    [ $this, 'prepare_location_coordinates_field' ] );
 		add_filter( 'acf/prepare_field/key=mai_location_lng',                    [ $this, 'prepare_location_coordinates_field' ] );
 		add_filter( 'acf/prepare_field/key=mai_location_place_id',               [ $this, 'prepare_location_place_id_field' ] );
-		add_filter( 'acf/prepare_field/key=mai_location_excerpt',                [ $this, 'prepare_location_exerpt_field' ] );
+		add_filter( 'acf/prepare_field/key=mai_location_excerpt',                [ $this, 'prepare_location_excerpt_field' ] );
 	}
 
 	/**
@@ -189,9 +189,6 @@ class LocationFields {
 		/**
 		 * Location Info.
 		 * This is the main field group that will show on all supported location post types.
-		 *
-		 * TODO: ACF caches the group before any post exists, so the {SINGULAR} placeholder
-		 * survives on real screens. See TODO.md.
 		 */
 		acf_add_local_field_group(
 			[
@@ -252,19 +249,13 @@ class LocationFields {
 		// Get current post type.
 		$post_type = get_post_type();
 
-		// Bail if no post type.
-		if ( ! $post_type ) {
-			return $field_group;
-		}
-
-		// Get labels.
-		$singular = mailocations_get_singular_label( $post_type );
-		$plural   = mailocations_get_plural_label( $post_type );
-
-		// Bail if no labels.
-		if ( ! ( $singular && $plural ) ) {
-			return $field_group;
-		}
+		// Get labels for the post type being edited, falling back to the plugin's own. ACF loads
+		// and caches the group before any post exists, and this used to bail there and leave the
+		// raw {SINGULAR} on screen. Fixed September 16, 2026.
+		$singular = $post_type ? mailocations_get_singular_label( $post_type ) : '';
+		$plural   = $post_type ? mailocations_get_plural_label( $post_type ) : '';
+		$singular = $singular ?: mailocations_get_singular();
+		$plural   = $plural ?: mailocations_get_plural();
 
 		// Replace the placeholder.
 		$field_group['title'] = str_replace( '{SINGULAR}', $singular, $field_group['title'] );
@@ -357,10 +348,27 @@ class LocationFields {
 	}
 
 	/**
-	 * Sets the excerpt editor to the basic toolbar with no media upload.
+	 * Sets the excerpt editor to the Visual tab only, with the basic toolbar and no media
+	 * upload.
 	 *
-	 * TODO: the method name is misspelled, and the docblock used to say it disables the Visual
-	 * tab while the code keeps only that tab. Kept as-is, since the name is public. See TODO.md.
+	 * @since TBD
+	 *
+	 * @param array<string, mixed> $field The field array.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function prepare_location_excerpt_field( $field ) {
+		$field['tabs']         = 'visual';
+		$field['toolbar']      = 'basic';
+		$field['media_upload'] = 0;
+
+		return $field;
+	}
+
+	/**
+	 * The old, misspelled name of prepare_location_excerpt_field().
+	 *
+	 * Renamed September 16, 2026. This stays because the class is public.
 	 *
 	 * @since TBD
 	 *
@@ -369,10 +377,6 @@ class LocationFields {
 	 * @return array<string, mixed>
 	 */
 	public function prepare_location_exerpt_field( $field ) {
-		$field['tabs']         = 'visual';
-		$field['toolbar']      = 'basic';
-		$field['media_upload'] = 0;
-
-		return $field;
+		return $this->prepare_location_excerpt_field( $field );
 	}
 }

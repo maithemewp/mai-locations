@@ -37,7 +37,8 @@ final class LocationFieldsCallbacksTest extends TestCase {
 		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mai_location_lat', 'prepare_location_coordinates_field' ) );
 		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mai_location_lng', 'prepare_location_coordinates_field' ) );
 		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mai_location_place_id', 'prepare_location_place_id_field' ) );
-		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mai_location_excerpt', 'prepare_location_exerpt_field' ) );
+		// Renamed September 16, 2026. The old, misspelled name still works.
+		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mai_location_excerpt', 'prepare_location_excerpt_field' ) );
 	}
 
 	public function test_rule_match_is_true_for_supported_post_type_in_array_screen(): void {
@@ -106,20 +107,23 @@ final class LocationFieldsCallbacksTest extends TestCase {
 		$this->assertSame( 'Locations', $group['title'] );
 	}
 
-	public function test_titles_unchanged_without_a_post(): void {
+	/**
+	 * Fixed September 16, 2026. Without a post this bailed and left the raw placeholder.
+	 */
+	public function test_titles_use_the_plugin_labels_without_a_post(): void {
 		unset( $GLOBALS['post'] );
 
 		$group = [ 'key' => 'mai_locations_location_field_group', 'title' => '{SINGULAR} Info' ];
 
-		$this->assertSame( $group, $this->fields->handle_field_group_titles( $group ) );
+		$this->assertSame( 'Location Info', $this->fields->handle_field_group_titles( $group )['title'] );
 	}
 
-	public function test_titles_unchanged_for_unsupported_post_type(): void {
+	public function test_titles_use_the_plugin_labels_for_an_unsupported_post_type(): void {
 		$GLOBALS['post'] = get_post( self::factory()->post->create() );
 
 		$group = [ 'key' => 'mai_locations_location_field_group', 'title' => '{SINGULAR} Info' ];
 
-		$this->assertSame( $group, $this->fields->handle_field_group_titles( $group ) );
+		$this->assertSame( 'Location Info', $this->fields->handle_field_group_titles( $group )['title'] );
 	}
 
 	public function test_titles_unchanged_for_other_groups(): void {
@@ -130,11 +134,14 @@ final class LocationFieldsCallbacksTest extends TestCase {
 		$this->assertSame( $group, $this->fields->handle_field_group_titles( $group ) );
 	}
 
-	public function test_pins_acf_caches_loaded_group_so_title_keeps_placeholder(): void {
-		// ACF ran acf/load_field_group once with no post and stored the result, so a later post changes nothing.
+	/**
+	 * Fixed September 16, 2026. ACF runs acf/load_field_group once, with no post, and caches the
+	 * result, so the raw placeholder was what everyone saw.
+	 */
+	public function test_cached_group_title_has_no_placeholder_left(): void {
 		$GLOBALS['post'] = get_post( $this->create_location() );
 
-		$this->assertSame( '{SINGULAR} Info', acf_get_field_group( 'mai_locations_location_field_group' )['title'] );
+		$this->assertSame( 'Location Info', acf_get_field_group( 'mai_locations_location_field_group' )['title'] );
 	}
 
 	public function test_fields_choices_unchanged_outside_admin(): void {
@@ -208,17 +215,18 @@ final class LocationFieldsCallbacksTest extends TestCase {
 		$this->assertSame( [ 'key' => 'mai_location_place_id', 'disabled' => 'disabled' ], $this->fields->prepare_location_place_id_field( [ 'key' => 'mai_location_place_id' ] ) );
 	}
 
-	public function test_pins_excerpt_field_is_visual_only_despite_docblock(): void {
-		// Docblock says it disables the visual tab; 'visual' in ACF keeps only the visual tab.
-		$this->assertSame(
-			[
-				'key'          => 'mai_location_excerpt',
-				'tabs'         => 'visual',
-				'toolbar'      => 'basic',
-				'media_upload' => 0,
-			],
-			$this->fields->prepare_location_exerpt_field( [ 'key' => 'mai_location_excerpt', 'tabs' => 'all' ] )
-		);
+	public function test_excerpt_field_keeps_only_the_visual_tab(): void {
+		$expected = [
+			'key'          => 'mai_location_excerpt',
+			'tabs'         => 'visual',
+			'toolbar'      => 'basic',
+			'media_upload' => 0,
+		];
+
+		$this->assertSame( $expected, $this->fields->prepare_location_excerpt_field( [ 'key' => 'mai_location_excerpt', 'tabs' => 'all' ] ) );
+
+		// The old, misspelled name still works. Renamed September 16, 2026.
+		$this->assertSame( $expected, $this->fields->prepare_location_exerpt_field( [ 'key' => 'mai_location_excerpt', 'tabs' => 'all' ] ) );
 	}
 
 	public function test_prepare_field_filters_run_through_acf(): void {
