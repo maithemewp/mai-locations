@@ -58,9 +58,10 @@ function mailocations_get_query_params() {
 			continue;
 		}
 
-		$get              = esc_html( $_GET[ $key ] );
-		$get              = is_array( $defaults[ $key ] ) ? explode( ',', $_GET[ $key ] ) : $_GET[ $key ];
-		$params[ $key ] = $get;
+		// Escape once, then use the escaped value. Until September 16, 2026 the second line read
+		// $_GET again and threw the escaped value away.
+		$get            = esc_html( $_GET[ $key ] );
+		$params[ $key ] = is_array( $defaults[ $key ] ) ? explode( ',', $get ) : $get;
 	}
 
 	return $params;

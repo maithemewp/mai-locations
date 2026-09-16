@@ -337,7 +337,7 @@ function mailocations_get_state_choices() {
 		'CO' => __( 'Colorado', 'mai-locations' ),
 		'CT' => __( 'Connecticut', 'mai-locations' ),
 		'DE' => __( 'Delaware', 'mai-locations' ),
-		'DC' => __( 'District of Colombia', 'mai-locations' ),
+		'DC' => __( 'District of Columbia', 'mai-locations' ),
 		'FL' => __( 'Florida', 'mai-locations' ),
 		'GA' => __( 'Georgia', 'mai-locations' ),
 		'HI' => __( 'Hawaii', 'mai-locations' ),

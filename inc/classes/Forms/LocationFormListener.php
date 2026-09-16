@@ -371,8 +371,8 @@ class LocationFormListener {
 	/**
 	 * Sends an email when a location moves from pending to published.
 	 *
-	 * TODO: $post_type is never defined here, so the label is empty and PHP warns. It should be
-	 * $post->post_type. Pinned in FormListenerTest. See TODO.md.
+	 * Until September 16, 2026 this read an undefined $post_type, so the label came out empty and
+	 * PHP warned on every published location.
 	 *
 	 * @since TBD
 	 *
@@ -388,7 +388,7 @@ class LocationFormListener {
 			return;
 		}
 
-		$singular  = mailocations_get_singular_label( $post_type );
+		$singular  = mailocations_get_singular_label( $post->post_type );
 		$to        = get_the_author_meta( 'user_email', $post->post_author );
 		$subject   = sprintf( '%s %s %s %s', __( 'Your', 'mai-locations' ), untrailingslashit( home_url() ), $singular, __( 'has been published!', 'mai-locations' ) );
 		$message   = __( 'Thank you for your submission!', 'mai-locations' ) . "\r\n\r\n";

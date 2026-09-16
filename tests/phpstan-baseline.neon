@@ -127,12 +127,6 @@ parameters:
 			path: ../inc/classes/Forms/LocationFormListener.php
 
 		-
-			message: '#^Undefined variable\: \$post_type$#'
-			identifier: variable.undefined
-			count: 1
-			path: ../inc/classes/Forms/LocationFormListener.php
-
-		-
 			message: '#^Function is_account_page not found\.$#'
 			identifier: function.notFound
 			count: 1

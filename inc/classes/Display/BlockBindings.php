@@ -71,11 +71,10 @@ class BlockBindings {
 			return null;
 		}
 
-		// Get value.
+		// Get value. postId is checked before it is read: without it, this used to warn and hand
+		// the block a false. Fixed September 16, 2026.
 		return match ( $source_args['key'] ) {
-			// TODO: reads postId without checking it is there, which warns and returns false.
-			// Pinned by BlockBindingsTest until the fix is agreed.
-			'filterSubmit', 'filterClear' => get_permalink( $block->context['postId'] ),
+			'filterSubmit', 'filterClear' => isset( $block->context['postId'] ) ? get_permalink( $block->context['postId'] ) : null,
 			default                       => null,
 		};
 	}

@@ -253,7 +253,8 @@ final class FieldFunctionsTest extends TestCase {
 
 	public function test_pins_bug_dc_label_is_misspelled_colombia(): void {
 		// Should read "District of Columbia".
-		$this->assertSame( 'District of Colombia', mailocations_get_state_choices()['DC'] );
+		// Spelling fixed September 16, 2026. The country list's "Colombia" is a different entry.
+		$this->assertSame( 'District of Columbia', mailocations_get_state_choices()['DC'] );
 	}
 
 	public function test_country_choices_start_empty_and_us_is_not_first(): void {

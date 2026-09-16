@@ -79,7 +79,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [ ] The count block ignores its field defaults and renders `0  0`.
 - [ ] The map's directions link uses `ref=` instead of `rel=`. The map's "All locations" setting queries regular posts on any page that is not a location archive.
 - [ ] The submit button variation keeps the link's `href` on the `<button>`. Distance options keep a leading space (`value=" 20"`).
-- [ ] The "District of Colombia" state label is misspelled. `includes/functions-fields.php:415`.
+- [x] The "District of Colombia" state label was misspelled, now "District of Columbia". The country list's own "Colombia" is a different entry and stays. Fixed September 16, 2026.
 
 ### Wrong data saved
 
@@ -114,12 +114,12 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 ### Security
 
 - [x] `[mai_location_phone]` printed `style` unescaped, and `[mai_location_place]` printed `place_id` unescaped while ignoring `style` entirely. Both escape now, and the place shortcode prints its style like the others. `inc/shortcodes.php`. Fixed September 16, 2026.
-- [ ] `mailocations_get_query_params()` escapes the value and then overwrites it with the raw `$_GET` value. `includes/functions-filters.php:61`.
+- [x] `mailocations_get_query_params()` escaped the value and then overwrote it with the raw `$_GET` value on the next line. It escapes once and uses that now. `inc/functions-filters.php`. Fixed September 16, 2026.
 
 ### Smaller
 
-- [ ] `send_published_email()` uses an undefined `$post_type`, so the email reads "Your http://example.org  has been published!". `classes/class-location-form-listener.php:369`.
-- [ ] The block binding source warns on a missing `postId` context for `filterSubmit` and `filterClear`, and returns nothing for location meta. `classes/class-block-bindings.php:61`.
+- [x] `send_published_email()` read an undefined `$post_type`, so the email read "Your http://example.org  has been published!" and PHP warned. Now `$post->post_type`. `inc/classes/Forms/LocationFormListener.php`. Fixed September 16, 2026.
+- [x] The block binding source warned on a missing `postId` context for `filterSubmit` and `filterClear`, handing the block a `false`. It checks the context first and returns null now. `inc/classes/Display/BlockBindings.php`. Fixed September 16, 2026. It still returns nothing for location meta keys, which is by design: the source only provides permalinks.
 - [x] `mailocations_user_can_edit()` was true only for the post author, so administrators and editors saw no front-end Edit button on locations they could already edit in wp-admin. Now the author, whatever their role, or anyone who passes `current_user_can( 'edit_post' )`. Mike's call, September 15, 2026. The author branch stays first because location owners are often subscriber level and would fail a capability check.
 - [ ] `mailocations_delete_transients()` prefix-matches, so it also deletes transients like `mai_locationsother`.
 - [ ] The taxonomy is hierarchical but its rewrite is not, so child term URLs get no rule.

@@ -73,8 +73,11 @@ final class BlockBindingsTest extends TestCase {
 		$this->assertNull( $bindings->get_source_value( [ 'key' => 0 ], $block, 'url' ) );
 	}
 
-	public function test_pins_bug_filter_submit_without_post_id_context_warns(): void {
-		// Should check for postId before reading it.
+	/**
+	 * Fixed September 16, 2026. postId was read without checking it is there, which warned and
+	 * handed the block a false.
+	 */
+	public function test_filter_submit_without_post_id_context_returns_null(): void {
 		$messages = [];
 
 		set_error_handler(
@@ -92,8 +95,8 @@ final class BlockBindingsTest extends TestCase {
 			restore_error_handler();
 		}
 
-		$this->assertSame( [ 'Undefined array key "postId"' ], $messages );
-		$this->assertFalse( $value );
+		$this->assertSame( [], $messages );
+		$this->assertNull( $value );
 	}
 
 	/**

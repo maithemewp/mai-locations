@@ -71,11 +71,14 @@ final class FiltersTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_query_params_are_not_escaped(): void {
+	/**
+	 * Fixed September 16, 2026. The value was escaped and then overwritten with the raw one on
+	 * the next line.
+	 */
+	public function test_query_params_are_escaped(): void {
 		$_GET = [ 'address' => '<script>alert(1)</script>' ];
 
-		// Correct would be the escaped value. Line 61 escapes, then line 62 overwrites it with the raw value.
-		$this->assertSame( [ 'address' => '<script>alert(1)</script>' ], mailocations_get_query_params() );
+		$this->assertSame( [ 'address' => '&lt;script&gt;alert(1)&lt;/script&gt;' ], mailocations_get_query_params() );
 	}
 
 	public function test_filtered_args_empty_without_get(): void {

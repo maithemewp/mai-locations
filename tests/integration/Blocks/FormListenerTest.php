@@ -242,21 +242,23 @@ final class FormListenerTest extends TestCase {
 		$this->assertSame( [], $this->sent_mail() );
 	}
 
-	public function test_pins_bug_published_email_reads_an_undefined_post_type(): void {
-		// Line 369 passes undefined $post_type, so the label is empty. Correct behaviour: use $post->post_type,
-		// giving "Your http://example.org Location has been published!" and "View your Location here".
+	/**
+	 * Fixed September 16, 2026. It read an undefined $post_type, so the label came out empty and
+	 * PHP warned on every published location.
+	 */
+	public function test_published_email_names_the_location_type(): void {
 		$user = self::factory()->user->create( [ 'user_email' => 'ann@example.org' ] );
 		$id   = $this->create_location( [], [ 'post_author' => $user, 'post_name' => 'hollow-inn' ] );
 
 		$this->capture_errors( fn() => $this->listener->send_published_email( get_post( $id ) ) );
 
-		$this->assertSame( [ 'Undefined variable $post_type' ], $this->errors );
+		$this->assertSame( [], $this->errors );
 		$this->assertSame(
 			[
 				[
 					'to'      => [ 'ann@example.org' ],
-					'subject' => 'Your http://example.org  has been published!',
-					'body'    => "Thank you for your submission!\r\n\r\nView your  here: http://example.org/?mai_location=hollow-inn\r\n\r\n",
+					'subject' => 'Your http://example.org Location has been published!',
+					'body'    => "Thank you for your submission!\r\n\r\nView your Location here: http://example.org/?mai_location=hollow-inn\r\n\r\n",
 				],
 			],
 			$this->sent_mail()
@@ -310,10 +312,10 @@ final class FormListenerTest extends TestCase {
 		$this->assertSame( [ $id ], get_user_meta( $user, 'user_locations', true ) );
 
 		// Publishing fires pending_to_publish first, then the submission notice goes out.
-		$this->assertSame( [ 'Undefined variable $post_type' ], $this->errors );
+		$this->assertSame( [], $this->errors );
 		$this->assertSame(
 			[
-				[ [ 'ann@example.org' ], 'Your http://example.org  has been published!' ],
+				[ [ 'ann@example.org' ], 'Your http://example.org Location has been published!' ],
 				[ [ 'x@example.org' ], 'New Location submission from Ann Author' ],
 			],
 			array_map( static fn( array $mail ): array => [ $mail['to'], $mail['subject'] ], $this->sent_mail() )
