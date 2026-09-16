@@ -132,7 +132,6 @@ final class Mai_Locations_Plugin {
 		foreach ( glob( MAI_LOCATIONS_PLUGIN_DIR . 'inc/' . '*.php' ) as $file ) { include $file; }
 
 		// Classes.
-		include_once __DIR__ . '/inc/classes/class-location-fields.php';
 		include_once __DIR__ . '/inc/classes/class-location-import.php';
 		include_once __DIR__ . '/inc/classes/class-locations-cli.php';
 
@@ -149,7 +148,7 @@ final class Mai_Locations_Plugin {
 
 		// Instantiate classes.
 		new Mai\Locations\BlockBindings;
-		new Mai_Locations_Location_Fields;
+		new Mai\Locations\LocationFields;
 		new Mai\Locations\LocationFormListener;
 		new Mai_Locations_Location_Import;
 		new Mai\Locations\Scripts;

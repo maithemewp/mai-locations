@@ -1,13 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Location_Fields {
+/**
+ * Registers the ACF field groups for locations, and prepares individual fields.
+ *
+ * Was Mai_Locations_Location_Fields in classes/class-location-fields.php. That name still
+ * works, via inc/aliases.php.
+ *
+ * @since TBD
+ */
+class LocationFields {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -18,7 +31,7 @@ class Mai_Locations_Location_Fields {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'acf/init',                                                  [ $this, 'register_field_groups' ] );
 		add_filter( 'acf/location/rule_match/mailocations_supported_post_types', [ $this, 'post_type_rule_match' ], 10, 4 );
 		add_filter( 'acf/load_field_group',                                      [ $this, 'handle_field_group_titles' ] );
@@ -31,13 +44,13 @@ class Mai_Locations_Location_Fields {
 	}
 
 	/**
-	 * Add Location Info and Locations field groups.
+	 * Adds the Location Info and Locations field groups.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	function register_field_groups() {
+	public function register_field_groups(): void {
 		/**
 		 * All location post type fields.
 		 * These don't show in the post editor in the back end.
@@ -64,6 +77,8 @@ class Mai_Locations_Location_Fields {
 						// 'required' => 1,
 					],
 					[
+						// TODO: no 'name', so update_field() on this key writes nothing, and the
+						// text domain reads mai-location. See TODO.md.
 						'label'         => __( 'Image', 'mai-locations' ),
 						'instructions'  => __( 'Only jpeg, jpg, png allowed. 5 MB max.', 'mai-location' ),
 						'key'           => 'mai_location_image',
@@ -72,21 +87,6 @@ class Mai_Locations_Location_Fields {
 						'preview_size'  => 'medium',
 						'library'       => 'uploadedTo', // 'all' or 'uploadedTo'. Make sure to check acf_form() for 'uploader' as 'wp' or 'basic'.
 					],
-					// [
-					// 	'label'         => __( 'Categories', 'mai-locations'),
-					// 	'key'           => 'mai_location_category',
-					// 	'name'          => 'category',
-					// 	'type'          => 'taxonomy',
-					// 	'taxonomy'      => 'mai_location_cat',
-					// 	'add_term'      => 0,
-					// 	'save_terms'    => 1,
-					// 	'load_terms'    => 1,
-					// 	'return_format' => 'id',
-					// 	'field_type'    => 'checkbox',
-					// 	'layout'        => 'horizontal',
-					// 	'allow_null'    => 1,
-					// 	'multiple'      => 1,
-					// ],
 				],
 				'menu_order' => 999,
 				'location'   => false,
@@ -163,8 +163,9 @@ class Mai_Locations_Location_Fields {
 
 			/**
 			 * Post type specific fields.
-			 * These are public and will show in the post editor in the back end.
-			 * as well as the front end submission/edit forms, if selected via the Mai Locations Table and Mai Locations Submission blocks.
+			 * These are public and will show in the post editor in the back end,
+			 * as well as the front end submission/edit forms, if selected via the Mai Locations
+			 * Table and Mai Locations Submission blocks.
 			 */
 			acf_add_local_field_group(
 				[
@@ -187,6 +188,9 @@ class Mai_Locations_Location_Fields {
 		/**
 		 * Location Info.
 		 * This is the main field group that will show on all supported location post types.
+		 *
+		 * TODO: ACF caches the group before any post exists, so the {SINGULAR} placeholder
+		 * survives on real screens. See TODO.md.
 		 */
 		acf_add_local_field_group(
 			[
@@ -205,73 +209,40 @@ class Mai_Locations_Location_Fields {
 				],
 			]
 		);
-
-		// // Locations.
-		// acf_add_local_field_group(
-		// 	[
-		// 		'key'         => 'mai_locations_user_locations_field_group',
-		// 		'title'       => $plural,
-		// 		'description' => sprintf( '%s %s', $plural, __( 'Locations this user can manage' ) ),
-		// 		'fields'      => [
-		// 			[
-		// 				'key'           => 'field_606f28c86abee',
-		// 				'label'         => 'Locations',
-		// 				'name'          => 'user_locations',
-		// 				'type'          => 'post_object',
-		// 				'post_type'     => [
-		// 					'mai_location',
-		// 				],
-		// 				'allow_null'    => 1,
-		// 				'multiple'      => 1,
-		// 				'ui'            => 1,
-		// 				'return_format' => 'object',
-		// 			],
-		// 		],
-		// 		'location' => [
-		// 			[
-		// 				[
-		// 					'param'    => 'user_form',
-		// 					'operator' => '==',
-		// 					'value'    => 'edit',
-		// 				],
-		// 				[
-		// 					'param'    => 'current_user_role',
-		// 					'operator' => '==',
-		// 					'value'    => 'administrator',
-		// 				],
-		// 			],
-		// 		],
-		// 	]
-		// );
 	}
 
 	/**
-	 * Shows location info metabox on supported post types.
+	 * Shows the location info metabox on supported post types.
+	 *
+	 * ACF passes the screen args as an array, not a WP_Screen, whatever the old docblock said.
+	 *
+	 * TODO: ignores the incoming result, the operator and the value. See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @param bool      $result Whether the rule matches.
-	 * @param array     $rule   Current rule to match (param, operator, value).
-	 * @param WP_Screen $screen The current screen.
+	 * @param bool                 $result      Whether the rule matches.
+	 * @param array<string, mixed> $rule        Current rule to match (param, operator, value).
+	 * @param array<string, mixed> $screen      The current screen args.
+	 * @param array<string, mixed> $field_group The field group.
 	 *
 	 * @return bool
 	 */
-	function post_type_rule_match( $result, $rule, $screen, $field_group ) {
+	public function post_type_rule_match( $result, $rule, $screen, $field_group ) {
 		$post_types = mailocations_get_location_post_types();
 
 		return $post_types && isset( $screen['post_type'] ) && isset( $post_types[ $screen['post_type'] ] );
 	}
 
 	/**
-	 * Change the field group title based on the post type.
+	 * Changes the field group title based on the post type.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $field_group The field group data.
+	 * @param array<string, mixed> $field_group The field group data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function handle_field_group_titles( $field_group ) {
+	public function handle_field_group_titles( $field_group ) {
 		// If not the field groups we want.
 		if ( ! in_array( $field_group['key'], [ 'mai_locations_core_field_group', 'mai_locations_location_field_group' ] ) ) {
 			return $field_group;
@@ -302,15 +273,18 @@ class Mai_Locations_Location_Fields {
 	}
 
 	/**
-	 * Make sure the field choices are in the correct order, based on existing values.
+	 * Keeps the field choices in the right order, based on existing values.
+	 *
+	 * TODO: a saved key that no longer exists stays in the list with the key as its label.
+	 * See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $field The field data.
+	 * @param array<string, mixed> $field The field data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function load_location_fields_choices( $field ) {
+	public function load_location_fields_choices( $field ) {
 		if ( ! is_admin() ) {
 			return $field;
 		}
@@ -350,43 +324,17 @@ class Mai_Locations_Location_Fields {
 		return $field;
 	}
 
-	// /**
-	//  * Replace placeholders in field labels.
-	//  *
-	//  * @since TBD
-	//  *
-	//  * @param array $field The field data.
-	//  *
-	//  * @return array
-	//  */
-	// function prepare_labels( $field ) {
-	// 	$post_type = get_post_type();
-	// 	$singular  = mailocations_get_singular_label( $post_type );
-	// 	$plural    = mailocations_get_plural_label( $post_type );
-
-	// 	// Bail if no labels.
-	// 	if ( ! ( $singular && $plural ) ) {
-	// 		return $field;
-	// 	}
-
-	// 	// Replace placeholders in field label.
-	// 	$field['label'] = str_replace( '{SINGULAR}', $singular, $field['label'] );
-	// 	$field['label'] = str_replace( '{PLURAL}', $plural, $field['label'] );
-
-	// 	return $field;
-	// }
-
 	/**
-	 * Disables the location coordinates fields.
-	 * If not disabled, the fields will overwrite `update_lat_lng_value()`.
+	 * Disables the location coordinates fields. If they stay enabled they overwrite the values
+	 * saved from the map field.
 	 *
 	 * @since TBD
 	 *
-	 * @param $field array The field array containing all settings.
+	 * @param array<string, mixed> $field The field array containing all settings.
 	 *
-	 * @return array|false
+	 * @return array<string, mixed>
 	 */
-	function prepare_location_coordinates_field( $field ) {
+	public function prepare_location_coordinates_field( $field ) {
 		$field['disabled'] = 'disabled';
 
 		return $field;
@@ -397,26 +345,29 @@ class Mai_Locations_Location_Fields {
 	 *
 	 * @since TBD
 	 *
-	 * @param $field array The field array containing all settings.
+	 * @param array<string, mixed> $field The field array containing all settings.
 	 *
-	 * @return array|false
+	 * @return array<string, mixed>
 	 */
-	function prepare_location_place_id_field( $field ) {
+	public function prepare_location_place_id_field( $field ) {
 		$field['disabled'] = 'disabled';
 
 		return $field;
 	}
 
 	/**
-	 * Disabled the visual tab, media upload, and use basic toolbar.
+	 * Sets the excerpt editor to the basic toolbar with no media upload.
+	 *
+	 * TODO: the method name is misspelled, and the docblock used to say it disables the Visual
+	 * tab while the code keeps only that tab. Kept as-is, since the name is public. See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $field
+	 * @param array<string, mixed> $field The field array.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function prepare_location_exerpt_field( $field ) {
+	public function prepare_location_exerpt_field( $field ) {
 		$field['tabs']         = 'visual';
 		$field['toolbar']      = 'basic';
 		$field['media_upload'] = 0;

@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || die;
 $mailocations_aliases = [
 	'Mai_Locations_Block_Bindings' => Mai\Locations\BlockBindings::class,
 	'Mai_Geo_Query'               => Mai\Locations\GeoQuery::class,
+	'Mai_Locations_Location_Fields'      => Mai\Locations\LocationFields::class,
 	'Mai_Locations_Location_Form'        => Mai\Locations\LocationForm::class,
 	'Mai_Locations_Location_Form_Edit'   => Mai\Locations\LocationFormEdit::class,
 	'Mai_Locations_Location_Form_Listener' => Mai\Locations\LocationFormListener::class,
