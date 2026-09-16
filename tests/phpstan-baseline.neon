@@ -283,10 +283,22 @@ parameters:
 			path: ../blocks/location-table/block.php
 
 		-
+			message: '#^Call to function class_exists\(\) with ''Mai_Locations_Block…''\|''Mai_Locations…'' and false will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: ../inc/aliases.php
+
+		-
 			message: '#^Callback expects 0 parameters, \$accepted_args is set to 3\.$#'
 			identifier: arguments.count
 			count: 1
 			path: ../inc/classes/BlockBindings.php
+
+		-
+			message: '#^Function mailocations_get_geo_query_args not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: ../inc/classes/Queries.php
 
 		-
 			message: '#^Method Mai_Geo_Query\:\:get_distance\(\) should return float but returns false\.$#'
@@ -671,36 +683,6 @@ parameters:
 			identifier: argument.templateType
 			count: 3
 			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^Function mailocations_get_geo_query_args not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: ../inc/classes/class-locations-queries.php
-
-		-
-			message: '#^Method Mai_Locations_Queries\:\:mai_post_grid_query\(\) has parameter \$args with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-locations-queries.php
-
-		-
-			message: '#^Method Mai_Locations_Queries\:\:mai_post_grid_query\(\) has parameter \$query_args with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-locations-queries.php
-
-		-
-			message: '#^Method Mai_Locations_Queries\:\:mai_post_grid_query\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-locations-queries.php
-
-		-
-			message: '#^Method Mai_Locations_Queries\:\:pre_get_posts_query\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: ../inc/classes/class-locations-queries.php
 
 		-
 			message: '#^Method Mai_Locations_Locations_Table\:\:__construct\(\) has parameter \$args with no value type specified in iterable type array\.$#'

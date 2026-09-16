@@ -15,6 +15,8 @@ defined( 'ABSPATH' ) || die;
  */
 $mailocations_aliases = [
 	'Mai_Locations_Block_Bindings' => Mai\Locations\BlockBindings::class,
+	'Mai_Locations_Queries'       => Mai\Locations\Queries::class,
+	'Mai_Locations_Scripts'       => Mai\Locations\Scripts::class,
 ];
 
 foreach ( $mailocations_aliases as $mailocations_old => $mailocations_new ) {

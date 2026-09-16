@@ -11,7 +11,8 @@ use WP_Query;
 require_once __DIR__ . '/ScenarioRunner.php';
 
 /**
- * The archive query changes in classes/class-locations-queries.php.
+ * The archive query changes in inc/classes/Queries.php, still written against the old
+ * Mai_Locations_Queries name so it exercises the alias in inc/aliases.php.
  *
  * Whether the page is filtered is cached in a static on first check, and in this process that
  * first check never sees filter parameters. Filtered cases run in a fresh process.
@@ -43,7 +44,9 @@ final class QueriesTest extends TestCase {
 
 	public function test_pins_bug_post_grid_query_fatals_for_location_post_type(): void {
 		$this->expectException( \Error::class );
-		$this->expectExceptionMessage( 'Call to undefined function mailocations_get_geo_query_args()' );
+		// Namespaced since the class moved to Mai\Locations\Queries: PHP names the namespaced
+		// attempt in the message. Still the same fatal, still only reachable by calling it.
+		$this->expectExceptionMessage( 'Call to undefined function Mai\Locations\mailocations_get_geo_query_args()' );
 
 		// Calls a function that does not exist. Harmless only because the hook is commented out.
 		$this->queries()->mai_post_grid_query( [ 'post_type' => 'mai_location' ], [] );

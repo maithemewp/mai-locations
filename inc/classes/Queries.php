@@ -1,13 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
+use WP_Query;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Queries {
+/**
+ * Changes the location archive query.
+ *
+ * Was Mai_Locations_Queries in classes/class-locations-queries.php. That name still works,
+ * via inc/aliases.php.
+ *
+ * @since TBD
+ */
+class Queries {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -18,20 +33,21 @@ class Mai_Locations_Queries {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'pre_get_posts', [ $this, 'pre_get_posts_query' ] );
 		// add_filter( 'mai_post_grid_query_args', [ $this, 'mai_post_grid_query' ], 10, 2 );
 	}
 
-
 	/**
-	* Filters the location archive page query.
-	*
-	* @since TBD
-	*
-	* @return void
-	*/
-	function pre_get_posts_query( $query ) {
+	 * Filters the location archive page query.
+	 *
+	 * @since TBD
+	 *
+	 * @param WP_Query $query The query.
+	 *
+	 * @return void
+	 */
+	public function pre_get_posts_query( $query ): void {
 		// Bail if in the Dashboard.
 		if ( is_admin() ) {
 			return;
@@ -70,17 +86,20 @@ class Mai_Locations_Queries {
 	}
 
 	/**
-	 * Modify Mai Post Grid args with filter arguments.
-	 * TODO: Add setting for when to hijack Mai Post Grid.
+	 * Modifies Mai Post Grid args with filter arguments.
+	 *
+	 * Dead code: its hook is commented out above, and it calls
+	 * mailocations_get_geo_query_args(), which does not exist, so it fatals for a location post
+	 * type. Carried over unchanged, with its tests, until deleting it is agreed.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $query_args WP_Query args
-	 * @param array $args       Mai Post Grid block args.
+	 * @param array<string, mixed> $query_args WP_Query args.
+	 * @param array<string, mixed> $args       Mai Post Grid block args.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function mai_post_grid_query( $query_args, $args ) {
+	public function mai_post_grid_query( $query_args, $args ) {
 		// Check if post types intersect.
 		$post_types = mailocations_get_location_post_types();
 		$post_types = array_keys( $post_types );

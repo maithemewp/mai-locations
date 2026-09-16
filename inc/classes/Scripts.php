@@ -1,13 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Scripts {
+/**
+ * Registers the front-end scripts and styles, and the editor's sortable assets.
+ *
+ * Was Mai_Locations_Scripts in classes/class-locations-scripts.php. That name still works,
+ * via inc/aliases.php.
+ *
+ * @since TBD
+ */
+class Scripts {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -18,19 +31,19 @@ class Mai_Locations_Scripts {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'wp_enqueue_scripts',          [ $this, 'register_scripts' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_sortable' ] );
 	}
 
 	/**
-	 * Enqueues scripts and styles.
+	 * Registers scripts and styles.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	function register_scripts() {
+	public function register_scripts(): void {
 		// Asset data for cache busting.
 		$locations_asset       = mailocations_get_asset( 'mai-locations' );
 		$locations_style_asset = mailocations_get_asset( 'mai-locations-styles' );
@@ -41,7 +54,8 @@ class Mai_Locations_Scripts {
 		wp_register_style( 'mai-locations-form', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations-form-styles.css', [], $form_style_asset['version'] );
 		wp_register_style( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations-styles.css', [], $locations_style_asset['version'] );
 
-		// Scripts — no defer on map scripts due to Google Maps callback timing.
+		// Scripts. No defer on the map scripts, because of Google Maps callback timing.
+		// TODO: mai-locations does not list the clusterer as a dependency. See TODO.md.
 		wp_register_script( 'mai-locations-markerclusterer', MAI_LOCATIONS_PLUGIN_URL . 'build/markerclusterer.js', $clusterer_asset['dependencies'], $clusterer_asset['version'], [ 'in_footer' => true ] );
 		wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations.js', $locations_asset['dependencies'], $locations_asset['version'], [ 'in_footer' => true ] );
 
@@ -62,15 +76,16 @@ class Mai_Locations_Scripts {
 	}
 
 	/**
-	 * Add sortable scripts and styles.
+	 * Adds the sortable script and style in the editor.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function enqueue_sortable() {
+	public function enqueue_sortable(): void {
 		$sortable_asset       = mailocations_get_asset( 'mai-locations-sortable' );
 		$sortable_style_asset = mailocations_get_asset( 'mai-locations-sortable-styles' );
+
 		wp_enqueue_script( 'mai-locations-sortable', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations-sortable.js', array_merge( [ 'jquery', 'jquery-ui-sortable', 'acf-input' ], $sortable_asset['dependencies'] ), $sortable_asset['version'], [ 'strategy' => 'defer', 'in_footer' => true ] );
 		wp_enqueue_style( 'mai-locations-sortable', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations-sortable-styles.css', [], $sortable_style_asset['version'] );
 	}

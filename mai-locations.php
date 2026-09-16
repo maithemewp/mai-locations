@@ -140,9 +140,7 @@ final class Mai_Locations_Plugin {
 		include_once __DIR__ . '/inc/classes/class-location-form-submit.php';
 		include_once __DIR__ . '/inc/classes/class-location-import.php';
 		include_once __DIR__ . '/inc/classes/class-locations-cli.php';
-		include_once __DIR__ . '/inc/classes/class-locations-scripts.php';
 		include_once __DIR__ . '/inc/classes/class-locations-table.php';
-		include_once __DIR__ . '/inc/classes/class-locations-queries.php';
 		include_once __DIR__ . '/inc/classes/class-settings.php';
 		include_once __DIR__ . '/inc/classes/class-upgrade.php';
 		include_once __DIR__ . '/inc/classes/class-woocommerce-account-tabs.php';
@@ -163,8 +161,8 @@ final class Mai_Locations_Plugin {
 		new Mai_Locations_Location_Fields;
 		new Mai_Locations_Location_Form_Listener;
 		new Mai_Locations_Location_Import;
-		new Mai_Locations_Scripts;
-		new Mai_Locations_Queries;
+		new Mai\Locations\Scripts;
+		new Mai\Locations\Queries;
 		new Mai_Locations_Upgrade;
 
 		// Instantiate blocks.

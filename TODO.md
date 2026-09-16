@@ -137,7 +137,10 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [ ] Move classes one at a time behind the tests, keeping public names working until the release. Make the static caches resettable as each file moves.
   - Each migrated class keeps its old global name in `inc/aliases.php`, which the bootstrap picks up through its `inc/*.php` glob. `PublicNamesTest::test_migrated_classes_keep_their_old_names_as_aliases()` fails if an alias breaks.
   - [x] `Mai_Locations_Block_Bindings` to `Mai\Locations\BlockBindings`. September 15, 2026.
-  - [ ] The remaining 14 classes in `inc/classes/`, then the 9 block classes.
+  - [x] `Mai_Locations_Scripts` to `Mai\Locations\Scripts`, and `Mai_Locations_Queries` to `Mai\Locations\Queries`. September 15, 2026.
+  - [ ] The remaining 12 classes in `inc/classes/`, then the 9 block classes.
+  - **Watch for namespaced function calls.** A missing global function called from a namespaced class reports as `Mai\Locations\the_function()`, which is what the `mai_post_grid_query()` fatal test caught. Same behaviour, different message.
+  - **Dead code found on the way, not deleted yet:** `Queries::mai_post_grid_query()` is unhooked and calls a function that does not exist. Deleting it removes a public method, so it needs Mike's yes. Three tests pin it today.
 - [ ] Fix the open bugs above, each by flipping its pinned test.
 - [ ] Raise the PHP floor and write the changelog.
 - [ ] Release.
