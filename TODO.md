@@ -101,7 +101,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 
 - [ ] `send_published_email()` uses an undefined `$post_type`, so the email reads "Your http://example.org  has been published!". `classes/class-location-form-listener.php:369`.
 - [ ] The block binding source warns on a missing `postId` context for `filterSubmit` and `filterClear`, and returns nothing for location meta. `classes/class-block-bindings.php:61`.
-- [ ] `mailocations_user_can_edit()` is true only for the post author, not administrators. Decide whether that is intended.
+- [x] `mailocations_user_can_edit()` was true only for the post author, so administrators and editors saw no front-end Edit button on locations they could already edit in wp-admin. Now the author, whatever their role, or anyone who passes `current_user_can( 'edit_post' )`. Mike's call, September 15, 2026. The author branch stays first because location owners are often subscriber level and would fail a capability check.
 - [ ] `mailocations_delete_transients()` prefix-matches, so it also deletes transients like `mai_locationsother`.
 - [ ] The taxonomy is hierarchical but its rewrite is not, so child term URLs get no rule.
 - [ ] The map script does not list the marker clusterer as a dependency. The settings link hook hardcodes the folder name `mai-locations`.

@@ -272,7 +272,20 @@ function mailocations_delete_transients() {
  * @return bool
  */
 function mailocations_user_can_edit( $location_id ) {
-	return is_user_logged_in() && get_current_user_id() === (int) get_post_field( 'post_author', $location_id );
+	if ( ! is_user_logged_in() ) {
+		return false;
+	}
+
+	$location_id = (int) $location_id;
+
+	// The author, whatever their role. Location owners are often subscriber level,
+	// so a capability check alone would lock out the people this form is built for.
+	if ( get_current_user_id() === (int) get_post_field( 'post_author', $location_id ) ) {
+		return true;
+	}
+
+	// Anyone WordPress already lets edit this location, such as an editor or administrator.
+	return current_user_can( 'edit_post', $location_id );
 }
 
 /**

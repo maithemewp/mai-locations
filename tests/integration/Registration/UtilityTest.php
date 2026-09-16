@@ -94,12 +94,31 @@ final class UtilityTest extends TestCase {
 		$this->assertFalse( mailocations_user_can_edit( $post_id ) );
 	}
 
-	public function test_user_can_edit_ignores_capabilities(): void {
+	/**
+	 * Changed September 15, 2026 on Mike's call. It was author-only, which hid the front-end
+	 * Edit button from people who could already edit the location in wp-admin.
+	 */
+	public function test_user_can_edit_allows_anyone_wordpress_lets_edit_the_post(): void {
 		$post_id = $this->create_location( [], [ 'post_author' => self::factory()->user->create() ] );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertTrue( mailocations_user_can_edit( $post_id ) );
 
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'editor' ] ) );
+		$this->assertTrue( mailocations_user_can_edit( $post_id ) );
+
+		// A subscriber who owns nothing here still gets nothing.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'subscriber' ] ) );
 		$this->assertFalse( mailocations_user_can_edit( $post_id ) );
+	}
+
+	public function test_user_can_edit_keeps_subscriber_level_owners(): void {
+		$owner   = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$post_id = $this->create_location( [], [ 'post_author' => $owner ] );
+
+		wp_set_current_user( $owner );
+
+		$this->assertTrue( mailocations_user_can_edit( $post_id ) );
 	}
 
 	public function test_user_can_edit_missing_post(): void {
