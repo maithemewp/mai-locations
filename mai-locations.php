@@ -139,7 +139,6 @@ final class Mai_Locations_Plugin {
 		include_once __DIR__ . '/inc/classes/class-location-form-submit.php';
 		include_once __DIR__ . '/inc/classes/class-location-import.php';
 		include_once __DIR__ . '/inc/classes/class-locations-cli.php';
-		include_once __DIR__ . '/inc/classes/class-woocommerce-account-tabs.php';
 
 		// Blocks.
 		include_once __DIR__ . '/blocks/location-address-search/block.php';
@@ -195,7 +194,7 @@ final class Mai_Locations_Plugin {
 				return;
 			}
 
-			new Mai_Locations_WooCommerce_Account_Tabs;
+			new Mai\Locations\WooCommerceAccountTabs;
 		}
 	}
 

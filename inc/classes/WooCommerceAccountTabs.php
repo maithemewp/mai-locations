@@ -1,35 +1,47 @@
 <?php
 
-// Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) exit;
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
+// Prevent direct file access.
+defined( 'ABSPATH' ) || die;
 
 /**
- * Locations WooCommerce account tab.
- * Should only be instantiated if WooCommerce is active.
+ * Adds a Locations tab to the WooCommerce account pages.
+ *
+ * Only safe to instantiate when WooCommerce is active: add_acf_form_head() calls
+ * is_account_page() and is_wc_endpoint_url(), which WooCommerce defines. The plugin does not
+ * instantiate this today; the call sits commented out in the bootstrap.
+ *
+ * Was Mai_Locations_WooCommerce_Account_Tabs in classes/class-woocommerce-account-tabs.php.
+ * That name still works, via inc/aliases.php.
  *
  * @since TBD
- *
- * @return void
  */
-class Mai_Locations_WooCommerce_Account_Tabs {
+class WooCommerceAccountTabs {
+
 	/**
-	 * Gets is started.
+	 * Gets it started.
 	 *
 	 * @since TBD
 	 */
-	function __construct() {
+	public function __construct() {
 		// Hooks.
 		$this->hooks();
 	}
 
 	/**
-	 * Gets tabs.
+	 * Gets the tabs, endpoint to label.
+	 *
+	 * TODO: cached in a static for the whole request, so the filter cannot be added later. See
+	 * TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
-	function get_tabs() {
+	public function get_tabs() {
 		// Set static tabs.
 		static $tabs = null;
 
@@ -41,7 +53,7 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 		// Default tabs.
 		$tabs = [ mailocations_get_base() => mailocations_get_plural() ];
 
-		// Set filtereable tabs.
+		// Set filterable tabs.
 		$tabs = apply_filters( 'mailocations_woocommerce_account_tabs', $tabs );
 
 		return $tabs;
@@ -51,8 +63,10 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	 * Runs hooks.
 	 *
 	 * @since TBD
+	 *
+	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'init',                           [ $this, 'add_endpoint' ] );
 		add_filter( 'query_vars',                     [ $this, 'add_query_vars' ], 0 );
 		add_filter( 'woocommerce_get_query_vars',     [ $this, 'add_woo_query_vars' ] );
@@ -62,22 +76,22 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	}
 
 	/**
-	 * Adds account nav endpoints.
+	 * Adds the account nav endpoints.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function add_endpoint() {
+	public function add_endpoint(): void {
 		foreach ( $this->get_tabs() as $endpoint => $label ) {
 			// Add endpoint.
 			add_rewrite_endpoint( $endpoint, EP_ROOT | EP_PAGES );
 
 			// Add action.
-			add_action( "woocommerce_account_{$endpoint}_endpoint", function() use ( $endpoint ) {
+			add_action( "woocommerce_account_{$endpoint}_endpoint", function () use ( $endpoint ) {
 				// Add action hook.
 				do_action( "mailocations_account_{$endpoint}_content" );
-			});
+			} );
 		}
 	}
 
@@ -86,11 +100,11 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	 *
 	 * @since TBD
 	 *
-	 * @param array $vars The existing query vars.
+	 * @param array<int, string> $vars The existing query vars.
 	 *
-	 * @return array
+	 * @return array<int, string>
 	 */
-	function add_query_vars( $vars ) {
+	public function add_query_vars( $vars ) {
 		foreach ( $this->get_tabs() as $endpoint => $label ) {
 			$vars[] = $endpoint;
 		}
@@ -103,11 +117,11 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	 *
 	 * @since TBD
 	 *
-	 * @param array $vars The existing query vars.
+	 * @param array<string, string> $vars The existing query vars.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
-	function add_woo_query_vars( $vars ) {
+	public function add_woo_query_vars( $vars ) {
 		foreach ( $this->get_tabs() as $endpoint => $label ) {
 			$vars[ $endpoint ] = $endpoint;
 		}
@@ -116,15 +130,15 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	}
 
 	/**
-	 * Adds content area for Mai Theme v2.
+	 * Adds a content area for Mai Theme v2.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $config The existing config array.
+	 * @param array<string, mixed> $config The existing config array.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function add_content_areas( $config ) {
+	public function add_content_areas( $config ) {
 		foreach ( $this->get_tabs() as $endpoint => $label ) {
 			// Add to config.
 			$config["woo-{$endpoint}"] = [
@@ -138,16 +152,15 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	}
 
 	/**
-	 * Adds account menu item.
-	 * Is not added if Mai Theme v2 Content Area doesn't exist or doesn't have content.
+	 * Adds the account menu item. Skipped on Mai Theme v2 when the content area has no content.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $items The existing items.
+	 * @param array<string, string> $items The existing items.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
-	function add_menu_items( $items ) {
+	public function add_menu_items( $items ) {
 		foreach ( $this->get_tabs() as $endpoint => $label ) {
 			// Skip if Mai Theme v2 and no template part.
 			if ( function_exists( 'mai_has_template_part' ) && ! mai_has_template_part( "woo-{$endpoint}" ) ) {
@@ -162,13 +175,15 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	}
 
 	/**
-	 * Adds ACF form head if needed.
+	 * Loads the ACF form head where the account page needs it.
+	 *
+	 * TODO: calls is_account_page() without checking WooCommerce is active. See TODO.md.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function add_acf_form_head() {
+	public function add_acf_form_head(): void {
 		if ( ! is_account_page() ) {
 			return;
 		}
@@ -197,18 +212,17 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	}
 
 	/**
-	 * Insert a value or key/value pair before a specific key in an array.
-	 * If key doesn't exist, value is appended to the end of the array.
+	 * Inserts a key/value pair before a specific key. Appends when the key is not there.
 	 *
 	 * @since TBD
 	 *
-	 * @param array  $array
-	 * @param string $key
-	 * @param array  $new
+	 * @param array<string, mixed> $array The array to insert into.
+	 * @param string               $key   The key to insert before.
+	 * @param array<string, mixed> $new   What to insert.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function insert_before( array $array, $key, array $new ) {
+	public function insert_before( array $array, $key, array $new ) {
 		$keys  = array_keys( $array );
 		$index = array_search( $key, $keys );
 		$pos   = $index !== false ? $index : count( $array ); // If key doesn't exist, insert at the end.
@@ -217,18 +231,17 @@ class Mai_Locations_WooCommerce_Account_Tabs {
 	}
 
 	/**
-	 * Insert a value or key/value pair after a specific key in an array.
-	 * If key doesn't exist, value is appended to the end of the array.
+	 * Inserts a key/value pair after a specific key. Appends when the key is not there.
 	 *
 	 * @since TBD
 	 *
-	 * @param array  $array
-	 * @param string $key
-	 * @param array  $new
+	 * @param array<string, mixed> $array The array to insert into.
+	 * @param string               $key   The key to insert after.
+	 * @param array<string, mixed> $new   What to insert.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function insert_after( array $array, $key, array $new ) {
+	public function insert_after( array $array, $key, array $new ) {
 		$keys  = array_keys( $array );
 		$index = array_search( $key, $keys );
 		$pos   = false === $index ? count( $array ) : $index + 1;

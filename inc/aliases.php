@@ -21,6 +21,7 @@ $mailocations_aliases = [
 	'Mai_Locations_Scripts'       => Mai\Locations\Scripts::class,
 	'Mai_Locations_Settings'      => Mai\Locations\Settings::class,
 	'Mai_Locations_Upgrade'       => Mai\Locations\Upgrade::class,
+	'Mai_Locations_WooCommerce_Account_Tabs' => Mai\Locations\WooCommerceAccountTabs::class,
 ];
 
 foreach ( $mailocations_aliases as $mailocations_old => $mailocations_new ) {

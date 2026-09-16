@@ -108,7 +108,9 @@ final class WooCommerceAccountTabsTest extends TestCase {
 
 	public function test_add_acf_form_head_fatals_without_woocommerce(): void {
 		$this->expectException( \Error::class );
-		$this->expectExceptionMessage( 'Call to undefined function is_account_page()' );
+		// Namespaced since the class moved to Mai\Locations\WooCommerceAccountTabs. Same fatal:
+		// PHP names the namespaced attempt when the global function does not exist.
+		$this->expectExceptionMessage( 'Call to undefined function Mai\Locations\is_account_page()' );
 
 		$this->tabs->add_acf_form_head();
 	}
