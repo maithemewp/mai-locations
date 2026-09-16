@@ -261,9 +261,10 @@ final class LocationImportTest extends TestCase {
 		$this->assertSame( '', $post->post_content );
 		$this->assertSame( (int) get_current_user_id(), (int) $post->post_author );
 
-		// The template repeats the address_street header, so the second column ("Suite 2") wins.
-		$this->assertSame( 'Suite 2', get_post_meta( $post->ID, 'address_street', true ) );
-		$this->assertSame( '', get_post_meta( $post->ID, 'address_street_2', true ) );
+		// Fixed September 16, 2026. The template repeated the address_street header, so the
+		// second column overwrote the street with "Suite 2" and nothing set the second line.
+		$this->assertSame( '123 Main St.', get_post_meta( $post->ID, 'address_street', true ) );
+		$this->assertSame( 'Suite 2', get_post_meta( $post->ID, 'address_street_2', true ) );
 		$this->assertSame( 'Hackettstown', get_post_meta( $post->ID, 'address_city', true ) );
 		$this->assertSame( 'NJ', get_post_meta( $post->ID, 'address_state', true ) );
 		$this->assertSame( '07840', get_post_meta( $post->ID, 'address_postcode', true ) );

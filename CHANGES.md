@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+* Fixed: The example import CSV used the `address_street` heading twice, so anyone following it lost the street and imported the suite number in its place.
 * Fixed: The location fields panel in the editor was titled "{SINGULAR} Info" instead of "Location Info".
 * Changed: `Mai_Locations_Location_Fields::prepare_location_exerpt_field()` is now spelled `prepare_location_excerpt_field()`. The old name still works.
 * Fixed: A location category nested under another had no working URL. Visit Settings > Permalinks and press Save once after updating.
