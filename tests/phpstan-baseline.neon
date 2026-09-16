@@ -211,12 +211,6 @@ parameters:
 			path: ../inc/functions-filters.php
 
 		-
-			message: '#^Function mailocations_get_distance\(\) with return type void returns mixed but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: ../inc/functions-filters.php
-
-		-
 			message: '#^Function mailocations_get_filtered_query_args\(\) has parameter \$args with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -243,18 +237,6 @@ parameters:
 		-
 			message: '#^Function mailocation_get_user_locations\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/functions-locations.php
-
-		-
-			message: '#^Function mailocations_add_location_to_user\(\) with return type void returns WP_Error but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: ../inc/functions-locations.php
-
-		-
-			message: '#^Function mailocations_add_location_to_user\(\) with return type void returns true but should not return anything\.$#'
-			identifier: return.void
 			count: 1
 			path: ../inc/functions-locations.php
 
@@ -453,12 +435,6 @@ parameters:
 		-
 			message: '#^Function mailocation_location_url_shortcode\(\) should return string but empty return statement found\.$#'
 			identifier: return.empty
-			count: 1
-			path: ../inc/shortcodes.php
-
-		-
-			message: '#^Result of function mailocations_get_distance \(void\) is used\.$#'
-			identifier: function.void
 			count: 1
 			path: ../inc/shortcodes.php
 

@@ -189,7 +189,7 @@ function mailocations_get_filtered_query_args( $args = [] ) {
  * @param  WP_Post   $post_obj
  * @param  int|false $round    The amount of decimal places to round the value to.
  *
- * @return void
+ * @return float|false The distance, or false when the post carries none.
  */
 function mailocations_get_distance( $post_obj = null, $round = 1 ) {
 	return Mai_Geo_Query::get_distance( $post_obj, $round );

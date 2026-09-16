@@ -108,7 +108,7 @@ function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
  * @param int $post_id The post ID.
  * @param int $user_id The user ID.
  *
- * @return void
+ * @return true|\WP_Error True on success, or an error when there is no such user.
  */
 function mailocations_add_location_to_user( $post_id, $user_id ) {
 	$user = get_user_by( 'id', $user_id );

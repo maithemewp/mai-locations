@@ -401,8 +401,7 @@ class LocationFormListener {
 	/**
 	 * Whether the post should be updated.
 	 *
-	 * TODO: returns null, not false, when no ACF data was posted, though the docblock says bool.
-	 * See TODO.md.
+	 * Returns null, not false, when no ACF data was posted.
 	 *
 	 * @since TBD
 	 *

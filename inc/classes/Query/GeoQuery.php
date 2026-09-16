@@ -72,8 +72,6 @@ class GeoQuery {
 	/**
 	 * Gets the distance from a post object.
 	 *
-	 * TODO: documented as float, returns false when the post carries no distance. See TODO.md.
-	 *
 	 * @since 0.1.0
 	 *
 	 * @param \WP_Post|null $post_obj The post object.
