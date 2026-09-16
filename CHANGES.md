@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+* Fixed: Upgrading from an older version carried the old settings over exactly as they were, so a URL base with spaces or punctuation in it was saved unusable.
+* Changed: A plural label, singular label or URL base set through a filter is now cleaned every time it is read, not only the first time. A filtered base is cleaned the same way a saved one is, so `Our Places!` gives `our-places` where it used to give `OurPlaces`.
 * Fixed: Saving the settings with the distance field empty stored a distance of 0, which searches with no limit at all. An empty field now keeps the default, and a 0 entered on purpose still means no limit.
 * Fixed: The Default Units setting accepted any text. It now accepts only miles or kilometres.
 * Fixed: A setting saved during a request was not seen again until the next one.

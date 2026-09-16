@@ -160,6 +160,8 @@ class Upgrade {
 			$options[ $key ] = $value;
 		}
 
-		update_option( 'mai_locations', $options );
+		// Clean the migrated values, which came from ACF option rows and were saved exactly as
+		// they were, so a base of "Our Places!" went in as-is. Fixed September 16, 2026.
+		update_option( 'mai_locations', mailocations_sanitize_options( $options ) );
 	}
 }

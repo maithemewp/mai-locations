@@ -17,10 +17,13 @@ function mailocations_get_plural() {
 		return $label;
 	}
 
+	// Escape before caching. Only the first call used to be escaped, because the raw value was
+	// what got stored. Fixed September 16, 2026.
 	$label = mailocations_get_option( 'label_plural' );
 	$label = apply_filters( 'mailocations_plural', $label );
+	$label = esc_html( $label );
 
-	return esc_html( $label );
+	return $label;
 }
 
 /**
@@ -37,10 +40,12 @@ function mailocations_get_singular() {
 		return $label;
 	}
 
+	// Escape before caching. Only the first call used to be escaped. Fixed September 16, 2026.
 	$label = mailocations_get_option( 'label_singular' );
 	$label = apply_filters( 'mailocations_singular', $label );
+	$label = esc_html( $label );
 
-	return esc_html( $label );
+	return $label;
 }
 
 /**
@@ -57,10 +62,14 @@ function mailocations_get_base() {
 		return $base;
 	}
 
+	// Clean before caching, and clean it the same way the saved setting is cleaned. Only the
+	// first call used to be cleaned, and with sanitize_html_class(), which keeps characters a
+	// URL base should not have. Fixed September 16, 2026.
 	$base = mailocations_get_option( 'base' );
 	$base = apply_filters( 'mailocations_base', $base );
+	$base = sanitize_title_with_dashes( $base );
 
-	return sanitize_html_class( $base );
+	return $base;
 }
 
 /**

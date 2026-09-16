@@ -76,14 +76,16 @@ final class ContentTypeFiltersTest extends TestCase {
 		$this->assertSame( 'Store Categories', $result['taxonomy_labels']['name'] );
 	}
 
-	public function test_pins_bug_base_sanitized_on_first_call_but_raw_on_later_calls(): void {
+	/**
+	 * Fixed September 16, 2026. The filtered base was cleaned with sanitize_html_class() rather
+	 * than the sanitize_title_with_dashes() used on the saved setting, and the raw value was
+	 * cached, so only the first call was cleaned at all.
+	 */
+	public function test_filtered_base_is_cleaned_the_same_way_on_every_call(): void {
 		$result = $this->run_scenario( [ 'returns' => [ 'mailocations_base' => 'Our Places!' ] ] );
 
-		// The option is cleaned with sanitize_title_with_dashes(), but the filtered value only with sanitize_html_class().
-		$this->assertSame( 'OurPlaces', $result['post_type_rewrite']['slug'] );
-
-		// The static caches the raw value, so later calls skip sanitizing. They should match the first call.
-		$this->assertSame( 'Our Places!', $result['base_later_call'] );
+		$this->assertSame( 'our-places', $result['post_type_rewrite']['slug'] );
+		$this->assertSame( 'our-places', $result['base_later_call'] );
 	}
 
 	public function test_empty_filtered_base_gives_an_empty_rewrite_slug(): void {
@@ -92,14 +94,14 @@ final class ContentTypeFiltersTest extends TestCase {
 		$this->assertSame( '', $result['post_type_rewrite']['slug'] );
 	}
 
-	public function test_pins_bug_label_escaped_on_first_call_but_raw_on_later_calls(): void {
+	/**
+	 * Fixed September 16, 2026. The raw label was cached, so only the first call was escaped.
+	 */
+	public function test_filtered_label_is_escaped_on_every_call(): void {
 		$result = $this->run_scenario( [ 'returns' => [ 'mailocations_plural' => 'Bed & Breakfasts' ] ] );
 
-		// First call, during registration, returns esc_html() output.
 		$this->assertSame( 'Bed &amp; Breakfasts', $result['post_type_labels']['name'] );
-
-		// The static caches the unescaped value, so later calls return it raw. Both should be escaped the same way.
-		$this->assertSame( 'Bed & Breakfasts', $result['plural_later_call'] );
+		$this->assertSame( 'Bed &amp; Breakfasts', $result['plural_later_call'] );
 	}
 
 	public function test_taxonomy_base_filter_is_sanitized_and_empty_falls_back_to_default(): void {

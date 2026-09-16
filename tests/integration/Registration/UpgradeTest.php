@@ -115,13 +115,16 @@ final class UpgradeTest extends TestCase {
 		$this->assertSame( 'Place', get_option( 'options_location_label_singular' ) );
 	}
 
-	public function test_upgrade_completed_does_not_sanitize_migrated_values(): void {
+	/**
+	 * Fixed September 16, 2026. The migrated values were saved exactly as they were.
+	 */
+	public function test_upgrade_completed_sanitizes_migrated_values(): void {
 		delete_option( 'mai_locations' );
 		update_option( 'options_location_base', 'Our Places!' );
 
 		$this->upgrade()->upgrade_completed( null, [] );
 
-		$this->assertSame( 'Our Places!', get_option( 'mai_locations' )['base'] );
+		$this->assertSame( 'our-places', get_option( 'mai_locations' )['base'] );
 	}
 
 	public function test_upgrade_completed_bails_when_option_exists(): void {
