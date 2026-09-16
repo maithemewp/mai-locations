@@ -142,7 +142,9 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
   - [x] `Mai_Locations_Locations_Table` to `Mai\Locations\LocationsTable`, and `Mai_Locations_Settings` to `Mai\Locations\Settings`. September 15, 2026. Settings used to instantiate itself at the top of its own file; the bootstrap does that now. Its nine `add_settings_field()` calls became one loop over a field list, since every callback is named after its id.
   - [x] `Mai_Locations_WooCommerce_Account_Tabs` to `Mai\Locations\WooCommerceAccountTabs`. September 15, 2026.
   - [x] The three form classes: `Mai_Locations_Location_Form` to `Mai\Locations\LocationForm`, plus `LocationFormEdit` and `LocationFormSubmit`. September 15, 2026.
-  - [ ] The remaining 4 classes in `inc/classes/`: the CLI, the importer, the location fields and the form listener. Then the 9 block classes.
+  - [x] `Mai_Locations_Location_Form_Listener` to `Mai\Locations\LocationFormListener`. September 15, 2026.
+  - [ ] The remaining 3 classes in `inc/classes/`: the CLI, the importer and the location fields. Then the 9 block classes.
+  - **The CLI file also holds two public global functions**, `mailocations_get_data_from_website()` and `mailocations_upload_image()`, which Visit Sleepy Hollow calls from its own scripts. They stay global, in a procedural file under `inc/`, when that class moves.
   - **Watch for files that run code on load.** Several classes instantiate themselves at the top or bottom of their file, which autoloading never runs. Each one moves to the bootstrap as its class moves.
   - **Watch for values arriving as strings.** `declare(strict_types=1)` turns coercion that used to happen silently into a `TypeError`. `GeoQuery::get_distance()` caught it: MySQL returns the computed distance column as a string, and `round()` then refused it, breaking nine tests. Cast at the boundary as each file moves.
   - **Watch for namespaced function calls.** A missing global function called from a namespaced class reports as `Mai\Locations\the_function()`, which is what the `mai_post_grid_query()` fatal test caught. Same behaviour, different message.

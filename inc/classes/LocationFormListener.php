@@ -1,13 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Location_Form_Listener {
+/**
+ * Handles the front-end form submissions: loads ACF's form head, moves the title, excerpt and
+ * image out of the field data and onto the post, keeps the address and map in step, and sends
+ * the notification emails.
+ *
+ * Was Mai_Locations_Location_Form_Listener in classes/class-location-form-listener.php. That
+ * name still works, via inc/aliases.php.
+ *
+ * @since TBD
+ */
+class LocationFormListener {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -18,7 +33,7 @@ class Mai_Locations_Location_Form_Listener {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'get_header',                                 [ $this, 'create_listener' ], 0 );
 		add_action( 'get_header',                                 [ $this, 'edit_listener' ], 0 );
 		add_action( 'acf/save_post',                              [ $this, 'before_save_post' ], 4 );
@@ -27,14 +42,13 @@ class Mai_Locations_Location_Form_Listener {
 	}
 
 	/**
-	 * Processes create form submission.
-	 * Adds acf_form_head().
+	 * Processes the create form submission, and adds acf_form_head().
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function create_listener() {
+	public function create_listener(): void {
 		// Bail if not logged in or not a single post.
 		if ( ! ( is_user_logged_in() && is_singular() ) ) {
 			return;
@@ -53,14 +67,13 @@ class Mai_Locations_Location_Form_Listener {
 	}
 
 	/**
-	 * Processes edit form submission.
-	 * Adds acf_form_head().
+	 * Processes the edit form submission, and adds acf_form_head().
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function edit_listener() {
+	public function edit_listener(): void {
 		// Bail if not logged in or not a single post.
 		if ( ! ( is_user_logged_in() && is_singular() ) ) {
 			return;
@@ -76,7 +89,8 @@ class Mai_Locations_Location_Form_Listener {
 			return;
 		}
 
-		// Get location to edit.
+		// Get location to edit. filter_input() reads the real request, so this path cannot be
+		// driven from a test by setting $_GET.
 		$location_id = filter_input( INPUT_GET, 'location_id', FILTER_SANITIZE_NUMBER_INT );
 
 		// Bail if no location ID or user can't edit.
@@ -89,16 +103,20 @@ class Mai_Locations_Location_Form_Listener {
 	}
 
 	/**
-	 * Saves featured image.
-	 * Forces location to public when saving, if it's not already.
+	 * Pulls the post fields out of the submitted ACF data, and queues the work that has to
+	 * happen after ACF saves.
+	 *
+	 * TODO: forces any status but publish to publish, on Dashboard saves as well as front-end
+	 * ones, and sweeps up private and trashed locations. The agreed replacement is a Publish
+	 * checkbox on the edit form. See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @param int $post_id The post ID.
+	 * @param int|string $post_id The post ID.
 	 *
 	 * @return void
- 	 */
-	function before_save_post( $post_id ) {
+	 */
+	public function before_save_post( $post_id ): void {
 		if ( ! $this->should_update( $post_id ) ) {
 			return;
 		}
@@ -146,7 +164,8 @@ class Mai_Locations_Location_Form_Listener {
 			unset( $_POST['acf']['mai_location_excerpt'] );
 		}
 
-		// Author.
+		// Author. Read from the existing post, never from the submitter, so another user editing
+		// a location does not take it over.
 		$author_id = get_post_field( 'post_author', $post_id );
 
 		if ( $author_id ) {
@@ -163,8 +182,7 @@ class Mai_Locations_Location_Form_Listener {
 		}
 
 		/**
-		 * Run after ACF saves the post
-		 * to update the post title, excerpt, and/or featured image.
+		 * Runs after ACF saves the post, to update the post title, excerpt and featured image.
 		 *
 		 * @since TBD
 		 *
@@ -172,7 +190,7 @@ class Mai_Locations_Location_Form_Listener {
 		 *
 		 * @return void
 		 */
-		add_action( 'acf/save_post', function( $post_id ) use ( $data ) {
+		add_action( 'acf/save_post', function ( $post_id ) use ( $data ) {
 			if ( ! $this->should_update( $post_id ) ) {
 				return;
 			}
@@ -215,6 +233,8 @@ class Mai_Locations_Location_Form_Listener {
 						set_post_thumbnail( $post_id, $value );
 					break;
 					case 'author':
+						// TODO: adds a duplicate entry to the author's list on every save.
+						// See TODO.md.
 						mailocations_add_location_to_user( $post_id, $value );
 					break;
 				}
@@ -238,7 +258,6 @@ class Mai_Locations_Location_Form_Listener {
 					$this->send_emails( $post_id, $data );
 				}
 			}
-
 		}, 20 );
 
 		// Address fields.
@@ -278,8 +297,7 @@ class Mai_Locations_Location_Form_Listener {
 		$location_changing = ! ( $location_current || $location_new ) || ( ( $location_current || $location_new ) && $location_current !== $location_new );
 
 		/**
-		 * Run after ACF saves the post
-		 * to update the post title, excerpt, and/or featured image.
+		 * Runs after ACF saves the post, to keep the address fields and the map in step.
 		 *
 		 * @since TBD
 		 *
@@ -287,7 +305,7 @@ class Mai_Locations_Location_Form_Listener {
 		 *
 		 * @return void
 		 */
-		add_action( 'acf/save_post', function( $post_id ) use ( $address_changing, $location_changing ) {
+		add_action( 'acf/save_post', function ( $post_id ) use ( $address_changing, $location_changing ) {
 			// If we're updating an address but no location.
 			if ( $address_changing && ! $location_changing ) {
 				// Update the google map field.
@@ -298,21 +316,20 @@ class Mai_Locations_Location_Form_Listener {
 				// Update the address fields.
 				mailocations_update_address_from_google_map( $post_id );
 			}
-
 		}, 20 );
 	}
 
 	/**
-	 * Sends emails.
+	 * Sends the submission notification emails.
 	 *
 	 * @since TBD
 	 *
-	 * @param int   $post_id The post ID.
-	 * @param array $data    The data.
+	 * @param int                  $post_id The post ID.
+	 * @param array<string, mixed> $data    The data.
 	 *
 	 * @return void
 	 */
-	function send_emails( $post_id, $data ) {
+	public function send_emails( $post_id, $data ): void {
 		// Bail if no emails.
 		if ( ! $data['emails'] ) {
 			return;
@@ -352,13 +369,18 @@ class Mai_Locations_Location_Form_Listener {
 	}
 
 	/**
-	 * Send email when a location is changed from pending to published.
+	 * Sends an email when a location moves from pending to published.
+	 *
+	 * TODO: $post_type is never defined here, so the label is empty and PHP warns. It should be
+	 * $post->post_type. Pinned in FormListenerTest. See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @param WP_Post $post Post object.
+	 * @param \WP_Post $post Post object.
+	 *
+	 * @return void
 	 */
-	function send_published_email( $post ) {
+	public function send_published_email( $post ): void {
 		$post_types = mailocations_get_location_post_types();
 
 		// Bail if not a supported post type.
@@ -377,15 +399,18 @@ class Mai_Locations_Location_Form_Listener {
 	}
 
 	/**
-	 * If the post should be updated.
+	 * Whether the post should be updated.
+	 *
+	 * TODO: returns null, not false, when no ACF data was posted, though the docblock says bool.
+	 * See TODO.md.
 	 *
 	 * @since TBD
 	 *
 	 * @param mixed $post_id The post ID from ACF.
 	 *
-	 * @return bool
+	 * @return bool|null
 	 */
-	function should_update( $post_id ) {
+	public function should_update( $post_id ) {
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return false;
 		}
@@ -412,18 +437,18 @@ class Mai_Locations_Location_Form_Listener {
 	}
 
 	/**
-	 * Saves separate latitude and longitude and place ID values from map field.
+	 * Saves separate latitude, longitude and place ID values from the map field.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $value
-	 * @param mixed $post_id
-	 * @param array $field
-	 * @param JSON  $original I think it's JSON?
+	 * @param mixed      $value    The map field value.
+	 * @param int|string $post_id  The post ID.
+	 * @param array<string, mixed> $field The field array.
+	 * @param mixed      $original The original value, as JSON.
 	 *
-	 * @return array
+	 * @return mixed
 	 */
-	function update_lat_lng_place_id_value( $value, $post_id, $field, $original ) {
+	public function update_lat_lng_place_id_value( $value, $post_id, $field, $original ) {
 		if ( ! is_array( $value ) ) {
 			return $value;
 		}
