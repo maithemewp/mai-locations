@@ -32,6 +32,8 @@ final class LocationFieldsCallbacksTest extends TestCase {
 		$this->assertSame( [ 10, 4 ], $this->hook( 'acf/location/rule_match/mailocations_supported_post_types', 'post_type_rule_match' ) );
 		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/load_field_group', 'handle_field_group_titles' ) );
 		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mai_location_fields', 'load_location_fields_choices' ) );
+		// The table block's own copy of the field, which needs a different key to keep its labels.
+		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mailocations_table_fields', 'load_location_fields_choices' ) );
 		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mai_location_lat', 'prepare_location_coordinates_field' ) );
 		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mai_location_lng', 'prepare_location_coordinates_field' ) );
 		$this->assertSame( [ 10, 1 ], $this->hook( 'acf/prepare_field/key=mai_location_place_id', 'prepare_location_place_id_field' ) );

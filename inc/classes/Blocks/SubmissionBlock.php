@@ -83,9 +83,6 @@ class SubmissionBlock {
 	/**
 	 * Registers the block's field group.
 	 *
-	 * TODO: mai_location_redirect and mai_location_fields are the same keys the table block
-	 * registers, so ACF keeps whichever loads first. See TODO.md.
-	 *
 	 * @since TBD
 	 *
 	 * @return void

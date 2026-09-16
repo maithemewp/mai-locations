@@ -86,10 +86,6 @@ class TableBlock {
 	/**
 	 * Registers the block's field group.
 	 *
-	 * TODO: mai_location_redirect and mai_location_fields are the same keys the submission block
-	 * registers, so ACF keeps whichever loads first and this block shows that block's labels.
-	 * Two labels here also use the text domain "mai-location". See TODO.md.
-	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
@@ -115,32 +111,34 @@ class TableBlock {
 						'placeholder' => __( 'My Location', 'mai-locations' ),
 					],
 					[
-						'label'       => __( 'Table Header', 'mai-location' ),
+						'label'       => __( 'Table Header', 'mai-locations' ),
 						'key'         => 'field_6071c00cbfdac',
 						'name'        => 'locations_table_header',
 						'type'        => 'text',
 						'placeholder' => __( 'Locations', 'mai-locations' ),
 					],
 					[
-						'label' => __( 'No Results Message', 'mai-location' ),
+						'label' => __( 'No Results Message', 'mai-locations' ),
 						'key'   => 'field_6071d22cdrdbd',
 						'name'  => 'locations_no_results',
 						'type'  => 'textarea',
 						'rows'  => 2,
 					],
 					[
-						// This field has to match what's in location-submission/block.php.
+						// The name matches the submission block's field, so saved values still
+						// load. The key must not, or ACF keeps whichever group registers first
+						// and this block shows the submission block's labels. Fixed September
+						// 16, 2026.
 						'label'        => __( 'Redirect', 'mai-locations' ),
 						'instructions' => __( 'Redirect to this URL after saving.', 'mai-locations' ),
-						'key'          => 'mai_location_redirect',
+						'key'          => 'mailocations_table_redirect',
 						'name'         => 'location_redirect',
 						'type'         => 'text',
 					],
 					[
-						// This field has to match what's in location-submission/block.php.
 						'label'         => __( 'Edit Form Fields', 'mai-locations' ),
 						'instructions'  => __( 'Allow editing of these fields.', 'mai-locations' ),
-						'key'           => 'mai_location_fields',
+						'key'           => 'mailocations_table_fields',
 						'name'          => 'location_fields',
 						'type'          => 'checkbox',
 						'multiple'      => 1,

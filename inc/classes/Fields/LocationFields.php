@@ -36,6 +36,7 @@ class LocationFields {
 		add_filter( 'acf/location/rule_match/mailocations_supported_post_types', [ $this, 'post_type_rule_match' ], 10, 4 );
 		add_filter( 'acf/load_field_group',                                      [ $this, 'handle_field_group_titles' ] );
 		add_filter( 'acf/prepare_field/key=mai_location_fields',                 [ $this, 'load_location_fields_choices' ] );
+		add_filter( 'acf/prepare_field/key=mailocations_table_fields',           [ $this, 'load_location_fields_choices' ] );
 		// add_filter( 'acf/prepare_field/key=TBD',                                 [ $this, 'prepare_labels' ] );
 		add_filter( 'acf/prepare_field/key=mai_location_lat',                    [ $this, 'prepare_location_coordinates_field' ] );
 		add_filter( 'acf/prepare_field/key=mai_location_lng',                    [ $this, 'prepare_location_coordinates_field' ] );

@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+* Fixed: The locations table block's settings were labelled "Submission Redirect" and "Submission Form Fields", because both blocks registered two fields under the same ACF keys. Saved settings are unaffected.
+* Fixed: Two locations table block labels were untranslatable, because they used the wrong text domain.
 * Fixed: A class added to a location form ran into the form's own class, so `class="extra"` came out as `mailocations-formextra` and never matched any styles.
 * Fixed: The locations table printed its heading inside the `<table>` element, which is not valid HTML. The heading now sits above the table.
 * Fixed: The locations table accepted a `class` and never printed it.

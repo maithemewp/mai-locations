@@ -122,9 +122,9 @@ final class BlockRegistrationTest extends TestCase {
 					'field_6071bfebbddbg'   => 'locations_table_post_type',
 					'field_6071bfebbfdab'   => 'locations_table_title',
 					'field_6071c00cbfdac'   => 'locations_table_header',
-					'field_6071d22cdrdbd'   => 'locations_no_results',
-					'mai_location_redirect' => 'location_redirect',
-					'mai_location_fields'   => 'location_fields',
+					'field_6071d22cdrdbd'         => 'locations_no_results',
+					'mailocations_table_redirect' => 'location_redirect',
+					'mailocations_table_fields'   => 'location_fields',
 				],
 			],
 		];
@@ -144,17 +144,23 @@ final class BlockRegistrationTest extends TestCase {
 		$this->assertSame( $fields, wp_list_pluck( acf_get_fields( $key ), 'name', 'key' ) );
 	}
 
-	public function test_pins_bug_table_group_shows_submission_labels_for_shared_field_keys(): void {
-		// The submission and table groups both define mai_location_redirect and mai_location_fields.
-		// ACF keeps the first definition of a key, so the table block's settings show the submission labels.
-		// Correct behaviour: each group uses unique keys, and the table shows "Redirect" and "Edit Form Fields".
+	/**
+	 * Fixed September 16, 2026. Both groups used the keys mai_location_redirect and
+	 * mai_location_fields, and ACF keeps the first definition of a key, so the table block's
+	 * settings showed the submission block's labels.
+	 */
+	public function test_each_group_keeps_its_own_field_labels(): void {
 		$this->assertSame( 'mai_location_submission_field_group', acf_get_field( 'mai_location_redirect' )['parent'] );
-		$this->assertSame( 'mai_location_submission_field_group', acf_get_field( 'mai_location_fields' )['parent'] );
+		$this->assertSame( 'mailocations_locations_table_field_group', acf_get_field( 'mailocations_table_redirect' )['parent'] );
 
 		$labels = wp_list_pluck( acf_get_fields( 'mailocations_locations_table_field_group' ), 'label', 'key' );
 
-		$this->assertSame( 'Submission Redirect', $labels['mai_location_redirect'] );
-		$this->assertSame( 'Submission Form Fields', $labels['mai_location_fields'] );
+		$this->assertSame( 'Redirect', $labels['mailocations_table_redirect'] );
+		$this->assertSame( 'Edit Form Fields', $labels['mailocations_table_fields'] );
+
+		// The names still match, so values saved before the keys changed still load.
+		$this->assertSame( 'location_redirect', acf_get_field( 'mailocations_table_redirect' )['name'] );
+		$this->assertSame( 'location_fields', acf_get_field( 'mailocations_table_fields' )['name'] );
 	}
 
 	public function test_submission_status_choices_are_core_post_statuses(): void {
