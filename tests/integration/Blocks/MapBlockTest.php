@@ -47,8 +47,7 @@ final class MapBlockTest extends TestCase {
 		return '<div style="display:none;" class="marker" data-lat="41.08" data-lng="-73.86">'
 			. '<strong style="display:block;margin-bottom:4px;"><a href="http://example.org/?mai_location=hollow-inn" target="_blank" rel="noopener nofollow">Hollow Inn</a></strong>'
 			. '<div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress" class="mai-address"><div class="mai-address-item"><span class="locality" itemprop="addressLocality">Sleepy Hollow</span><span class="region" itemprop="addressRegion">&nbsp;NY</span></div></div>'
-			// The directions link uses ref, not rel.
-			. '<p style="display:block;margin-top:4px;"><a href="https://www.google.com/maps/dir/?api=1&destination=41.08,-73.86" target="_blank" ref="noopener nofollow">Get Directions</a></p>'
+			. '<p style="display:block;margin-top:4px;"><a href="https://www.google.com/maps/dir/?api=1&destination=41.08,-73.86" target="_blank" rel="noopener nofollow">Get Directions</a></p>'
 			. '</div>';
 	}
 
@@ -112,12 +111,18 @@ final class MapBlockTest extends TestCase {
 		$this->assertSame( '1', $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_mai\\_locations\\_markers\\_%'" ) );
 	}
 
-	public function test_all_query_outside_a_location_query_looks_up_posts_and_finds_no_markers(): void {
-		// The "all" query is built from the main query's vars, so on the home page it queries regular posts.
+	/**
+	 * Fixed September 16, 2026. The "all" query was built from the main query's vars, so on any
+	 * page that is not a location archive it looked up regular posts and found nothing.
+	 */
+	public function test_all_query_finds_locations_outside_a_location_query(): void {
 		$this->located();
 		$this->go_to( home_url( '/' ) );
 
-		$this->assertSame( '<div style="aspect-ratio:800/533;" class="mailocations-map" data-zoom="7"></div>', $this->render( '<!-- wp:acf/mai-locations-map {"data":{"query":"all"}} /-->' ) );
+		$this->assertSame(
+			'<div style="aspect-ratio:800/533;" class="mailocations-map" data-zoom="7">' . $this->marker_html() . '</div>',
+			$this->render( '<!-- wp:acf/mai-locations-map {"data":{"query":"all"}} /-->' )
+		);
 	}
 
 	public function test_none_query_renders_no_markers_at_the_given_size(): void {

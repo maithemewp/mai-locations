@@ -55,9 +55,6 @@ class CountBlock {
 	/**
 	 * Renders the block.
 	 *
-	 * TODO: unset settings come back as null from get_field(), so the defaults in block.json are
-	 * lost and an empty block renders "0  0". See TODO.md.
-	 *
 	 * @since TBD
 	 *
 	 * @param array<string, mixed> $attributes The block attributes.
@@ -80,12 +77,43 @@ class CountBlock {
 		}
 
 		// Values.
-		$before    = wp_kses_post( (string) get_field( 'before' ) );
-		$separator = wp_kses_post( (string) get_field( 'separator' ) );
-		$after     = wp_kses_post( (string) get_field( 'after' ) );
-		$count     = sprintf( '%s %s %s %s %s', $before, absint( $number ), $separator, absint( $total ), $after );
+		$parts = [
+			$this->setting( 'before', 'mailocations_count_before' ),
+			(string) absint( $number ),
+			$this->setting( 'separator', 'mailocations_count_separator' ),
+			(string) absint( $total ),
+			$this->setting( 'after', 'mailocations_count_after' ),
+		];
 
-		printf( '<p class="mailocations-count">%s</p>', trim( $count ) );
+		// Skip the empty parts, so a cleared setting does not leave a double space behind.
+		$count = implode( ' ', array_filter( $parts, static fn( string $part ): bool => '' !== $part ) );
+
+		printf( '<p class="mailocations-count">%s</p>', $count );
+	}
+
+	/**
+	 * Gets one of the block's text settings.
+	 *
+	 * A setting that was never saved comes back from get_field() as null, which used to print as
+	 * an empty string and lose the field's default. A setting the user cleared comes back as an
+	 * empty string and stays empty. Fixed September 16, 2026.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $name The field name.
+	 * @param string $key  The field key, used to read its registered default.
+	 *
+	 * @return string
+	 */
+	private function setting( string $name, string $key ): string {
+		$value = get_field( $name );
+
+		if ( is_null( $value ) || false === $value ) {
+			$field = acf_get_field( $key );
+			$value = is_array( $field ) ? ( $field['default_value'] ?? '' ) : '';
+		}
+
+		return wp_kses_post( (string) $value );
 	}
 
 	/**

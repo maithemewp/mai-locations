@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+* Fixed: A map set to show all locations showed none on any page that is not a locations archive, because it looked up regular posts.
+* Fixed: The Get Directions link in a map marker wrote `ref` where it meant `rel`, so it opened without the usual link protections.
+* Fixed: A locations count block added without changing its settings printed "0  0" instead of "Showing 0 of 0 Locations". Clearing a setting on purpose still leaves it out, without the double space it used to print.
 * Fixed: The locations table block's settings were labelled "Submission Redirect" and "Submission Form Fields", because both blocks registered two fields under the same ACF keys. Saved settings are unaffected.
 * Fixed: Two locations table block labels were untranslatable, because they used the wrong text domain.
 * Fixed: A class added to a location form ran into the form's own class, so `class="extra"` came out as `mailocations-formextra` and never matched any styles.

@@ -27,9 +27,19 @@ final class CountBlockTest extends TestCase {
 		$this->restore_acf_local_meta_filters();
 	}
 
-	public function test_empty_settings_ignore_field_defaults(): void {
-		// The before/separator/after fields have default values, but a block with no saved data gets none of them.
-		$this->assertSame( '<p class="mailocations-count">0  0</p>', do_blocks( '<!-- wp:acf/mai-locations-count {} /-->' ) );
+	/**
+	 * Fixed September 16, 2026. A block with no saved data rendered "0  0", because an unset
+	 * setting comes back as null and the field defaults were never read.
+	 */
+	public function test_empty_settings_use_the_field_defaults(): void {
+		$this->assertSame( '<p class="mailocations-count">Showing 0 of 0 Locations</p>', do_blocks( '<!-- wp:acf/mai-locations-count {} /-->' ) );
+	}
+
+	public function test_a_cleared_setting_stays_empty(): void {
+		$this->assertSame(
+			'<p class="mailocations-count">0 of 0</p>',
+			do_blocks( '<!-- wp:acf/mai-locations-count {"data":{"before":"","separator":"of","after":""}} /-->' )
+		);
 	}
 
 	public function test_counts_the_main_query_on_an_archive(): void {
@@ -51,6 +61,6 @@ final class CountBlockTest extends TestCase {
 		ob_start();
 		$block->render_block( [], '', true, 0, null, [] );
 
-		$this->assertSame( '<p class="mailocations-count">123  456</p>', ob_get_clean() );
+		$this->assertSame( '<p class="mailocations-count">Showing 123 of 456 Locations</p>', ob_get_clean() );
 	}
 }

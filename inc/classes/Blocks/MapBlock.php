@@ -56,10 +56,6 @@ class MapBlock {
 	/**
 	 * Renders the block.
 	 *
-	 * TODO: "All locations" builds its query from the main query, so on a page that is not a
-	 * location archive it looks up regular posts and shows nothing. The directions link uses
-	 * ref= instead of rel=. See TODO.md.
-	 *
 	 * @since TBD
 	 *
 	 * @param array<string, mixed> $attributes The block attributes.
@@ -112,6 +108,15 @@ class MapBlock {
 		if ( $show_all ) {
 			// Get filtered args.
 			$filtered_args = mailocations_get_filtered_query_args( $wp_query->query );
+
+			// "All" means all locations. On any page that is not a location archive the current
+			// query has no location post type of its own, so the map used to look up regular
+			// posts and find nothing. Fixed September 16, 2026.
+			$post_types = array_keys( mailocations_get_location_post_types() );
+
+			if ( ! array_intersect( (array) ( $filtered_args['post_type'] ?? [] ), $post_types ) ) {
+				$filtered_args['post_type'] = $post_types;
+			}
 
 			// Add new args.
 			$filtered_args['fields']                 = 'ids';
@@ -169,7 +174,7 @@ class MapBlock {
 				printf( '<div style="display:none;" class="marker" data-lat="%s" data-lng="%s">', esc_html( $marker['lat'] ), esc_html( $marker['lng'] ) );
 					printf( '<strong style="display:block;margin-bottom:4px;"><a href="%s" target="_blank" rel="noopener nofollow">%s</a></strong>', $marker['href'], $marker['title'] );
 					echo $marker['address'];
-					printf( '<p style="display:block;margin-top:4px;"><a href="%s" target="_blank" ref="noopener nofollow">%s</a></p>', $marker['directions'], __( 'Get Directions', 'mai-locations' ) );
+					printf( '<p style="display:block;margin-top:4px;"><a href="%s" target="_blank" rel="noopener nofollow">%s</a></p>', $marker['directions'], __( 'Get Directions', 'mai-locations' ) );
 				echo '</div>';
 			}
 		}
