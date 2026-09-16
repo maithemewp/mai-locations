@@ -91,7 +91,7 @@ final class CliCommandTest extends TestCase {
 
 		foreach ( $wp_filter['cli_init']->callbacks as $priority => $callbacks ) {
 			foreach ( $callbacks as $callback ) {
-				if ( $callback['function'] instanceof \Closure && str_ends_with( (string) ( new \ReflectionFunction( $callback['function'] ) )->getFileName(), 'inc/classes/class-locations-cli.php' ) ) {
+				if ( $callback['function'] instanceof \Closure && str_ends_with( (string) ( new \ReflectionFunction( $callback['function'] ) )->getFileName(), 'mai-locations.php' ) ) {
 					$found[] = [ $priority, $callback['function'] ];
 				}
 			}
@@ -102,7 +102,9 @@ final class CliCommandTest extends TestCase {
 
 		$found[0][1]();
 
-		$this->assertSame( [ [ 'add_command', [ 'mailocations', 'Mai_Locations_CLI' ] ] ], WP_CLI::$calls );
+		// The command is registered with the namespaced class since September 15, 2026. The
+		// command name, `wp mailocations`, is unchanged, which is the part sites depend on.
+		$this->assertSame( [ [ 'add_command', [ 'mailocations', \Mai\Locations\CLI::class ] ] ], WP_CLI::$calls );
 	}
 
 	public function test_subcommands_are_the_three_public_methods_and_there_is_no_constructor(): void {

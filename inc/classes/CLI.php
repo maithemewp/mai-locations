@@ -1,39 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
+use WP_CLI;
+use WP_Query;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
 /**
- * Instantiate the class.
+ * The `wp mailocations` commands.
+ *
+ * Was Mai_Locations_CLI in classes/class-locations-cli.php. That name still works, via
+ * inc/aliases.php. The command registration and the discarded instantiation that used to sit
+ * at the top of that file now live in the plugin bootstrap, which autoloading does not run.
+ *
+ * The two global functions that shared the old file, mailocations_get_data_from_website() and
+ * mailocations_upload_image(), moved to inc/functions-website.php and stay global. Visit
+ * Sleepy Hollow calls both from its own scripts.
  *
  * @since 0.1.0
- *
- * @return void
  */
-new Mai_Locations_CLI;
+class CLI {
 
-/**
- * Gets it started.
- *
- * @since 0.1.0
- *
- * @link https://docs.wpvip.com/how-tos/write-custom-wp-cli-commands/
- * @link https://webdevstudios.com/2019/10/08/making-wp-cli-commands/
- *
- * @return void
- */
-add_action( 'cli_init', function() {
-	WP_CLI::add_command( 'mailocations', 'Mai_Locations_CLI' );
-});
-
-/**
- * Main Mai_Locations_CLI Class.
- *
- * @since 0.1.0
- */
-class Mai_Locations_CLI {
 	/**
-	 * Gets environment.
+	 * Gets the environment.
 	 *
 	 * Usage: wp mailocations get_environment
 	 *
@@ -41,12 +34,12 @@ class Mai_Locations_CLI {
 	 *
 	 * @return void
 	 */
-	function get_environment() {
+	public function get_environment(): void {
 		WP_CLI::log( sprintf( 'Environment: %s', wp_get_environment_type() ) );
 	}
 
 	/**
-	 * Imports locations from google places search.
+	 * Imports locations from a Google Places search.
 	 *
 	 * Usage: wp mailocations import_places --post_status=pending --search='Birth Centers in Myrtle Beach SC' --set_cats="Birth Centers" --max=20
 	 * Usage: wp mailocations import_places --post_type=practitioner --post_status=pending --search='Rock Climbing Gym Myrtle Beach SC" --max=20
@@ -56,12 +49,12 @@ class Mai_Locations_CLI {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $args       Standard command args.
-	 * @param array $assoc_args Keyed args like --search and --fields.
+	 * @param array<int, string>   $args       Standard command args.
+	 * @param array<string, mixed> $assoc_args Keyed args like --search and --fields.
 	 *
 	 * @return void
 	 */
-	function import_places( $args, $assoc_args ) {
+	public function import_places( $args, $assoc_args ): void {
 		$api_key = mailocations_get_option( 'google_api_key' );
 
 		// Bail if no API key.
@@ -200,12 +193,12 @@ class Mai_Locations_CLI {
 			}
 
 			// Helper function to transform keys.
-			$transform_keys = function( $array ) {
+			$transform_keys = function ( $array ) {
 				$keys = [];
 
 				foreach ( $array as $key => $value ) {
 					// Transform key from camelCase to snake_case.
-					$transformed = strtolower( preg_replace('/(?<!^)[A-Z]/', '_$0', $key ) );
+					$transformed = strtolower( preg_replace( '/(?<!^)[A-Z]/', '_$0', $key ) );
 
 					// Manually transform some keys.
 					switch ( $transformed ) {
@@ -366,7 +359,6 @@ class Mai_Locations_CLI {
 						$reference = untrailingslashit( $reference );
 
 						// https://places.googleapis.com/v1/places/PLACE_ID/photos/PHOTO_REFERENCE/media?maxWidthPx=400&key=API_KEY
-						// https://places.googleapis.com/v1/places/ChIJ2fzCmcW7j4AR2JzfXBBoh6E/photos/AUacShh3_Dd8yvV2JZMtNjjbbSbFhSv-0VmUN-uasQ2Oj00XB63irPTks0-A_1rMNfdTunoOVZfVOExRRBNrupUf8TY4Kw5iQNQgf2rwcaM8hXNQg7KDyvMR5B-HzoCE1mwy2ba9yxvmtiJrdV-xBgO8c5iJL65BCd0slyI1/media?maxHeightPx=400&maxWidthPx=400&key=API_KEY
 						$image_url = sprintf( 'https://places.googleapis.com/v1/%s/media', $reference );
 						$image_url = add_query_arg(
 							[
@@ -410,7 +402,7 @@ class Mai_Locations_CLI {
 	}
 
 	/**
-	 * Updates locations from website.
+	 * Updates locations from their website.
 	 *
 	 * Usage: wp mailocations update_locations_from_website --posts_per_page="50" --offset="0"
 	 *
@@ -419,16 +411,19 @@ class Mai_Locations_CLI {
 	 * there. --skip_excerpt and --skip_image leave that half alone, so the command can fetch
 	 * only images or only excerpts.
 	 *
+	 * TODO: a failed image download crashes the run, and a failed sideload is logged as
+	 * success. See TODO.md.
+	 *
 	 * @link https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places/get
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $args       Standard command args.
-	 * @param array $assoc_args Keyed args like --search and --fields.
+	 * @param array<int, string>   $args       Standard command args.
+	 * @param array<string, mixed> $assoc_args Keyed args like --search and --fields.
 	 *
 	 * @return void
 	 */
-	function update_locations_from_website( $args, $assoc_args ) {
+	public function update_locations_from_website( $args, $assoc_args ): void {
 		// Parse args.
 		$assoc_args = wp_parse_args(
 			$assoc_args,
@@ -483,6 +478,7 @@ class Mai_Locations_CLI {
 				$data = mailocations_get_data_from_website( $url );
 
 				// Bail if no data.
+				// TODO: always false, because the array always has two keys. See TODO.md.
 				if ( ! array_values( $data ) ) {
 					// WP_CLI::line( sprintf( 'No description or image: %s', get_permalink( $post_id ) ) );
 					continue;
@@ -552,219 +548,4 @@ class Mai_Locations_CLI {
 
 		wp_reset_postdata();
 	}
-}
-
-/**
- * Gets data from the website url source.
- *
- * @access private
- *
- * @since TBD
- *
- * @param string $url
- * @param string $key
- *
- * @return array|string
- */
-function mailocations_get_data_from_website( $url, $key = '' ) {
-	// Start data.
-	$data = [
-		'image' => '',
-		'desc'  => '',
-	];
-
-	// Request.
-	$response = wp_remote_get( $url );
-	$code     = wp_remote_retrieve_response_code( $response );
-
-	// Bail if error. 403 is a valid response, but sometimes we were blocked.
-	if ( ! in_array( $code, [ 200, 403 ] ) ) {
-		return $key ? $data[ $key ] : $data;
-	}
-
-	// Get body.
-	$body = wp_remote_retrieve_body( $response );
-	$body = str_replace( '<!DOCTYPE html>', '', $body );
-
-	// Bail if no body.
-	if ( ! $body ) {
-		return $key ? $data[ $key ] : $data;
-	}
-
-	// Set up tag processor.
-	$tags = new WP_HTML_Tag_Processor( $body );
-
-	// Loop through tags.
-	while ( $tags->next_tag( [ 'tag_name' => 'meta' ] ) ) {
-		// Get property.
-		$property = $tags->get_attribute( 'property' );
-
-		// Skip if no property or not the right property.
-		if ( ! $property || ! in_array( $property, [ 'og:description', 'og:image' ] ) ) {
-			continue;
-		}
-
-		// Try for data.
-		switch ( $property ) {
-			case 'og:description':
-				$data['desc'] = (string) $tags->get_attribute( 'content' );
-				break;
-			case 'og:image':
-				$data['image'] = (string) $tags->get_attribute( 'content' );
-				break;
-		}
-	}
-
-	// Maybe try for fallbacks.
-	if ( ! array_values( $data ) ) {
-		// Set up tag processor.
-		$tags = new WP_HTML_Tag_Processor( $body );
-
-		// Loop through tags.
-		while ( $tags->next_tag( [ 'tag_name' => 'meta' ] ) ) {
-			// Get name.
-			$name = $tags->get_attribute( 'name' );
-
-			// Skip if no name or not the right name.
-			if ( ! $name || ! in_array( $name, [ 'twitter:description', 'twitter:image' ] ) ) {
-				continue;
-			}
-
-			// Try for name.
-			switch ( $name ) {
-				case 'twitter:description':
-					$data['desc'] = $data['desc'] ?: (string) $tags->get_attribute( 'content' );
-					break;
-				case 'twitter:image':
-					$data['image'] = $data['image'] ?: (string) $tags->get_attribute( 'content' );
-					break;
-			}
-		}
-	}
-
-	return $key ? $data[ $key ] : $data;
-}
-
-/**
- * Downloads a remote file and inserts it into the WP Media Library.
- *
- * @access private
- *
- * @see https://developer.wordpress.org/reference/functions/media_handle_sideload/
- *
- * @param string $ref_uri The reference URI of a remote file.
- * @param string $ref_key The reference key of a remote file.
- * @param string $url     HTTP URL address of a remote file.
- * @param int    $post_id The post ID the media is associated with.
- *
- * @return int|WP_Error The ID of the attachment or a WP_Error on failure.
- */
-function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
-	// Make sure we have the functions we need.
-	if ( ! function_exists( 'download_url' ) || ! function_exists( 'media_handle_sideload' ) ) {
-		require_once( ABSPATH . 'wp-admin/includes/media.php' );
-		require_once( ABSPATH . 'wp-admin/includes/file.php' );
-		require_once( ABSPATH . 'wp-admin/includes/image.php' );
-	}
-
-	// Check if there is an attachment with places_url meta key and value of $image_url.
-	$existing_ids = get_posts(
-		[
-			'post_type'    => 'attachment',
-			'post_status'  => 'any',
-			'meta_key'     => $ref_key,
-			'meta_value'   => $ref_uri,
-			'meta_compare' => '=',
-			'fields'       => 'ids',
-		]
-	);
-
-	// Get existing ID.
-	$existing_id = $existing_ids && isset( $existing_ids[0] ) ? $existing_ids[0] : 0;
-
-	// Bail if the image already exists.
-	if ( $existing_id ) {
-		return $existing_id;
-	}
-
-	// Get contents of the image url.
-	$image_hashed   = md5( $image_url ) . '.jpg';
-	$image_contents = file_get_contents( $image_url );
-
-	// If contents.
-	if ( $image_contents ) {
-		// Get the uploads directory.
-		$upload_dir = wp_get_upload_dir();
-		$upload_url = $upload_dir['baseurl'];
-
-		// Specify the path to the destination directory within uploads.
-		$destination_dir = $upload_dir['basedir'] . '/mai-locations/';
-
-		// Create the destination directory if it doesn't exist.
-		if ( ! file_exists( $destination_dir ) ) {
-			mkdir( $destination_dir, 0755, true );
-		}
-
-		// Specify the path to the destination file.
-		$destination_file = $destination_dir . $image_hashed;
-
-		// Save the image to the destination file.
-		file_put_contents( $destination_file, $image_contents );
-
-		// Bail if the file doesn't exist.
-		if ( ! file_exists( $destination_file ) ) {
-			return 0;
-		}
-
-		$image_url = $image_hashed;
-	}
-	// Bail, no image contents.
-	else {
-		return 0;
-	}
-
-	// Build the image url.
-	$image_url = untrailingslashit( $upload_url ) . '/mai-locations/' . $image_hashed;
-
-	// Build a temp url.
-	$tmp = download_url( $image_url );
-
-	// Remove the temp file.
-	wp_delete_file( $destination_file );
-
-	// Bail if error.
-	if ( is_wp_error( $tmp ) ) {
-		// ray( $tmp->get_error_code() . ': upload_image() 1 ' . $image_url . ' ' . $tmp->get_error_message() );
-
-		// Remove the original image and return the error.
-		wp_delete_file( $tmp );
-
-		return 0;
-	}
-
-	// Build the file array.
-	$file_array = [
-		'name'     => basename( $image_url ),
-		'tmp_name' => $tmp,
-	];
-
-	// Add the image to the media library.
-	$image_id = media_handle_sideload( $file_array, $post_id );
-
-	// Bail if error.
-	if ( is_wp_error( $image_id ) ) {
-		// ray( $image_id->get_error_code() . ': upload_image() 2 ' . $image_url . ' ' . $image_id->get_error_message() );
-
-		// Remove the original image and return the error.
-		wp_delete_file( $file_array[ 'tmp_name' ] );
-		return $image_id;
-	}
-
-	// Remove the original image.
-	wp_delete_file( $file_array[ 'tmp_name' ] );
-
-	// Set the reference url for possible reference later.
-	update_post_meta( $image_id, $ref_key, $ref_uri );
-
-	return $image_id;
 }

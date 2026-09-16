@@ -145,7 +145,9 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
   - [x] `Mai_Locations_Location_Form_Listener` to `Mai\Locations\LocationFormListener`. September 15, 2026.
   - [x] `Mai_Locations_Location_Fields` to `Mai\Locations\LocationFields`. September 15, 2026. Two long commented-out field blocks went with it, a Categories field and a user-locations group; git history has them.
   - [x] `Mai_Locations_Location_Import` to `Mai\Locations\LocationImport`. September 15, 2026.
-  - [ ] The last class in `inc/classes/`: the CLI. Then the 9 block classes.
+  - [x] `Mai_Locations_CLI` to `Mai\Locations\CLI`. September 15, 2026. Its two public global functions, `mailocations_get_data_from_website()` and `mailocations_upload_image()`, moved to `inc/functions-website.php` and stay global, because Visit Sleepy Hollow calls both from its own scripts. The command registration and the discarded instantiation that used to run at the top of the class file moved to the bootstrap. `wp mailocations` is unchanged; only the class the command is registered with changed.
+  - [x] **All 15 classes in `inc/classes/` are namespaced.**
+  - [ ] The 9 block classes in `blocks/*/block.php`.
   - **The CLI file also holds two public global functions**, `mailocations_get_data_from_website()` and `mailocations_upload_image()`, which Visit Sleepy Hollow calls from its own scripts. They stay global, in a procedural file under `inc/`, when that class moves.
   - **Watch for files that run code on load.** Several classes instantiate themselves at the top or bottom of their file, which autoloading never runs. Each one moves to the bootstrap as its class moves.
   - **Watch for values arriving as strings.** `declare(strict_types=1)` turns coercion that used to happen silently into a `TypeError`. `GeoQuery::get_distance()` caught it: MySQL returns the computed distance column as a string, and `round()` then refused it, breaking nine tests. Cast at the boundary as each file moves.

@@ -132,7 +132,6 @@ final class Mai_Locations_Plugin {
 		foreach ( glob( MAI_LOCATIONS_PLUGIN_DIR . 'inc/' . '*.php' ) as $file ) { include $file; }
 
 		// Classes.
-		include_once __DIR__ . '/inc/classes/class-locations-cli.php';
 
 		// Blocks.
 		include_once __DIR__ . '/blocks/location-address-search/block.php';
@@ -161,6 +160,14 @@ final class Mai_Locations_Plugin {
 		// Starts the geo query filters. Was a call at the top of classes/class-geo-query.php,
 		// which autoloading no longer runs for us.
 		Mai\Locations\GeoQuery::instance();
+
+		// Registers `wp mailocations`. Was at the top of classes/class-locations-cli.php, along
+		// with an instantiation whose result was discarded; both kept as they were.
+		new Mai\Locations\CLI;
+
+		add_action( 'cli_init', function() {
+			WP_CLI::add_command( 'mailocations', Mai\Locations\CLI::class );
+		});
 
 		// Instantiate blocks.
 		new Mai_Locations_Address_Search_Block;

@@ -283,7 +283,7 @@ parameters:
 			path: ../blocks/location-table/block.php
 
 		-
-			message: '#^Call to function class_exists\(\) with ''Mai_Geo_Query''\|''Mai_Locations_Block…''\|''Mai_Locations…'' and false will always evaluate to false\.$#'
+			message: '#^Call to function class_exists\(\) with ''Mai_Geo_Query''\|''Mai_Locations_Block…''\|''Mai_Locations_CLI''\|''Mai_Locations…'' and false will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
 			path: ../inc/aliases.php
@@ -293,6 +293,12 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: ../inc/classes/BlockBindings.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
+			identifier: argument.templateType
+			count: 3
+			path: ../inc/classes/CLI.php
 
 		-
 			message: '#^Ternary operator condition is always true\.$#'
@@ -407,66 +413,6 @@ parameters:
 			identifier: function.notFound
 			count: 1
 			path: ../inc/classes/WooCommerceAccountTabs.php
-
-		-
-			message: '#^Call to new Mai_Locations_CLI\(\) on a separate line has no effect\.$#'
-			identifier: new.resultUnused
-			count: 1
-			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^Function mailocations_get_data_from_website\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^Function mailocations_upload_image\(\) has parameter \$image_url with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^Method Mai_Locations_CLI\:\:import_places\(\) has parameter \$args with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^Method Mai_Locations_CLI\:\:import_places\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^Method Mai_Locations_CLI\:\:update_locations_from_website\(\) has parameter \$args with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^Method Mai_Locations_CLI\:\:update_locations_from_website\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$url$#'
-			identifier: parameter.notFound
-			count: 1
-			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^Parameter \#1 \$file of function wp_delete_file expects string, WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: ../inc/classes/class-locations-cli.php
-
-		-
-			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
-			identifier: argument.templateType
-			count: 3
-			path: ../inc/classes/class-locations-cli.php
 
 		-
 			message: '#^Function mailocations_get_address\(\) has parameter \$args with no value type specified in iterable type array\.$#'
@@ -745,6 +691,18 @@ parameters:
 			path: ../inc/functions-utility.php
 
 		-
+			message: '#^Function mailocations_get_data_from_website\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: ../inc/functions-website.php
+
+		-
+			message: '#^Parameter \#1 \$file of function wp_delete_file expects string, WP_Error given\.$#'
+			identifier: argument.type
+			count: 1
+			path: ../inc/functions-website.php
+
+		-
 			message: '#^Function mailocation_location_address_shortcode\(\) has parameter \$atts with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -833,6 +791,12 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../inc/upgrade.php
+
+		-
+			message: '#^Call to new Mai\\Locations\\CLI\(\) on a separate line has no effect\.$#'
+			identifier: new.resultUnused
+			count: 1
+			path: ../mai-locations.php
 
 		-
 			message: '#^Inner named functions are not supported by PHPStan\. Consider refactoring to an anonymous function, class method, or a top\-level\-defined function\. See issue \#165 \(https\://github\.com/phpstan/phpstan/issues/165\) for more details\.$#'

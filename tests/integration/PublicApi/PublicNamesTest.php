@@ -149,6 +149,7 @@ final class PublicNamesTest extends TestCase {
 		$migrated = [
 			'Mai_Locations_Block_Bindings' => \Mai\Locations\BlockBindings::class,
 			'Mai_Geo_Query'               => \Mai\Locations\GeoQuery::class,
+			'Mai_Locations_CLI'           => \Mai\Locations\CLI::class,
 			'Mai_Locations_Location_Fields'      => \Mai\Locations\LocationFields::class,
 			'Mai_Locations_Location_Form'        => \Mai\Locations\LocationForm::class,
 			'Mai_Locations_Location_Import'      => \Mai\Locations\LocationImport::class,
