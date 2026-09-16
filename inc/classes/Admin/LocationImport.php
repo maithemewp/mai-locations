@@ -294,9 +294,6 @@ class LocationImport {
 	/**
 	 * Maybe imports locations and creates the associated users.
 	 *
-	 * TODO: the status falls back to "public", which is not a post status, and one blank line in
-	 * the CSV stops the import with a ValueError. str_getcsv() is also called without its
-	 * $escape argument, which PHP 8.4 deprecates. See TODO.md.
 	 *
 	 * @since TBD
 	 *
@@ -348,8 +345,9 @@ class LocationImport {
 			return;
 		}
 
-		// Load csv into array.
-		$csv = array_map( 'str_getcsv', file( $file_path ) );
+		// Load csv into array. The escape argument is passed because PHP 8.4 deprecates leaving
+		// it out, and an empty string is the value PHP is moving to. Fixed September 16, 2026.
+		$csv = array_map( static fn( string $line ): array => str_getcsv( $line, ',', '"', '' ), file( $file_path ) );
 
 		$header = $csv[0];
 
@@ -376,10 +374,35 @@ class LocationImport {
 	}
 
 	/**
-	 * Imports the locations and creates the associated users.
+	 * Finds an existing location by its exact title.
 	 *
-	 * TODO: get_page_by_title() is deprecated, and users are created without a password. See
-	 * TODO.md.
+	 * Replaces get_page_by_title(), which WordPress deprecated in 6.2. Trashed locations are not
+	 * matched, where the old function matched them. Changed September 16, 2026.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $title The post title.
+	 *
+	 * @return \WP_Post|null
+	 */
+	private function get_location_by_title( string $title ): ?\WP_Post {
+		$query = new \WP_Query(
+			[
+				'post_type'              => 'mai_location',
+				'title'                  => $title,
+				'post_status'            => 'any',
+				'posts_per_page'         => 1,
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			]
+		);
+
+		return $query->posts[0] ?? null;
+	}
+
+	/**
+	 * Imports the locations and creates the associated users.
 	 *
 	 * @since TBD
 	 *
@@ -427,6 +450,10 @@ class LocationImport {
 							[
 								'user_login'   => $email,
 								'user_email'   => $email,
+								// Users used to be created with an empty password. Fixed
+								// September 16, 2026. They set their own through the lost
+								// password form.
+								'user_pass'    => wp_generate_password( 24, true, true ),
 								'display_name' => trim( $first_name . ' ' . $last_name ),
 								'nickname'     => trim( $first_name . ' ' . $last_name ),
 								'first_name'   => $first_name,
@@ -529,7 +556,7 @@ class LocationImport {
 
 			// If we have a post title.
 			if ( $post_title ) {
-				$existing = get_page_by_title( $post_title, OBJECT, 'mai_location' );
+				$existing = $this->get_location_by_title( $post_title );
 
 				if ( $existing ) {
 					// Add location to user.

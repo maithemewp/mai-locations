@@ -275,7 +275,9 @@ function mailocations_get_current_url_clean( $get = null ) {
 function mailocations_delete_transients() {
 	global $wpdb;
 
-	$prefix = 'mai_locations';
+	// The trailing underscore matters. Without it this also matched a transient named, say,
+	// mai_locationsother. Fixed September 16, 2026.
+	$prefix = 'mai_locations_';
 	$prefix = $wpdb->esc_like( '_transient_' . $prefix );
 	$sql    = "SELECT `option_name` FROM $wpdb->options WHERE `option_name` LIKE '%s'";
 	$keys   = $wpdb->get_results( $wpdb->prepare( $sql, $prefix . '%' ), ARRAY_A );

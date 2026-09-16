@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+* Fixed: CSV imports logged a PHP 8.4 deprecation notice for every line of the file.
+* Changed: Checking whether a location already exists no longer uses a function WordPress deprecated. A location in the trash with the same title no longer counts as existing, so importing that row creates a new location.
+* Fixed: Users created by a CSV import were created with no password at all, which WordPress warns about. They now get a generated one and set their own through the lost password form.
+* Fixed: Clearing the plugin's cached map data also cleared any other site transient whose name happened to start with the same letters.
 * Fixed: Upgrading from an older version carried the old settings over exactly as they were, so a URL base with spaces or punctuation in it was saved unusable.
 * Changed: A plural label, singular label or URL base set through a filter is now cleaned every time it is read, not only the first time. A filtered base is cleaned the same way a saved one is, so `Our Places!` gives `our-places` where it used to give `OurPlaces`.
 * Fixed: Saving the settings with the distance field empty stored a distance of 0, which searches with no limit at all. An empty field now keeps the default, and a 0 entered on purpose still means no limit.

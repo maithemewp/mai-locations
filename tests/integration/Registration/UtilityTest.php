@@ -68,8 +68,8 @@ final class UtilityTest extends TestCase {
 		$this->assertFalse( get_transient( 'mai_locations_markers_abc' ) );
 		$this->assertFalse( get_option( '_transient_timeout_mai_locations_markers_abc' ) );
 
-		// A plain prefix match, so no underscore is needed after `mai_locations`.
-		$this->assertFalse( get_transient( 'mai_locationsother' ) );
+		// Fixed September 16, 2026. The prefix had no trailing underscore, so this one went too.
+		$this->assertSame( 'x', get_transient( 'mai_locationsother' ) );
 		$this->assertSame( 'x', get_transient( 'mailocations_markers' ) );
 		$this->assertSame( 'x', get_transient( 'other_markers' ) );
 	}

@@ -26,7 +26,6 @@ final class LocationImportTest extends TestCase {
 	private const FIXTURES = __DIR__ . '/fixtures';
 	private const SCREEN   = 'mai_location_page_location-import';
 
-	private const NO_PASSWORD_WARNING = 'wp_insert_user(): The user_pass field is required when creating a new user. The user will need to reset their password before logging in.';
 
 	public function set_up(): void {
 		parent::set_up();
@@ -248,8 +247,6 @@ final class LocationImportTest extends TestCase {
 	}
 
 	public function test_imports_the_shipped_template_csv(): void {
-		$this->setExpectedDeprecated( 'get_page_by_title' );
-
 		$result = $this->run_import( MAI_LOCATIONS_PLUGIN_DIR . 'assets/csv/mai-locations-import-template.csv' );
 
 		$this->assertSame(
@@ -281,16 +278,14 @@ final class LocationImportTest extends TestCase {
 		$this->assertSame( [], wp_get_object_terms( $post->ID, 'mai_location_cat', [ 'fields' => 'names' ] ) );
 	}
 
-	public function test_pins_bug_str_getcsv_raises_a_deprecation_per_csv_line_on_php_84(): void {
-		$this->setExpectedDeprecated( 'get_page_by_title' );
-
+	/**
+	 * Fixed September 16, 2026. str_getcsv() was called without its $escape argument, which
+	 * PHP 8.4 deprecates, once per line of the file.
+	 */
+	public function test_reading_the_csv_raises_no_deprecations(): void {
 		$result = $this->run_import( MAI_LOCATIONS_PLUGIN_DIR . 'assets/csv/mai-locations-import-template.csv' );
 
-		// Correct behaviour: pass the $escape argument so PHP 8.4 raises nothing.
-		$this->assertSame(
-			array_fill( 0, 2, 'str_getcsv(): the $escape parameter must be provided as its default value will change' ),
-			$result['deprecations']
-		);
+		$this->assertSame( [], $result['deprecations'] );
 	}
 
 	/**
@@ -298,8 +293,6 @@ final class LocationImportTest extends TestCase {
 	 * existed inside get_fields(), so every value fell back to esc_html().
 	 */
 	public function test_meta_values_are_sanitized_by_field_type(): void {
-		$this->setExpectedDeprecated( 'get_page_by_title' );
-
 		$this->run_import( self::FIXTURES . '/import-escaping.csv' );
 
 		$post = $this->location_by_title( 'Ichabod & Co' );
@@ -347,7 +340,6 @@ final class LocationImportTest extends TestCase {
 	}
 
 	public function test_creates_and_links_users_when_enabled(): void {
-		$this->setExpectedDeprecated( 'get_page_by_title' );
 		$katrina = self::factory()->user->create( [ 'user_email' => 'katrina@example.com', 'role' => 'subscriber' ] );
 
 		$result = $this->run_import(
@@ -355,9 +347,7 @@ final class LocationImportTest extends TestCase {
 			[
 				'mailocations_location_import_users'     => '1',
 				'mailocations_location_import_user_role' => 'editor',
-			],
-			// Users are created without a password, which WordPress warns about for both new users.
-			[ self::NO_PASSWORD_WARNING, self::NO_PASSWORD_WARNING ]
+			]
 		);
 
 		$this->assertSame(
@@ -397,7 +387,6 @@ final class LocationImportTest extends TestCase {
 	}
 
 	public function test_skips_existing_titles_and_rows_without_a_title(): void {
-		$this->setExpectedDeprecated( 'get_page_by_title' );
 		$church  = $this->create_location( [], [ 'post_title' => 'Old Dutch Church', 'post_status' => 'draft' ] );
 		$katrina = self::factory()->user->create( [ 'user_email' => 'katrina@example.com' ] );
 
@@ -415,7 +404,6 @@ final class LocationImportTest extends TestCase {
 	}
 
 	public function test_assigns_only_categories_that_already_exist_by_name(): void {
-		$this->setExpectedDeprecated( 'get_page_by_title' );
 		$inns  = self::factory()->term->create( [ 'taxonomy' => 'mai_location_cat', 'name' => 'Inns' ] );
 		$parks = self::factory()->term->create( [ 'taxonomy' => 'mai_location_cat', 'name' => 'Parks' ] );
 
@@ -433,7 +421,6 @@ final class LocationImportTest extends TestCase {
 	 * not know.
 	 */
 	public function test_default_status_is_publish_when_status_not_posted(): void {
-		$this->setExpectedDeprecated( 'get_page_by_title' );
 		$file_id = self::factory()->attachment->create_object( [ 'file' => self::FIXTURES . '/import-categories.csv', 'post_mime_type' => 'text/csv' ] );
 
 		set_current_screen( self::SCREEN );
@@ -459,8 +446,6 @@ final class LocationImportTest extends TestCase {
 	 * leave at the end of a file, which stopped the whole import.
 	 */
 	public function test_blank_line_in_csv_is_skipped(): void {
-		$this->setExpectedDeprecated( 'get_page_by_title' );
-
 		$result = $this->run_import( self::FIXTURES . '/import-blank-line.csv' );
 
 		$this->assertSame( '1', $result['query']['imported'] );
