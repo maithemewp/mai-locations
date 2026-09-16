@@ -320,6 +320,67 @@ final class FormListenerTest extends TestCase {
 		);
 	}
 
+	/**
+	 * The forced publish has no is_admin() guard and no check for the front-end form, and ACF
+	 * renders _acf_post_id on the Dashboard edit screen too, so saving a draft location in
+	 * wp-admin publishes it. The 0.4.0 changelog says this was meant for the front-end edit
+	 * form only. Pinned as today's behaviour, pending a decision on the flow.
+	 */
+	public function test_pins_bug_saving_a_draft_in_the_dashboard_also_forces_publish(): void {
+		$id = $this->create_location( [], [ 'post_status' => 'draft' ] );
+		remove_all_actions( 'acf/save_post' );
+		set_current_screen( 'edit-post' );
+
+		$_POST = [
+			'_acf_post_id' => (string) $id,
+			'acf'          => [ 'other' => 'kept' ],
+		];
+
+		$this->assertTrue( is_admin() );
+
+		$this->listener->before_save_post( $id );
+		do_action( 'acf/save_post', $id );
+
+		$this->assertSame( 'publish', get_post( $id )->post_status );
+
+		set_current_screen( 'front' );
+	}
+
+	/**
+	 * The forced publish reads the current status and only skips it when it is already publish,
+	 * so every other status is swept up, trash and private included.
+	 *
+	 * @dataProvider non_publish_statuses
+	 */
+	public function test_pins_bug_any_status_but_publish_is_forced_live( string $status ): void {
+		$id = $this->create_location( [], [ 'post_status' => $status ] );
+		remove_all_actions( 'acf/save_post' );
+
+		$_POST = [
+			'_acf_post_id' => (string) $id,
+			'acf'          => [ 'other' => 'kept' ],
+		];
+
+		$this->listener->before_save_post( $id );
+
+		// Publishing a pending location fires the published email, which warns on its own bug.
+		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
+
+		$this->assertSame( 'publish', get_post( $id )->post_status );
+	}
+
+	/**
+	 * @return array<string, array{string}>
+	 */
+	public static function non_publish_statuses(): array {
+		return [
+			'draft'   => [ 'draft' ],
+			'pending' => [ 'pending' ],
+			'private' => [ 'private' ],
+			'trash'   => [ 'trash' ],
+		];
+	}
+
 	public function test_before_save_post_on_a_published_location_adds_the_user_but_sends_nothing(): void {
 		$user = self::factory()->user->create();
 		$id   = $this->create_location( [], [ 'post_author' => $user ] );
