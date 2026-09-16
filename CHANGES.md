@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+* Fixed: A class added to a location form ran into the form's own class, so `class="extra"` came out as `mailocations-formextra` and never matched any styles.
+* Fixed: The locations table printed its heading inside the `<table>` element, which is not valid HTML. The heading now sits above the table.
+* Fixed: The locations table accepted a `class` and never printed it.
+* Fixed: Edit links in the locations table did not encode the page they return to, so a Back link lost anything after a question mark.
+* Fixed: A locations table block with no settings saved printed nothing and logged a deprecation notice. It now falls back to its default heading, header and no-results text.
 * Fixed: A location sitting exactly on the searched point was left out of the results when the search had no distance limit.
 * Fixed: A location search ordered by distance with no direction set produced broken SQL. The direction is also limited to ascending or descending now, rather than passed through to the database.
 * Fixed: A search on the equator or the prime meridian, where a coordinate is 0, ran as though no location had been given.

@@ -43,12 +43,6 @@ parameters:
 			path: ../inc/classes/Display/BlockBindings.php
 
 		-
-			message: '#^Method Mai\\Locations\\Display\\LocationsTable\:\:get\(\) should return string\|null but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: ../inc/classes/Display/LocationsTable.php
-
-		-
 			message: '#^Parameter \#1 \$location_id of function mailocations_user_can_edit expects int, string given\.$#'
 			identifier: argument.type
 			count: 1

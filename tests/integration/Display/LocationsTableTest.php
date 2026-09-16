@@ -64,12 +64,16 @@ final class LocationsTableTest extends TestCase {
 	}
 
 	private function edit_url( int $id ): string {
-		return 'http://example.org/account/?location_id=' . $id . '&#038;referrer=http://example.org/account/';
+		// The referrer is URL encoded, so a referrer carrying its own query string survives.
+		return 'http://example.org/account/?location_id=' . $id . '&#038;referrer=' . rawurlencode( 'http://example.org/account/' );
 	}
 
-	public function test_logged_out_returns_null(): void {
-		$this->assertNull( ( new Mai_Locations_Locations_Table() )->get() );
-		$this->assertNull( mailocations_get_locations_table() );
+	/**
+	 * Changed September 16, 2026. It used to return null.
+	 */
+	public function test_logged_out_returns_an_empty_string(): void {
+		$this->assertSame( '', ( new Mai_Locations_Locations_Table() )->get() );
+		$this->assertSame( '', mailocations_get_locations_table() );
 		$this->assertSame( '', do_shortcode( '[mai_locations_table post_type="mlt_logged_out"]' ) );
 	}
 
@@ -123,9 +127,9 @@ final class LocationsTableTest extends TestCase {
 
 		$link = get_permalink( $published );
 
-		// The template whitespace after </style>, the h2 inside the table, and the space after </table> are all pinned as they are.
+		// The template whitespace after </style> and the space after </table> are pinned as they are.
 		$this->assertSame(
-			"\n\t\t\t\t" . '<table class="mai-locations-table"><h2>My Locations</h2><thead><tr><th colspan="2">Locations</th></tr></thead><tbody>'
+			"\n\t\t\t\t" . '<h2>My Locations</h2><table class="mai-locations-table"><thead><tr><th colspan="2">Locations</th></tr></thead><tbody>'
 			. '<tr><td><span class="mai-location-item-title"><a href="' . $link . '">Lyndhurst</a></span>'
 			. '<div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress" class="mai-address">'
 			. '<div class="mai-address-item"><span class="street-address" itemprop="streetAddress">381 N Broadway</span></div>'
@@ -139,16 +143,18 @@ final class LocationsTableTest extends TestCase {
 		);
 	}
 
-	public function test_front_end_header_title_and_unused_class(): void {
+	/**
+	 * The class arg was sanitized and never printed until September 16, 2026.
+	 */
+	public function test_front_end_header_title_and_class(): void {
 		$type    = $this->register_throwaway_type( 'mlt_front_args' );
 		$user_id = $this->log_in();
 		$this->create_location( [], [ 'post_type' => $type, 'post_author' => $user_id, 'post_title' => 'Philipsburg' ] );
 
 		$html = mailocations_get_locations_table( [ 'post_type' => $type, 'title' => '', 'header' => '<b>Mine</b>', 'class' => 'my-table' ] );
 
-		$this->assertStringContainsString( '<table class="mai-locations-table"><thead><tr><th colspan="2">&lt;b&gt;Mine&lt;/b&gt;</th></tr></thead>', $html );
-		// Oddity: the class arg is sanitized but never printed.
-		$this->assertStringNotContainsString( 'my-table', $html );
+		$this->assertStringContainsString( '<table class="mai-locations-table my-table"><thead><tr><th colspan="2">&lt;b&gt;Mine&lt;/b&gt;</th></tr></thead>', $html );
+		$this->assertStringNotContainsString( '<h2>', $html );
 	}
 
 	public function test_non_viewable_post_type_has_no_links_or_view_button(): void {
@@ -199,7 +205,7 @@ final class LocationsTableTest extends TestCase {
 
 		$this->assertSame(
 			'<style>.mai-locations-table a { pointer-events: none; }</style>'
-			. '<table class="mai-locations-table"><h2>My Locations</h2><thead><tr><th colspan="2">Locations</th></tr></thead><tbody>'
+			. '<h2>My Locations</h2><table class="mai-locations-table"><thead><tr><th colspan="2">Locations</th></tr></thead><tbody>'
 			. '<tr><td><span class="mai-location-item-title"><a href="' . $link . '">Newest</a></span></td>'
 			. self::ACTIONS_TD . '<a class="' . self::BUTTON . '" href="' . $link . '">View</a><a style="margin-left:6px;" class="' . self::BUTTON . '" href="' . $this->edit_url( $newest ) . '">Edit</a></td></tr>'
 			. '<tr><td><span class="mai-location-item-title">(pending) Middle</span></td>'

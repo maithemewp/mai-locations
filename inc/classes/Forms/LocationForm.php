@@ -105,9 +105,10 @@ class LocationForm {
 		$html  = '';
 		$class = 'mailocations-form';
 
-		// Add class.
+		// Add class. The trim() took the separating space with it, so a custom class ran into the
+		// default one. Fixed September 16, 2026.
 		if ( $this->args['class'] ) {
-			$class .= trim( ' ' . esc_attr( $this->args['class'] ) );
+			$class .= ' ' . esc_attr( trim( (string) $this->args['class'] ) );
 		}
 
 		// Open form wrapper.

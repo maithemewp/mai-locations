@@ -72,9 +72,9 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [x] The geo query order fallback never applies, because concatenation runs before `?:`. Fixed September 16, 2026, and the direction is now limited to ASC or DESC, since the `order` query var went straight into the SQL. `inc/classes/Query/GeoQuery.php`.
 - [x] A filter latitude of `0` counts as no geo query. Now `is_numeric()`. `inc/functions-filters.php`. Fixed September 16, 2026.
 - [ ] The location edit form reads `$GET['referrer']` instead of `$_GET['referrer']`, so its Back link never shows. `classes/class-location-form-edit.php:23`.
-- [ ] A custom form class runs into the default one (`mailocations-formextra`). `classes/class-location-form.php:87`.
-- [ ] The locations table puts its `<h2>` inside `<table>`, never prints its `class` arg, and does not URL-encode the referrer in Edit links. `classes/class-locations-table.php:152`.
-- [ ] An empty locations table block passes null to `wp_kses_post()` and loses its title, header and no-results defaults. `classes/class-locations-table.php:38`.
+- [x] A custom form class runs into the default one (`mailocations-formextra`). The `trim()` took the separating space with it. `inc/classes/Forms/LocationForm.php`. Fixed September 16, 2026.
+- [x] The locations table puts its `<h2>` inside `<table>`, never prints its `class` arg, and does not URL-encode the referrer in Edit links. All three fixed September 16, 2026. The title now prints above the table, the class is appended to `mai-locations-table`, and the referrer is `rawurlencode()`d. `inc/classes/Display/LocationsTable.php`.
+- [x] An empty locations table block passes null to `wp_kses_post()` and loses its title, header and no-results defaults. Null settings are dropped before `shortcode_atts()` now, so the defaults apply. `get()` also returns `''` rather than null when there is no user. `inc/classes/Display/LocationsTable.php`. Fixed September 16, 2026.
 - [ ] The table block's settings show the submission block's labels, because both field groups use the keys `mai_location_redirect` and `mai_location_fields` and ACF keeps the first.
 - [ ] The count block ignores its field defaults and renders `0  0`.
 - [ ] The map's directions link uses `ref=` instead of `rel=`. The map's "All locations" setting queries regular posts on any page that is not a location archive.

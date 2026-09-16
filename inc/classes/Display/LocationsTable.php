@@ -42,6 +42,9 @@ class LocationsTable {
 	 */
 	public function __construct( $args = [] ) {
 		$this->user_id = get_current_user_id();
+		// An unset block setting arrives from get_field() as null, and shortcode_atts() keeps a
+		// null over the default. Drop them so the defaults apply. Fixed September 16, 2026.
+		$args          = array_filter( (array) $args, static fn( $value ) => ! is_null( $value ) );
 		$args          = shortcode_atts(
 			[
 				'post_type'  => 'mai_location',
@@ -57,8 +60,6 @@ class LocationsTable {
 		);
 
 		// Sanitize.
-		// TODO: unset args arrive as null from get_field(), which wp_kses_post() warns about on
-		// PHP 8.4. See TODO.md.
 		$args = [
 			'post_type'  => sanitize_key( $args['post_type'] ),
 			'title'      => esc_html( $args['title'] ),
@@ -80,17 +81,14 @@ class LocationsTable {
 	 * Gets a locations table, with View and Edit buttons. While editing a location the table is
 	 * replaced by the ACF location fields.
 	 *
-	 * TODO: returns null, not '', when there is no user, and the title h2 sits inside the table
-	 * element. The `class` arg is never printed. See TODO.md.
-	 *
 	 * @since TBD
 	 *
-	 * @return string|null
+	 * @return string
 	 */
-	public function get() {
+	public function get(): string {
 		// Bail if no user.
 		if ( ! $this->user_id ) {
-			return;
+			return '';
 		}
 
 		// Set vars.
@@ -175,11 +173,14 @@ class LocationsTable {
 				$html .= ob_get_clean();
 			}
 
-			// Table.
-			$html .= '<table class="mai-locations-table">';
-				// Title.
-				$html .= $this->args['title'] ? sprintf( '<h2>%s</h2>', $this->args['title'] ) : '';
+			// Title. This used to print inside the table element, which is not valid HTML.
+			// Fixed September 16, 2026.
+			$html .= $this->args['title'] ? sprintf( '<h2>%s</h2>', $this->args['title'] ) : '';
 
+			// Table. The class arg used to be sanitized and then never printed. Fixed September
+			// 16, 2026.
+			$classes = $this->args['class'] ? 'mai-locations-table ' . $this->args['class'] : 'mai-locations-table';
+			$html   .= sprintf( '<table class="%s">', $classes );
 				// Header.
 				$html .= '<thead>';
 					$html .= '<tr>';
@@ -225,13 +226,14 @@ class LocationsTable {
 								);
 							$html .= '</td>';
 
-							// Get edit url.
-							// TODO: the referrer is not URL encoded. See TODO.md.
+							// Get edit url. add_query_arg() does not encode what it is given, so a
+							// referrer with its own query string used to break the link. Fixed
+							// September 16, 2026.
 							$edit_url = home_url( add_query_arg( null, null ) );
 							$edit_url = add_query_arg(
 								[
 									'location_id' => $location_id,
-									'referrer'    => $edit_url,
+									'referrer'    => rawurlencode( $edit_url ),
 								],
 								$edit_url
 							);

@@ -32,9 +32,11 @@ final class TableBlockTest extends TestCase {
 		parent::tear_down();
 	}
 
-	public function test_pins_bug_empty_settings_pass_null_to_kses_and_render_nothing_for_guests(): void {
-		// get_field() returns null for unset fields, and shortcode_atts() keeps the null over the defaults.
-		// Correct behaviour: unset settings fall back to the table defaults without a deprecation notice.
+	/**
+	 * Fixed September 16, 2026. get_field() returns null for an unset field, and
+	 * shortcode_atts() kept the null over the default, which wp_kses_post() warned about.
+	 */
+	public function test_empty_settings_fall_back_to_the_table_defaults(): void {
 		$errors = [];
 		set_error_handler(
 			static function ( int $errno, string $errstr ) use ( &$errors ): bool {
@@ -49,8 +51,18 @@ final class TableBlockTest extends TestCase {
 			restore_error_handler();
 		}
 
+		// Nothing renders for a guest, but nothing warns either.
 		$this->assertSame( '', $html );
-		$this->assertSame( [ 'preg_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated' ], $errors );
+		$this->assertSame( [], $errors );
+
+		// The same null settings the block hands over now fall back to the defaults.
+		$table = new \Mai_Locations_Locations_Table( [ 'title' => null, 'header' => null, 'no_results' => null, 'fields' => null, 'class' => null ] );
+		$args  = ( fn() => $this->args )->call( $table );
+
+		$this->assertSame( 'My Locations', $args['title'] );
+		$this->assertSame( 'Locations', $args['header'] );
+		$this->assertSame( 'Sorry, no locations available.', $args['no_results'] );
+		$this->assertSame( [], $args['fields'] );
 	}
 
 	public function test_renders_the_users_locations_on_the_front_end(): void {
@@ -68,14 +80,14 @@ final class TableBlockTest extends TestCase {
 
 		$this->assertStringStartsWith( "\t\t\t\t<style>", $html );
 
-		// The title h2 sits inside the table element, and a space follows the closing tag.
-		$table = '<table class="mai-locations-table"><h2>Mine</h2><thead><tr><th colspan="2">Places</th></tr></thead><tbody>'
+		// A space follows the closing tag.
+		$table = '<h2>Mine</h2><table class="mai-locations-table"><thead><tr><th colspan="2">Places</th></tr></thead><tbody>'
 			. '<tr><td><span class="mai-location-item-title"><a href="http://example.org/?mai_location=hollow-inn">Hollow Inn</a></span>'
 			. '<div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress" class="mai-address"><div class="mai-address-item"><span class="locality" itemprop="addressLocality">Sleepy Hollow</span><span class="region" itemprop="addressRegion">&nbsp;NY</span></div></div></td>'
 			. '<td style="text-align:right;white-space:nowrap;"><a class="button button-secondary button-small" href="http://example.org/?mai_location=hollow-inn">View</a>'
-			. '<a style="margin-left:6px;" class="button button-secondary button-small" href="http://example.org/?location_id=' . $public . '&#038;referrer=http://example.org/">Edit</a></td></tr>'
+			. '<a style="margin-left:6px;" class="button button-secondary button-small" href="http://example.org/?location_id=' . $public . '&#038;referrer=' . rawurlencode( 'http://example.org/' ) . '">Edit</a></td></tr>'
 			. '<tr><td><span class="mai-location-item-title">(pending) Pending One</span></td>'
-			. '<td style="text-align:right;white-space:nowrap;"><a style="margin-left:6px;" class="button button-secondary button-small" href="http://example.org/?location_id=' . $pending . '&#038;referrer=http://example.org/">Edit</a></td></tr>'
+			. '<td style="text-align:right;white-space:nowrap;"><a style="margin-left:6px;" class="button button-secondary button-small" href="http://example.org/?location_id=' . $pending . '&#038;referrer=' . rawurlencode( 'http://example.org/' ) . '">Edit</a></td></tr>'
 			. '</tbody></table> ';
 
 		$this->assertStringEndsWith( $table, $html );

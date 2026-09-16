@@ -30,11 +30,13 @@ final class FormsTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_form_class_is_glued_to_default_class(): void {
+	/**
+	 * Fixed September 16, 2026. trim() removed the separating space.
+	 */
+	public function test_form_class_is_added_after_the_default_class(): void {
 		$html = mailocations_get_location_submission_form( [ 'fields' => [ 'not_a_field' ], 'preview' => true, 'class' => 'extra' ] );
 
-		// Correct would be class="mailocations-form extra". trim() removes the separating space.
-		$this->assertStringStartsWith( '<div class="mailocations-formextra">', $html );
+		$this->assertStringStartsWith( '<div class="mailocations-form extra">', $html );
 	}
 
 	public function test_edit_form_without_location_id_is_an_empty_wrapper(): void {

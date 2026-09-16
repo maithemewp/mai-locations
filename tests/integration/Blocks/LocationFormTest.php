@@ -107,9 +107,11 @@ final class LocationFormTest extends TestCase {
 		$this->assertSame( '<div class="mailocations-form"></div>', ( new \Mai_Locations_Location_Form( [ 'fields' => [ 'mai_location_title' ] ] ) )->get() );
 	}
 
-	public function test_pins_bug_extra_class_is_joined_without_a_space(): void {
-		// trim() removes the space it just added. Correct behaviour: class="mailocations-form extra".
-		$this->assertSame( '<div class="mailocations-formextra"></div>', ( new \Mai_Locations_Location_Form( [ 'fields' => [ 'x' ], 'class' => 'extra' ] ) )->get() );
+	/**
+	 * Fixed September 16, 2026. trim() removed the space it had just added.
+	 */
+	public function test_extra_class_is_joined_with_a_space(): void {
+		$this->assertSame( '<div class="mailocations-form extra"></div>', ( new \Mai_Locations_Location_Form( [ 'fields' => [ 'x' ], 'class' => 'extra' ] ) )->get() );
 	}
 
 	public function test_get_applies_both_filters(): void {
