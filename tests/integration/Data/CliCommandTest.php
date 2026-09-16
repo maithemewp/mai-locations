@@ -233,6 +233,32 @@ final class CliCommandTest extends TestCase {
 		$this->assertSame( 'From the website', get_post( $id )->post_excerpt );
 	}
 
+	/**
+	 * Added September 15, 2026 on Mike's call, so a run can fetch missing photos without
+	 * writing excerpts onto every location that lacks one.
+	 */
+	public function test_update_skip_excerpt_leaves_excerpts_alone_and_still_sets_the_image(): void {
+		$path                                = self::FIXTURES . '/image.jpg';
+		$id                                  = $this->create_location( [ 'location_url' => 'https://inn.example/' ], [ 'post_excerpt' => '' ] );
+		$this->sites['https://inn.example/'] = [ 200, self::page( 'From the website', $path ) ];
+
+		$this->update( [ 'skip_excerpt' => 'true' ] );
+
+		$this->assertSame( '', get_post( $id )->post_excerpt );
+		$this->assertNotSame( 0, get_post_thumbnail_id( $id ) );
+	}
+
+	public function test_update_skip_image_leaves_featured_images_alone_and_still_sets_the_excerpt(): void {
+		$path                                = self::FIXTURES . '/image.jpg';
+		$id                                  = $this->create_location( [ 'location_url' => 'https://inn.example/' ], [ 'post_excerpt' => '' ] );
+		$this->sites['https://inn.example/'] = [ 200, self::page( 'From the website', $path ) ];
+
+		$this->update( [ 'skip_image' => 'true' ] );
+
+		$this->assertSame( 'From the website', get_post( $id )->post_excerpt );
+		$this->assertSame( 0, get_post_thumbnail_id( $id ) );
+	}
+
 	public function test_update_sets_featured_image_from_og_image_when_location_has_none(): void {
 		$path                                 = self::FIXTURES . '/image.jpg';
 		$id                                   = $this->create_location( [ 'location_url' => 'https://inn.example/' ] );

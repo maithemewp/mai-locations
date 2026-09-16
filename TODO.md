@@ -98,7 +98,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [ ] A failed sideload is logged as "Image updated": `mailocations_upload_image()` returns a `WP_Error`, the check at `:527` treats it as success, and `set_post_thumbnail()` gets the error.
 - [ ] `mailocations_upload_image()` fetches with `file_get_contents()` (no timeout, no user agent, warns on failure), then re-downloads the saved copy through the site's own uploads URL with `download_url()`. That fails on local sites with self-signed certificates (`cURL error 60` on Herd). Sideload from the fetched bytes instead. `:685`.
 - [ ] `mailocations_upload_image()` stages every image as `md5(url).jpg`. WordPress renames a PNG on sideload, but the staging name is still wrong.
-- [ ] `update_locations_from_website` always sets the excerpt from `og:description` on a location without one, with no way to turn that off. Add a flag or split the image and excerpt jobs.
+- [x] `update_locations_from_website` always set the excerpt from `og:description` on a location without one, with no way to turn that off. Added `--skip_excerpt` and `--skip_image`, alongside the existing `--force_excerpt` and `--force_image`. Mike's call, September 15, 2026.
 - [ ] `mailocations_get_data_from_website()` uses WordPress's default user agent and a 5 second timeout. Many hotel and chain sites answer only a browser user agent. Seen on Visit Sleepy Hollow: 44 of 106 sites gave no image until retried. An unknown `$key` warns and returns null.
 
 ### Settings page

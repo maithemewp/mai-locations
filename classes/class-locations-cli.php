@@ -414,6 +414,11 @@ class Mai_Locations_CLI {
 	 *
 	 * Usage: wp mailocations update_locations_from_website --posts_per_page="50" --offset="0"
 	 *
+	 * Sets the post excerpt from og:description and the featured image from og:image, on any
+	 * location that has neither. --force_excerpt and --force_image overwrite what is already
+	 * there. --skip_excerpt and --skip_image leave that half alone, so the command can fetch
+	 * only images or only excerpts.
+	 *
 	 * @link https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places/get
 	 *
 	 * @since 0.1.0
@@ -434,6 +439,8 @@ class Mai_Locations_CLI {
 				'offset'         => 0,
 				'force_excerpt'  => false, // Whether to force update the post excerpt if it already exists.
 				'force_image'    => false, // Whether to force update the featured image if it already exists.
+				'skip_excerpt'   => false, // Whether to leave post excerpts alone entirely.
+				'skip_image'     => false, // Whether to leave featured images alone entirely.
 			]
 		);
 
@@ -487,8 +494,8 @@ class Mai_Locations_CLI {
 				}
 				// Update the post excerpt.
 				else {
-					// If no excerpt or we're forcing the update.
-					if ( ! has_excerpt( $post_id ) || rest_sanitize_boolean( $assoc_args['force_excerpt'] ) ) {
+					// If not skipping excerpts, and there is no excerpt or we're forcing the update.
+					if ( ! rest_sanitize_boolean( (string) $assoc_args['skip_excerpt'] ) && ( ! has_excerpt( $post_id ) || rest_sanitize_boolean( $assoc_args['force_excerpt'] ) ) ) {
 						// Update the post excerpt.
 						$post_id = wp_update_post(
 							[
@@ -518,8 +525,8 @@ class Mai_Locations_CLI {
 					// Get featured image.
 					$featured_id = get_post_thumbnail_id( $post_id );
 
-					// If no featured image, or we're forcing the update.
-					if ( ! $featured_id || rest_sanitize_boolean( $assoc_args['force_image'] ) ) {
+					// If not skipping images, and there is no featured image or we're forcing the update.
+					if ( ! rest_sanitize_boolean( (string) $assoc_args['skip_image'] ) && ( ! $featured_id || rest_sanitize_boolean( $assoc_args['force_image'] ) ) ) {
 						// Maybe upload the image.
 						$image_id = mailocations_upload_image( $data['image'], 'original_url', $data['image'], $post_id );
 

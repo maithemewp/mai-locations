@@ -2,6 +2,7 @@
 
 ## Unreleased
 * Removed: Social media fields (Facebook, Twitter, YouTube, LinkedIn, Instagram, Pinterest, TikTok) and the `mailocations_social_fields` filter. They were switched off in 1.0.0 and never displayed anywhere. No site had any data saved in them.
+* Added: `--skip_excerpt` and `--skip_image` for `wp mailocations update_locations_from_website`, so a run can fetch only images or only excerpts.
 * Changed: Administrators and editors can now use the front-end edit form and see Edit buttons on any location, matching what they can already do in the Dashboard. Location owners keep editing their own locations whatever their role.
 * Fixed: `[mai_location_url]` removed the first letter of any web address starting with "w", so `www.washingtonirving.org` displayed as `ashingtonirving.org`.
 * Fixed: The CSV importer stored every value as escaped HTML, so imported website addresses came in with `&amp;` in them. Each value is now sanitized by its field type. Values imported before this update are unchanged.
