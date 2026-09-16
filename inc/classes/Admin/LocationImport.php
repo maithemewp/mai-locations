@@ -378,9 +378,8 @@ class LocationImport {
 	/**
 	 * Imports the locations and creates the associated users.
 	 *
-	 * TODO: the failed count can never rise, because mailocations_create_location() calls
-	 * wp_insert_post() without $wp_error. get_page_by_title() is deprecated, and users are
-	 * created without a password. See TODO.md.
+	 * TODO: get_page_by_title() is deprecated, and users are created without a password. See
+	 * TODO.md.
 	 *
 	 * @since TBD
 	 *

@@ -6,10 +6,14 @@ namespace Mai\Locations\Tests\Integration\Registration;
 
 use Mai\Locations\Tests\TestCase;
 
+require_once __DIR__ . '/ScenarioRunner.php';
+
 /**
  * Post type and taxonomy lookups in includes/functions-locations.php.
  */
 final class LocationFunctionsTest extends TestCase {
+
+	use ScenarioRunner;
 
 	public function tear_down(): void {
 		if ( taxonomy_exists( 'mai_test_tax' ) ) {
@@ -21,6 +25,30 @@ final class LocationFunctionsTest extends TestCase {
 		}
 
 		parent::tear_down();
+	}
+
+	/**
+	 * Fixed September 16, 2026. The country and state were checked by key rather than by value,
+	 * so both were always dropped and the geocoding request went out without them. The API key
+	 * is cached at boot, so this runs in a child process.
+	 */
+	public function test_geocoding_address_includes_the_country_and_state(): void {
+		$result = $this->run_scenario(
+			[
+				'probe'   => 'geocode_url',
+				'options' => [ 'google_api_key' => 'scenario-key' ],
+				'meta'    => [
+					'address_street'   => '150 Broadway',
+					'address_city'     => 'Sleepy Hollow',
+					'address_state'    => 'NY',
+					'address_country'  => 'US',
+					'address_postcode' => '10591',
+				],
+			]
+		);
+
+		$this->assertCount( 1, $result['requests'] );
+		$this->assertStringContainsString( 'address=' . urlencode( 'US,150 Broadway,Sleepy Hollow,NY,10591' ), $result['requests'][0] );
 	}
 
 	public function test_location_post_types(): void {

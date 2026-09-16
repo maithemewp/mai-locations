@@ -115,6 +115,37 @@ switch ( $scenario['probe'] ?? 'content_types' ) {
 		$result = [ 'html' => (string) ob_get_clean() ];
 		break;
 
+	case 'geocode_url':
+		$requests = [];
+
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) use ( &$requests ) {
+				$requests[] = $url;
+
+				return [
+					'headers'  => [],
+					'body'     => '{"results":[],"status":"ZERO_RESULTS"}',
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'cookies'  => [],
+					'filename' => '',
+				];
+			},
+			10,
+			3
+		);
+
+		$post_id = wp_insert_post( [ 'post_type' => 'mai_location', 'post_title' => 'Scenario', 'post_status' => 'publish' ] );
+
+		foreach ( $scenario['meta'] ?? [] as $key => $value ) {
+			update_post_meta( $post_id, $key, $value );
+		}
+
+		mailocations_update_google_map_from_address( $post_id );
+
+		$result = [ 'requests' => $requests ];
+		break;
+
 	case 'upgrade':
 		$writes = [];
 

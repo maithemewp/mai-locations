@@ -69,9 +69,10 @@ function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
 		]
 	);
 
+	// Values passed in win over the field defaults. The defaults used to be merged last, so a
+	// location created with a country of CA was saved as US. Fixed September 16, 2026.
 	$meta_defaults           = mailocations_get_fields_defaults();
-	$meta_input              = wp_parse_args( $meta_args, $meta_defaults );
-	$post_args['meta_input'] = isset( $post_args['meta_input'] ) ? array_merge( $post_args['meta_input'], $meta_input ) : $meta_input;
+	$post_args['meta_input'] = array_merge( $meta_defaults, (array) ( $post_args['meta_input'] ?? [] ), (array) $meta_args );
 
 	// Filter post args.
 	$post_args = apply_filters( 'mailocations_post_args', $post_args, $user_id );
@@ -79,7 +80,9 @@ function mailocations_create_location( $post_args, $meta_args, $user_id = 0 ) {
 	// Force post_type.
 	$post_args['post_type'] = 'mai_location';
 
-	$post_id = wp_insert_post( $post_args );
+	// Ask for the error. Without it a failed insert returned 0, so the importer's failed count
+	// could never rise and nothing said what went wrong. Fixed September 16, 2026.
+	$post_id = wp_insert_post( $post_args, true );
 
 	if ( $post_id && ! is_wp_error( $post_id ) ) {
 		// Update map with location data.
@@ -118,7 +121,9 @@ function mailocations_add_location_to_user( $post_id, $user_id ) {
 	$locations   = (array) get_user_meta( $user_id, 'user_locations', true );
 	$locations   = array_map( 'absint', $locations );
 	$locations   = array_filter( $locations );
-	$locations[] = $post_id;
+	$locations[] = absint( $post_id );
+	// The same location used to be added again on every call. Fixed September 16, 2026.
+	$locations   = array_values( array_unique( $locations ) );
 
 	update_user_meta( $user_id, 'user_locations', $locations );
 
@@ -287,11 +292,13 @@ function mailocations_update_google_map_from_address( $post_id ) {
 		$value = get_post_meta( $post_id, $key, true );
 
 		switch ( $key ) {
+			// These checked the key, never the value, so the country and state were always
+			// dropped and the geocoding request went out without them. Fixed September 16, 2026.
 			case 'address_country':
-				$value = isset( $countries[ $key ] ) ? $value : '';
+				$value = isset( $countries[ $value ] ) ? $value : '';
 				break;
 			case 'address_state':
-				$value = isset( $states[ $key ] ) ? $value : '';
+				$value = isset( $states[ $value ] ) ? $value : '';
 			break;
 		}
 
@@ -469,8 +476,9 @@ function mailocations_get_address_meta_from_components( $components ) {
 	// Build street.
 	$meta['address_street'] = sprintf( '%s %s', $street['number'], $street['name'] );
 
-	// If US, clear international.
-	if ( 'US' === $meta['address_country'] ) {
+	// If US, clear international. A result with no country at all used to warn here. Fixed
+	// September 16, 2026.
+	if ( 'US' === ( $meta['address_country'] ?? '' ) ) {
 		$meta['address_state_int'] = '';
 	}
 	// Else clear US.

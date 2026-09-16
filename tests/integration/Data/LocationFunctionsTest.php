@@ -123,23 +123,40 @@ final class LocationFunctionsTest extends TestCase {
 		$this->assertFalse( metadata_exists( 'post', $id, 'mai_location_location' ) );
 	}
 
-	public function test_pins_bug_create_location_meta_defaults_override_post_args_meta_input(): void {
+	/**
+	 * Fixed September 16, 2026. The field defaults were merged last and overwrote what the
+	 * caller passed, so a Canadian location was saved as US.
+	 */
+	public function test_create_location_meta_input_beats_the_field_defaults(): void {
 		$id = mailocations_create_location(
 			[ 'post_title' => 'Canada Place', 'meta_input' => [ 'address_country' => 'CA', 'extra' => 'x' ] ],
 			[]
 		);
 
-		// Correct behaviour: explicit meta_input should beat field defaults.
-		$this->assertSame( 'US', get_post_meta( $id, 'address_country', true ) );
+		$this->assertSame( 'CA', get_post_meta( $id, 'address_country', true ) );
 		$this->assertSame( 'x', get_post_meta( $id, 'extra', true ) );
 	}
 
-	public function test_create_location_without_user_links_nobody_and_returns_zero_on_empty_post(): void {
+	public function test_create_location_meta_args_beat_post_args_meta_input(): void {
+		$id = mailocations_create_location(
+			[ 'post_title' => 'Both', 'meta_input' => [ 'address_city' => 'From post args' ] ],
+			[ 'address_city' => 'From meta args' ]
+		);
+
+		$this->assertSame( 'From meta args', get_post_meta( $id, 'address_city', true ) );
+	}
+
+	/**
+	 * Changed September 16, 2026. A failed insert returned 0 and said nothing.
+	 */
+	public function test_create_location_without_user_links_nobody_and_returns_an_error_on_empty_post(): void {
 		$id = mailocations_create_location( [ 'post_title' => 'Nobody' ], [] );
 		$this->assertGreaterThan( 0, $id );
 
-		// wp_insert_post() is called without $wp_error, so failure is 0, never a WP_Error.
-		$this->assertSame( 0, mailocations_create_location( [], [] ) );
+		$result = mailocations_create_location( [], [] );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'empty_content', $result->get_error_code() );
 	}
 
 	/*
@@ -155,19 +172,22 @@ final class LocationFunctionsTest extends TestCase {
 		$this->assertSame( 'No user with the ID of 999999', $result->get_error_message() );
 	}
 
-	public function test_add_location_to_user_appends_without_deduplicating_and_returns_true(): void {
+	/**
+	 * Fixed September 16, 2026. The same location was added again on every call.
+	 */
+	public function test_add_location_to_user_stores_each_location_once(): void {
 		$user = self::factory()->user->create();
 
 		$this->assertTrue( mailocations_add_location_to_user( 12, $user ) );
 		$this->assertSame( [ 12 ], get_user_meta( $user, 'user_locations', true ) );
 
 		$this->assertTrue( mailocations_add_location_to_user( 12, $user ) );
-		$this->assertSame( [ 12, 12 ], get_user_meta( $user, 'user_locations', true ) );
+		$this->assertSame( [ 12 ], get_user_meta( $user, 'user_locations', true ) );
 
-		// Existing values are cast with absint and zeros dropped, keeping keys; the new one is stored as given.
+		// Every value is cast with absint, zeros are dropped, and the keys are renumbered.
 		update_user_meta( $user, 'user_locations', [ '7', 'abc', 0 ] );
 		$this->assertTrue( mailocations_add_location_to_user( '8', $user ) );
-		$this->assertSame( [ 0 => 7, 1 => '8' ], get_user_meta( $user, 'user_locations', true ) );
+		$this->assertSame( [ 7, 8 ], get_user_meta( $user, 'user_locations', true ) );
 	}
 
 	/*
@@ -252,12 +272,14 @@ final class LocationFunctionsTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_address_meta_without_country_warns(): void {
+	/**
+	 * Fixed September 16, 2026. A result with no country warned about the missing key.
+	 */
+	public function test_address_meta_without_country_is_treated_as_non_us(): void {
 		[ $result, $warnings ] = $this->capture_errors( fn() => mailocations_get_address_meta_from_components( [] ) );
 
-		// Correct behaviour: treat a missing country as non-US (or empty) without a warning.
 		$this->assertSame( [ 'address_street' => ' ', 'address_state' => '' ], $result );
-		$this->assertSame( [ 'Undefined array key "address_country"' ], $warnings );
+		$this->assertSame( [], $warnings );
 	}
 
 	/*

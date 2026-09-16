@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+* Fixed: A CSV import that could not create a location counted it as imported. Failed rows are now counted and the reason is shown.
+* Fixed: A location created in code with a country of its own was saved as US, because the field defaults overwrote what the caller passed.
+* Fixed: A user's list of locations gained a duplicate entry every time the same location was added again.
+* Fixed: Geocoding left the country and state out of the address it sent to Google, so an address could be matched in the wrong country.
+* Fixed: A geocoding result with no country logged a warning.
 * Fixed: The filter submit button kept the link address it was built from, on an element that cannot use one.
 * Fixed: Distance options written the natural way, "10, 20", searched a distance of " 20" with a leading space.
 * Fixed: A map set to show all locations showed none on any page that is not a locations archive, because it looked up regular posts.

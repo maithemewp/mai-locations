@@ -271,12 +271,6 @@ parameters:
 			path: ../inc/functions-locations.php
 
 		-
-			message: '#^Function mailocations_create_location\(\) never returns WP_Error so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: ../inc/functions-locations.php
-
-		-
 			message: '#^Function mailocations_create_location_from_woocommerce_user\(\) has parameter \$args with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
