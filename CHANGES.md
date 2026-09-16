@@ -6,6 +6,9 @@
 * Removed: Social media fields (Facebook, Twitter, YouTube, LinkedIn, Instagram, Pinterest, TikTok) and the `mailocations_social_fields` filter. They were switched off in 1.0.0 and never displayed anywhere. No site had any data saved in them.
 * Added: `--skip_excerpt` and `--skip_image` for `wp mailocations update_locations_from_website`, so a run can fetch only images or only excerpts.
 * Changed: Administrators and editors can now use the front-end edit form and see Edit buttons on any location, matching what they can already do in the Dashboard. Location owners keep editing their own locations whatever their role.
+* Fixed: Images fetched from a location's website were downloaded twice, the second time through the site's own uploads URL, which fails outright on a local site with a self-signed certificate. They are fetched once now.
+* Fixed: Every fetched image was saved as `.jpg` whatever it really was.
+* Fixed: When saving a fetched image failed, the run logged "Image updated" anyway. It now says the image failed and leaves the featured image alone.
 * Changed: `wp mailocations update_locations_from_website` now asks each site with a browser user agent and a 15 second timeout, instead of WordPress's own agent and 5 seconds. Many hotel and chain sites answered the old request with nothing. The request arguments are filterable through `mailocations_website_request_args`.
 * Fixed: A site with only Twitter card tags gave the command nothing, because the fallback that reads them could never run. It now fills in whatever the Open Graph tags did not provide.
 * Fixed: `mailocations_get_data_from_website()` warned and returned null when asked for a key it does not have. It returns an empty string.

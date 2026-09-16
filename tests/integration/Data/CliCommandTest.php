@@ -67,6 +67,20 @@ final class CliCommandTest extends TestCase {
 	}
 
 	/**
+	 * Registers an image URL the mock serves from a fixture, and returns it.
+	 *
+	 * Since September 16, 2026 the uploader fetches over the HTTP API, so image URLs have to be
+	 * served like any other request rather than passed as local paths.
+	 */
+	private function serve_image( string $name = 'photo.jpg', string $fixture = 'image.jpg' ): string {
+		$url = 'https://inn.example/' . $name;
+
+		$this->sites[ $url ] = [ 200, (string) file_get_contents( self::FIXTURES . '/' . $fixture ) ];
+
+		return $url;
+	}
+
+	/**
 	 * @param array<string, mixed> $assoc_args
 	 *
 	 * @return array<int, array{0: string, 1: mixed}>
@@ -240,7 +254,7 @@ final class CliCommandTest extends TestCase {
 	 * writing excerpts onto every location that lacks one.
 	 */
 	public function test_update_skip_excerpt_leaves_excerpts_alone_and_still_sets_the_image(): void {
-		$path                                = self::FIXTURES . '/image.jpg';
+		$path                                = $this->serve_image();
 		$id                                  = $this->create_location( [ 'location_url' => 'https://inn.example/' ], [ 'post_excerpt' => '' ] );
 		$this->sites['https://inn.example/'] = [ 200, self::page( 'From the website', $path ) ];
 
@@ -251,7 +265,7 @@ final class CliCommandTest extends TestCase {
 	}
 
 	public function test_update_skip_image_leaves_featured_images_alone_and_still_sets_the_excerpt(): void {
-		$path                                = self::FIXTURES . '/image.jpg';
+		$path                                = $this->serve_image();
 		$id                                  = $this->create_location( [ 'location_url' => 'https://inn.example/' ], [ 'post_excerpt' => '' ] );
 		$this->sites['https://inn.example/'] = [ 200, self::page( 'From the website', $path ) ];
 
@@ -262,7 +276,7 @@ final class CliCommandTest extends TestCase {
 	}
 
 	public function test_update_sets_featured_image_from_og_image_when_location_has_none(): void {
-		$path                                 = self::FIXTURES . '/image.jpg';
+		$path                                 = $this->serve_image();
 		$id                                   = $this->create_location( [ 'location_url' => 'https://inn.example/' ] );
 		$this->sites['https://inn.example/'] = [ 200, self::page( '', $path ) ];
 
@@ -278,15 +292,15 @@ final class CliCommandTest extends TestCase {
 		$thumbnail = get_post_thumbnail_id( $id );
 		$this->assertGreaterThan( 0, $thumbnail );
 		$this->assertSame( $path, get_post_meta( $thumbnail, 'original_url', true ) );
-		$this->assertSame(
-			[ 'https://inn.example/', wp_get_upload_dir()['baseurl'] . '/mai-locations/' . md5( $path ) . '.jpg' ],
-			$this->requested_urls()
-		);
+
+		// One page fetch and one image fetch. The image used to be downloaded a second time,
+		// through the site's own uploads URL.
+		$this->assertSame( [ 'https://inn.example/', $path ], $this->requested_urls() );
 		$this->assertFalse( has_excerpt( $id ) );
 	}
 
 	public function test_update_never_overwrites_an_existing_featured_image_unless_forced(): void {
-		$path     = self::FIXTURES . '/image.jpg';
+		$path     = $this->serve_image();
 		$id       = $this->create_location( [ 'location_url' => 'https://inn.example/' ] );
 		$original = self::factory()->attachment->create_object( [ 'file' => 'original.jpg', 'post_mime_type' => 'image/jpeg' ] );
 		set_post_thumbnail( $id, $original );
@@ -309,7 +323,7 @@ final class CliCommandTest extends TestCase {
 	}
 
 	public function test_update_forced_image_already_featured_logs_nothing_and_downloads_nothing(): void {
-		$path                                 = self::FIXTURES . '/image.jpg';
+		$path                                 = $this->serve_image();
 		$id                                   = $this->create_location( [ 'location_url' => 'https://inn.example/' ] );
 		$this->sites['https://inn.example/'] = [ 200, self::page( '', $path ) ];
 		$this->update();
@@ -324,7 +338,7 @@ final class CliCommandTest extends TestCase {
 	}
 
 	public function test_update_reuses_one_attachment_for_locations_sharing_an_og_image(): void {
-		$path  = self::FIXTURES . '/image.jpg';
+		$path  = $this->serve_image();
 		$first = $this->create_location( [ 'location_url' => 'https://one.example/' ], [ 'post_date' => '2026-02-01 00:00:00' ] );
 		$other = $this->create_location( [ 'location_url' => 'https://two.example/' ], [ 'post_date' => '2026-01-01 00:00:00' ] );
 		$this->sites['https://one.example/'] = [ 200, self::page( '', $path ) ];
@@ -344,7 +358,7 @@ final class CliCommandTest extends TestCase {
 	}
 
 	public function test_update_sets_excerpt_and_image_in_one_pass(): void {
-		$path                                 = self::FIXTURES . '/image.jpg';
+		$path                                 = $this->serve_image();
 		$id                                   = $this->create_location( [ 'location_url' => 'https://inn.example/' ] );
 		$this->sites['https://inn.example/'] = [ 200, self::page( 'Riverside inn', $path ) ];
 
@@ -373,22 +387,22 @@ final class CliCommandTest extends TestCase {
 		$this->assertSame( 'Twitter description', get_post( $id )->post_excerpt );
 	}
 
-	public function test_pins_bug_sideload_error_passes_wp_error_to_set_post_thumbnail_and_logs_success(): void {
+	/**
+	 * Fixed September 16, 2026. A WP_Error counted as success, so the run logged "Image updated"
+	 * and handed the error to set_post_thumbnail().
+	 */
+	public function test_sideload_error_is_logged_as_a_failure_and_leaves_the_thumbnail_alone(): void {
 		$id                                   = $this->create_location( [ 'location_url' => 'https://inn.example/' ] );
-		$this->sites['https://inn.example/'] = [ 200, self::page( '', self::FIXTURES . '/not-an-image.jpg' ) ];
+		// A file type WordPress will not accept, so the sideload fails.
+		$broken                               = $this->serve_image( 'payload.exe', 'not-an-image.jpg' );
+		$this->sites['https://inn.example/'] = [ 200, self::page( '', $broken ) ];
 
 		[ $calls, $warnings ] = $this->capture_errors( fn() => $this->update() );
 
-		// Correct behaviour: treat the WP_Error as a failure, log it, and leave the thumbnail alone.
-		$this->assertSame(
-			[
-				[ 'line', '1 found' ],
-				[ 'line', 'Image updated: ' . get_permalink( $id ) ],
-				[ 'success', 'Done.' ],
-			],
-			$calls
-		);
-		$this->assertSame( [ 'Object of class WP_Error could not be converted to int' ], $warnings );
+		$this->assertSame( '1 found', $calls[0][1] );
+		$this->assertStringStartsWith( 'Image failed: ', $calls[1][1] );
+		$this->assertSame( [ 'success', 'Done.' ], $calls[2] );
+		$this->assertSame( [], $warnings );
 		$this->assertSame( 0, get_post_thumbnail_id( $id ) );
 	}
 }

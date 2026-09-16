@@ -526,8 +526,14 @@ class CLI {
 						// Maybe upload the image.
 						$image_id = mailocations_upload_image( $data['image'], 'original_url', $data['image'], $post_id );
 
+						// Say so when the upload failed. Until September 16, 2026 a WP_Error counted
+						// as success here, so the run logged "Image updated" and handed the error to
+						// set_post_thumbnail().
+						if ( is_wp_error( $image_id ) ) {
+							WP_CLI::line( sprintf( 'Image failed: %s', $image_id->get_error_message() ) );
+						}
 						// If we have an image ID.
-						if ( $image_id && $image_id !== $featured_id ) {
+						elseif ( $image_id && $image_id !== $featured_id ) {
 							// Set the featured image.
 							set_post_thumbnail( $post_id, $image_id );
 

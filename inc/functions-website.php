@@ -120,10 +120,8 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
  *
  * Deliberately global, not namespaced, for the same reason as above.
  *
- * TODO: fetches with file_get_contents(), then re-downloads the saved copy through the site's
- * own uploads URL, which fails on a self-signed certificate. Stages every image as .jpg
- * whatever its type, and hands a WP_Error to wp_delete_file() on failure, which crashes the
- * run. See TODO.md.
+ * Fetches the image once, over the HTTP API, and sideloads it under a name that keeps the real
+ * file extension. Returns an existing attachment when one already carries the same reference.
  *
  * @access private
  *
@@ -164,76 +162,71 @@ function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 		return $existing_id;
 	}
 
-	// Get contents of the image url.
-	$image_hashed   = md5( $image_url ) . '.jpg';
-	$image_contents = file_get_contents( $image_url );
+	// Fetch the image over the HTTP API, with the same browser user agent the page reader uses.
+	// Until September 16, 2026 this read the URL with file_get_contents(), wrote it into uploads,
+	// and then downloaded that copy back through the site's own URL: a needless round trip that
+	// failed outright on a self-signed certificate, which is every local Herd site.
+	$args = apply_filters(
+		'mailocations_website_request_args',
+		[
+			'timeout'     => 30,
+			'redirection' => 5,
+			'user-agent'  => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+		],
+		$image_url
+	);
 
-	// If contents.
-	if ( $image_contents ) {
-		// Get the uploads directory.
-		$upload_dir = wp_get_upload_dir();
-		$upload_url = $upload_dir['baseurl'];
+	$response = wp_remote_get( $image_url, $args );
 
-		// Specify the path to the destination directory within uploads.
-		$destination_dir = $upload_dir['basedir'] . '/mai-locations/';
-
-		// Create the destination directory if it doesn't exist.
-		if ( ! file_exists( $destination_dir ) ) {
-			mkdir( $destination_dir, 0755, true );
-		}
-
-		// Specify the path to the destination file.
-		$destination_file = $destination_dir . $image_hashed;
-
-		// Save the image to the destination file.
-		file_put_contents( $destination_file, $image_contents );
-
-		// Bail if the file doesn't exist.
-		if ( ! file_exists( $destination_file ) ) {
-			return 0;
-		}
-
-		$image_url = $image_hashed;
-	}
-	// Bail, no image contents.
-	else {
+	// Bail if the request failed or the site did not give us the image.
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 		return 0;
 	}
 
-	// Build the image url.
-	$image_url = untrailingslashit( $upload_url ) . '/mai-locations/' . $image_hashed;
+	$bytes = wp_remote_retrieve_body( $response );
 
-	// Build a temp url.
-	$tmp = download_url( $image_url );
-
-	// Remove the temp file.
-	wp_delete_file( $destination_file );
-
-	// Bail if error. The staged file is already deleted above, and $tmp is the WP_Error itself,
-	// not a path: passing it to wp_delete_file() threw a TypeError out of unlink() and killed
-	// the whole CLI run. Fixed September 16, 2026.
-	if ( is_wp_error( $tmp ) ) {
+	// Bail if there is nothing to save.
+	if ( ! $bytes ) {
 		return 0;
 	}
+
+	// Keep the real extension. Every image used to be staged as .jpg whatever it was.
+	$mime      = (string) wp_remote_retrieve_header( $response, 'content-type' );
+	$extension = $mime ? (string) wp_get_default_extension_for_mime_type( $mime ) : '';
+	$extension = $extension ?: (string) pathinfo( (string) wp_parse_url( $image_url, PHP_URL_PATH ), PATHINFO_EXTENSION );
+	$extension = $extension ?: 'jpg';
+
+	// Write the bytes to a temp file for sideloading.
+	$tmp = wp_tempnam( $image_url );
+
+	if ( ! $tmp ) {
+		return 0;
+	}
+
+	file_put_contents( $tmp, $bytes );
 
 	// Build the file array.
 	$file_array = [
-		'name'     => basename( $image_url ),
+		'name'     => md5( $image_url ) . '.' . $extension,
 		'tmp_name' => $tmp,
 	];
 
 	// Add the image to the media library.
 	$image_id = media_handle_sideload( $file_array, $post_id );
 
-	// Bail if error.
+	// Bail if error, removing the temp file first.
 	if ( is_wp_error( $image_id ) ) {
-		// Remove the original image and return the error.
-		wp_delete_file( $file_array[ 'tmp_name' ] );
+		if ( file_exists( $tmp ) ) {
+			wp_delete_file( $tmp );
+		}
+
 		return $image_id;
 	}
 
-	// Remove the original image.
-	wp_delete_file( $file_array[ 'tmp_name' ] );
+	// Remove the temp file, if the sideload left it behind.
+	if ( file_exists( $tmp ) ) {
+		wp_delete_file( $tmp );
+	}
 
 	// Set the reference url for possible reference later.
 	update_post_meta( $image_id, $ref_key, $ref_uri );

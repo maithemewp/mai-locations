@@ -212,6 +212,7 @@ final class PublicNamesTest extends TestCase {
 			'mailocations_taxonomy_base',
 			'mailocations_taxonomy_plural',
 			'mailocations_taxonomy_singular',
+			'mailocations_website_request_args',
 			'mailocations_woocommerce_account_tabs',
 		];
 
