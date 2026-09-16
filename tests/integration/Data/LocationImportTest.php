@@ -293,19 +293,24 @@ final class LocationImportTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_every_meta_value_goes_through_esc_html(): void {
+	/**
+	 * Fixed September 15, 2026. The per-type sanitizers were looked up in a variable that only
+	 * existed inside get_fields(), so every value fell back to esc_html().
+	 */
+	public function test_meta_values_are_sanitized_by_field_type(): void {
 		$this->setExpectedDeprecated( 'get_page_by_title' );
 
 		$this->run_import( self::FIXTURES . '/import-escaping.csv' );
 
 		$post = $this->location_by_title( 'Ichabod & Co' );
 
-		// $allowed is undefined in import(), so the per-type callbacks from get_fields() are never used.
-		// Correct behaviour: text through esc_html, url through esc_url, email through sanitize_email.
-		$this->assertSame( 'Sleepy &lt;Hollow&gt;', get_post_meta( $post->ID, 'address_city', true ) );
-		$this->assertSame( 'https://example.com/?a=1&amp;b=2', get_post_meta( $post->ID, 'location_url', true ) );
-		$this->assertSame( '555 &amp; 1234', get_post_meta( $post->ID, 'location_phone', true ) );
+		// A url field keeps a usable URL, rather than one carrying an HTML entity.
+		$this->assertSame( 'https://example.com/?a=1&b=2', get_post_meta( $post->ID, 'location_url', true ) );
 		$this->assertSame( 'Info@Example.com', get_post_meta( $post->ID, 'location_email', true ) );
+
+		// Text fields keep their existing escaping.
+		$this->assertSame( 'Sleepy &lt;Hollow&gt;', get_post_meta( $post->ID, 'address_city', true ) );
+		$this->assertSame( '555 &amp; 1234', get_post_meta( $post->ID, 'location_phone', true ) );
 
 		// Title and description are not escaped.
 		$this->assertSame( '<p>Long text</p>', $post->post_content );

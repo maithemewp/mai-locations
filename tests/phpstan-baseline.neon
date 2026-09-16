@@ -619,24 +619,6 @@ parameters:
 			path: ../classes/class-location-import.php
 
 		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: ../classes/class-location-import.php
-
-		-
-			message: '#^Undefined variable\: \$allowed$#'
-			identifier: variable.undefined
-			count: 2
-			path: ../classes/class-location-import.php
-
-		-
-			message: '#^Variable \$allowed in isset\(\) is never defined\.$#'
-			identifier: isset.variable
-			count: 1
-			path: ../classes/class-location-import.php
-
-		-
 			message: '#^Call to new Mai_Locations_CLI\(\) on a separate line has no effect\.$#'
 			identifier: new.resultUnused
 			count: 1

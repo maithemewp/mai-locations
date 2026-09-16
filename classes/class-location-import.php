@@ -329,6 +329,7 @@ class Mai_Locations_Location_Import {
 		$skipped        = [];
 		$failed         = [];
 		$fields         = $this->get_fields();
+		$sanitizers     = $this->get_sanitizers();
 
 		foreach ( $this->csv as $index => $location ) {
 			$user_id    = 0;
@@ -454,7 +455,11 @@ class Mai_Locations_Location_Import {
 					continue;
 				}
 
-				$esc          = isset( $allowed[ $key ] ) && is_callable( $allowed[ $key ] ) ? $allowed[ $key ] : 'esc_html';
+				// Sanitize by the field's type. Before September 15, 2026 this read an $allowed
+				// variable that only existed inside get_fields(), so every value fell back to
+				// esc_html() and URLs were stored with &amp; in them.
+				$type              = isset( $fields[ $key ]['type'] ) ? $fields[ $key ]['type'] : '';
+				$esc               = isset( $sanitizers[ $type ] ) && is_callable( $sanitizers[ $type ] ) ? $sanitizers[ $type ] : 'esc_html';
 				$meta_args[ $key ] = $esc( $value );
 			}
 
@@ -518,8 +523,35 @@ class Mai_Locations_Location_Import {
 	 * @return array
 	 */
 	function get_fields() {
-		$fields  = mailocations_get_fields_raw();
-		$allowed = [
+		$fields     = mailocations_get_fields_raw();
+		$sanitizers = $this->get_sanitizers();
+
+		foreach ( $fields as $key => $field ) {
+			// `continue` after the first unset. Without it the second check reads the type of a
+			// field that has no type, which is the notice PHPStan flagged.
+			if ( ! isset( $field['type'] ) ) {
+				unset( $fields[ $key ] );
+				continue;
+			}
+
+			if ( ! isset( $sanitizers[ $field['type'] ] ) ) {
+				unset( $fields[ $key ] );
+			}
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * Gets the sanitize callback for each importable field type.
+	 * A field type missing from this list is not imported at all.
+	 *
+	 * @since TBD
+	 *
+	 * @return array<string, string> Field type to callable name.
+	 */
+	function get_sanitizers() {
+		return [
 			'email'      => 'sanitize_email',
 			'number'     => 'intval',
 			'radio'      => 'esc_html',
@@ -527,19 +559,9 @@ class Mai_Locations_Location_Import {
 			'text'       => 'esc_html',
 			'textarea'   => 'wp_kses_post',
 			'true_false' => 'rest_sanitize_boolean',
-			'url'        => 'esc_url',
+			// esc_url_raw, not esc_url. This value is stored, not printed, and esc_url would
+			// write &#038; into the database in place of every &.
+			'url'        => 'esc_url_raw',
 		];
-
-		foreach ( $fields as $key => $field ) {
-			if ( ! isset( $field['type'] ) ) {
-				unset( $fields[ $key ] );
-			}
-
-			if ( ! isset( $allowed[ $field['type'] ] ) ) {
-				unset( $fields[ $key ] );
-			}
-		}
-
-		return $fields;
 	}
 }
