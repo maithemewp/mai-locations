@@ -477,9 +477,9 @@ class CLI {
 				// Get website data.
 				$data = mailocations_get_data_from_website( $url );
 
-				// Bail if no data.
-				// TODO: always false, because the array always has two keys. See TODO.md.
-				if ( ! array_values( $data ) ) {
+				// Bail if the site gave us neither. The old check was `! array_values( $data )`,
+				// always false, so this never skipped anything. Fixed September 16, 2026.
+				if ( ! $data['desc'] && ! $data['image'] ) {
 					// WP_CLI::line( sprintf( 'No description or image: %s', get_permalink( $post_id ) ) );
 					continue;
 				}

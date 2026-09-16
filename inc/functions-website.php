@@ -9,9 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Deliberately global, not namespaced: Visit Sleepy Hollow and other sites call this directly
  * from their own scripts. It shared a file with the CLI class until September 15, 2026.
  *
- * TODO: uses WordPress's default user agent and a 5 second timeout, so many hotel and chain
- * sites return nothing. The twitter: fallback below can never run, because the check before it
- * is always false. An unknown $key warns and returns null. See TODO.md.
+ * Reads og:description and og:image, then fills whichever is still missing from the twitter:
+ * tags. Returns both as an array, or one of them when $key is given. An unknown key gives an
+ * empty string.
  *
  * @access private
  *
@@ -29,13 +29,25 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
 		'desc'  => '',
 	];
 
-	// Request.
-	$response = wp_remote_get( $url );
+	// Request. A browser user agent and a longer timeout, because many hotel and chain sites
+	// answer WordPress's default agent with nothing, or not within 5 seconds. On Visit Sleepy
+	// Hollow that was 44 of 106 sites. Filterable so a site can tune it. Changed September 16, 2026.
+	$args = apply_filters(
+		'mailocations_website_request_args',
+		[
+			'timeout'     => 15,
+			'redirection' => 5,
+			'user-agent'  => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+		],
+		$url
+	);
+
+	$response = wp_remote_get( $url, $args );
 	$code     = wp_remote_retrieve_response_code( $response );
 
 	// Bail if error. 403 is a valid response, but sometimes we were blocked.
 	if ( ! in_array( $code, [ 200, 403 ] ) ) {
-		return $key ? $data[ $key ] : $data;
+		return $key ? ( $data[ $key ] ?? '' ) : $data;
 	}
 
 	// Get body.
@@ -44,7 +56,7 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
 
 	// Bail if no body.
 	if ( ! $body ) {
-		return $key ? $data[ $key ] : $data;
+		return $key ? ( $data[ $key ] ?? '' ) : $data;
 	}
 
 	// Set up tag processor.
@@ -71,8 +83,10 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
 		}
 	}
 
-	// Maybe try for fallbacks.
-	if ( ! array_values( $data ) ) {
+	// Maybe try for fallbacks, for whichever value the og: tags did not provide. The old check was
+	// `! array_values( $data )`, always false because the array always has two keys, so the
+	// twitter: tags were never read. Fixed September 16, 2026.
+	if ( ! $data['desc'] || ! $data['image'] ) {
 		// Set up tag processor.
 		$tags = new WP_HTML_Tag_Processor( $body );
 
@@ -98,7 +112,7 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
 		}
 	}
 
-	return $key ? $data[ $key ] : $data;
+	return $key ? ( $data[ $key ] ?? '' ) : $data;
 }
 
 /**

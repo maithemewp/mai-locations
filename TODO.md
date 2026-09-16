@@ -96,12 +96,12 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 ### CLI and website data
 
 - [x] `mailocations_get_data_from_website()` returned `$data['key']` instead of `$data[ $key ]` on a failed request or empty body. Patched September 14, 2026.
-- [ ] **The Twitter card fallback still never runs.** The September 14 patch fixed the `$property`/`$name` switch, but the fallback sits behind `! array_values( $data )`, which is always false because the array always has two keys. The same check at `:479` means locations with no data are never skipped. `classes/class-locations-cli.php:612`. Corrected September 15, 2026; it was wrongly marked fixed.
+- [x] **The Twitter card fallback now runs.** The September 14 patch fixed the `$property`/`$name` switch, but the fallback sat behind `! array_values( $data )`, always false because the array always has two keys, so twitter: tags were never read. It now runs whenever either value is still missing. The same check in the CLI loop, which was meant to skip locations with no data, is now `! $data['desc'] && ! $data['image']`. `inc/functions-website.php` and `inc/classes/Cli/CLI.php`. Fixed September 16, 2026.
 - [ ] A failed sideload is logged as "Image updated": `mailocations_upload_image()` returns a `WP_Error`, the check at `:527` treats it as success, and `set_post_thumbnail()` gets the error.
 - [ ] `mailocations_upload_image()` fetches with `file_get_contents()` (no timeout, no user agent, warns on failure), then re-downloads the saved copy through the site's own uploads URL with `download_url()`. That fails on local sites with self-signed certificates (`cURL error 60` on Herd). Sideload from the fetched bytes instead. `:685`.
 - [ ] `mailocations_upload_image()` stages every image as `md5(url).jpg`. WordPress renames a PNG on sideload, but the staging name is still wrong.
 - [x] `update_locations_from_website` always set the excerpt from `og:description` on a location without one, with no way to turn that off. Added `--skip_excerpt` and `--skip_image`, alongside the existing `--force_excerpt` and `--force_image`. Mike's call, September 15, 2026.
-- [ ] `mailocations_get_data_from_website()` uses WordPress's default user agent and a 5 second timeout. Many hotel and chain sites answer only a browser user agent. Seen on Visit Sleepy Hollow: 44 of 106 sites gave no image until retried. An unknown `$key` warns and returns null.
+- [x] `mailocations_get_data_from_website()` used WordPress's default user agent and a 5 second timeout, and many hotel and chain sites answer only a browser agent. Seen on Visit Sleepy Hollow: 44 of 106 sites gave no image until retried. Now a browser user agent with a 15 second timeout, filterable through the new `mailocations_website_request_args`. An unknown `$key` returns an empty string instead of warning and returning null. Fixed September 16, 2026.
 
 ### Settings page
 

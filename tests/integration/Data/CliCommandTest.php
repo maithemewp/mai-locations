@@ -359,13 +359,18 @@ final class CliCommandTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_twitter_only_website_sets_nothing(): void {
+	/**
+	 * Fixed September 16, 2026. The twitter: fallback never ran, so a site with only twitter
+	 * tags gave the command nothing.
+	 */
+	public function test_twitter_only_website_sets_the_excerpt(): void {
 		$id                                   = $this->create_location( [ 'location_url' => 'https://inn.example/' ] );
 		$this->sites['https://inn.example/'] = [ 200, (string) file_get_contents( self::FIXTURES . '/page-twitter-only.html' ) ];
 
-		// Correct behaviour: the twitter:description fallback would set the excerpt.
-		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', 'Done.' ] ], $this->update() );
-		$this->assertFalse( has_excerpt( $id ) );
+		$this->capture_errors( fn() => $this->update() );
+
+		$this->assertTrue( has_excerpt( $id ) );
+		$this->assertSame( 'Twitter description', get_post( $id )->post_excerpt );
 	}
 
 	public function test_pins_bug_sideload_error_passes_wp_error_to_set_post_thumbnail_and_logs_success(): void {

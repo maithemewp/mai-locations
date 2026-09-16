@@ -49,7 +49,11 @@ final class GetDataFromWebsiteTest extends TestCase {
 		$this->assertSame( 'Rooms & suites by the river', mailocations_get_data_from_website( self::URL, 'desc' ) );
 	}
 
-	public function test_sends_one_get_with_wordpress_default_user_agent_and_5_second_timeout(): void {
+	/**
+	 * Changed September 16, 2026. WordPress's default agent and 5 second timeout left 44 of Visit
+	 * Sleepy Hollow's 106 sites returning nothing.
+	 */
+	public function test_sends_one_get_with_a_browser_user_agent_and_a_longer_timeout(): void {
 		$this->serve( 200, '' );
 
 		mailocations_get_data_from_website( self::URL );
@@ -59,10 +63,26 @@ final class GetDataFromWebsiteTest extends TestCase {
 
 		$this->assertSame( self::URL, $request['url'] );
 		$this->assertSame( 'GET', $request['args']['method'] );
-		// Known problem: many hotel and chain sites refuse this user agent and time out at 5 seconds.
-		$this->assertSame( 5, $request['args']['timeout'] );
-		$this->assertSame( 'WordPress/' . get_bloginfo( 'version' ) . '; ' . get_bloginfo( 'url' ), $request['args']['user-agent'] );
+		$this->assertSame( 15, $request['args']['timeout'] );
+		$this->assertStringStartsWith( 'Mozilla/5.0 ', $request['args']['user-agent'] );
 		$this->assertSame( 5, $request['args']['redirection'] );
+	}
+
+	public function test_request_args_are_filterable(): void {
+		$this->serve( 200, '' );
+
+		add_filter(
+			'mailocations_website_request_args',
+			static function ( array $args ): array {
+				$args['timeout'] = 30;
+
+				return $args;
+			}
+		);
+
+		mailocations_get_data_from_website( self::URL );
+
+		$this->assertSame( 30, $this->http_requests[0]['args']['timeout'] );
 	}
 
 	public function test_failed_request_returns_empty_values(): void {
@@ -113,12 +133,20 @@ final class GetDataFromWebsiteTest extends TestCase {
 		$this->assertSame( '', mailocations_get_data_from_website( self::URL, 'desc' ) );
 	}
 
-	public function test_pins_bug_twitter_fallback_never_runs(): void {
+	/**
+	 * Fixed September 16, 2026. The fallback sat behind `! array_values( $data )`, always false,
+	 * so twitter: tags were never read.
+	 */
+	public function test_twitter_tags_fill_in_what_og_tags_did_not(): void {
 		$this->serve( 200, self::fixture( 'page-twitter-only.html' ) );
 
-		// array_values() on two empty strings is a non-empty array, so the fallback branch is dead.
-		// Correct behaviour: desc 'Twitter description', image 'https://inn.example/twitter-image.jpg'.
-		$this->assertSame( [ 'image' => '', 'desc' => '' ], mailocations_get_data_from_website( self::URL ) );
+		$this->assertSame(
+			[
+				'image' => 'https://inn.example/twitter-image.jpg',
+				'desc'  => 'Twitter description',
+			],
+			mailocations_get_data_from_website( self::URL )
+		);
 	}
 
 	public function test_ignores_og_in_name_twitter_in_property_secure_url_and_plain_description(): void {
@@ -151,13 +179,15 @@ final class GetDataFromWebsiteTest extends TestCase {
 		$this->assertSame( '  Spaced  ', mailocations_get_data_from_website( self::URL, 'desc' ) );
 	}
 
-	public function test_pins_bug_unknown_key_warns_and_returns_null(): void {
+	/**
+	 * Fixed September 16, 2026. An unknown key used to warn and return null.
+	 */
+	public function test_unknown_key_returns_an_empty_string( ): void {
 		$this->serve( 200, self::fixture( 'page-og.html' ) );
 
 		[ $result, $warnings ] = $this->capture_errors( fn() => mailocations_get_data_from_website( self::URL, 'title' ) );
 
-		// Correct behaviour: reject or ignore unknown keys without a warning.
-		$this->assertNull( $result );
-		$this->assertSame( [ 'Undefined array key "title"' ], $warnings );
+		$this->assertSame( '', $result );
+		$this->assertSame( [], $warnings );
 	}
 }
