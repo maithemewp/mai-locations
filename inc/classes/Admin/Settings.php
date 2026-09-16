@@ -161,7 +161,7 @@ class Settings {
 	 * @return void
 	 */
 	public function label_plural_callback(): void {
-		printf( '<input class="regular-text" type="text" name="mai_locations[label_plural]" id="label_plural" value="%s">', $this->options['label_plural'] );
+		printf( '<input class="regular-text" type="text" name="mai_locations[label_plural]" id="label_plural" value="%s">', esc_attr( $this->options['label_plural'] ) );
 	}
 
 	/**
@@ -172,7 +172,7 @@ class Settings {
 	 * @return void
 	 */
 	public function label_singular_callback(): void {
-		printf( '<input class="regular-text" type="text" name="mai_locations[label_singular]" id="label_singular" value="%s">', $this->options['label_singular'] );
+		printf( '<input class="regular-text" type="text" name="mai_locations[label_singular]" id="label_singular" value="%s">', esc_attr( $this->options['label_singular'] ) );
 	}
 
 	/**
@@ -183,7 +183,7 @@ class Settings {
 	 * @return void
 	 */
 	public function base_callback(): void {
-		printf( '<input class="regular-text" type="text" name="mai_locations[base]" id="base" value="%s">', $this->options['base'] );
+		printf( '<input class="regular-text" type="text" name="mai_locations[base]" id="base" value="%s">', esc_attr( $this->options['base'] ) );
 		printf( '<p>%s</p>', $this->permalink_instructions() );
 	}
 
@@ -195,7 +195,7 @@ class Settings {
 	 * @return void
 	 */
 	public function category_base_callback(): void {
-		printf( '<input class="regular-text" type="text" name="mai_locations[category_base]" id="category_base" value="%s">', $this->options['category_base'] );
+		printf( '<input class="regular-text" type="text" name="mai_locations[category_base]" id="category_base" value="%s">', esc_attr( $this->options['category_base'] ) );
 		printf( '<p>%s</p>', $this->permalink_instructions() );
 	}
 
@@ -207,15 +207,12 @@ class Settings {
 	 * @return void
 	 */
 	public function distance_callback(): void {
-		printf( '<input type="number" name="mai_locations[distance]" id="distance" value="%s">', $this->options['distance'] );
+		printf( '<input type="number" name="mai_locations[distance]" id="distance" value="%s">', esc_attr( $this->options['distance'] ) );
 		printf( '<p>%s</p>', __( 'The default distance used for proximity search.', 'mai-locations' ) );
 	}
 
 	/**
 	 * Setting callback.
-	 *
-	 * TODO: selected() echoes as well as returning, so the markup carries a stray
-	 * selected='selected' outside the tag. See TODO.md.
 	 *
 	 * @since TBD
 	 *
@@ -230,7 +227,9 @@ class Settings {
 
 		echo '<select name="mai_locations[units]">';
 			foreach ( $options as $id => $label ) {
-				printf( '<option value="%s"%s>%s</option>', $id, selected( $selected, $id ), $label );
+				// The third argument stops selected() echoing as well as returning, which used to
+				// print a stray selected='selected' before the first option. Fixed September 16, 2026.
+				printf( '<option value="%s"%s>%s</option>', $id, selected( $selected, $id, false ), $label );
 			}
 		echo '</select>';
 
@@ -245,7 +244,7 @@ class Settings {
 	 * @return void
 	 */
 	public function google_api_key_callback(): void {
-		printf( '<input class="regular-text" type="password" name="mai_locations[google_api_key]" id="google_api_key" value="%s">', $this->options['google_api_key'] );
+		printf( '<input class="regular-text" type="password" name="mai_locations[google_api_key]" id="google_api_key" value="%s">', esc_attr( $this->options['google_api_key'] ) );
 		echo '<p>';
 			printf( '%s <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">%s</a>',
 				__( 'The Google API key for maps in ACF and the Location Map block.', 'mai-locations' ),
@@ -262,7 +261,7 @@ class Settings {
 	 * @return void
 	 */
 	public function google_api_signature_callback(): void {
-		printf( '<input class="regular-text" type="password" name="mai_locations[google_api_signature]" id="google_api_signature" value="%s">', $this->options['google_api_signature'] );
+		printf( '<input class="regular-text" type="password" name="mai_locations[google_api_signature]" id="google_api_signature" value="%s">', esc_attr( $this->options['google_api_signature'] ) );
 	}
 
 	/**
@@ -273,7 +272,7 @@ class Settings {
 	 * @return void
 	 */
 	public function google_map_id_callback(): void {
-		printf( '<input class="regular-text" type="text" name="mai_locations[google_map_id]" id="google_map_id" value="%s">', $this->options['google_map_id'] );
+		printf( '<input class="regular-text" type="text" name="mai_locations[google_map_id]" id="google_map_id" value="%s">', esc_attr( $this->options['google_map_id'] ) );
 		echo '<p>';
 			printf( '%s <a href="https://console.cloud.google.com/google/maps-apis/studio/maps" target="_blank">%s</a>',
 				__( 'The Map ID from Google Cloud Console. Required for advanced markers.', 'mai-locations' ),
@@ -283,10 +282,9 @@ class Settings {
 	}
 
 	/**
-	 * Fills in the Google Maps key and signature for ACF's map field.
-	 *
-	 * TODO: both conditions are always true, so a key set here always replaces one ACF already
-	 * had. See TODO.md.
+	 * Fills in the Google Maps key and signature for ACF's map field, where ACF has none of its
+	 * own. Until September 16, 2026 both conditions were always true, so a key saved here
+	 * replaced whatever ACF already had.
 	 *
 	 * @since TBD
 	 *
@@ -295,8 +293,8 @@ class Settings {
 	 * @return array<string, mixed>
 	 */
 	public function acf_google_map_api( $api ) {
-		// Maybe add key.
-		if ( isset( $api['key'] ) || empty( $api['key'] ) ) {
+		// Maybe add key, only when ACF has none.
+		if ( empty( $api['key'] ) ) {
 			$key = mailocations_get_option( 'google_api_key' );
 
 			if ( $key ) {
@@ -304,8 +302,8 @@ class Settings {
 			}
 		}
 
-		// Maybe add signature.
-		if ( isset( $api['signature'] ) || empty( $api['signature'] ) ) {
+		// Maybe add signature, same rule.
+		if ( empty( $api['signature'] ) ) {
 			$signature = mailocations_get_option( 'google_api_signature' );
 
 			if ( $signature ) {

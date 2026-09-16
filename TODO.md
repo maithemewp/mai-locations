@@ -105,9 +105,9 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 
 ### Settings page
 
-- [ ] `acf_google_map_api()` tests `isset( $api['key'] ) || empty( $api['key'] )`, always true, so the plugin's key always replaces ACF's. The signature check has the same bug. `classes/class-settings.php:332`.
-- [ ] The units dropdown prints `selected='selected'` outside the tag, because `selected()` echoes inside `printf()`. `classes/class-settings.php:269`.
-- [ ] Settings values go into `value=""` unescaped, so a label with a double quote breaks the field. `classes/class-settings.php:197`.
+- [x] `acf_google_map_api()` tested `isset( $api['key'] ) || empty( $api['key'] )`, always true, so a key saved in the settings replaced whatever ACF already had, and the signature check had the same bug. Both are plain `empty()` now, so the saved values fill in only what ACF is missing. Fixed September 16, 2026.
+- [x] The units dropdown printed `selected='selected'` between the select tag and its first option, because `selected()` echoes as well as returning. Now passed `false` as its third argument. Fixed September 16, 2026.
+- [x] Settings values went into `value=""` unescaped, so a label with a double quote broke its field. All eight printed values are wrapped in `esc_attr()` now, with a scenario test that renders the page from a saved option holding a quote. Fixed September 16, 2026.
 - [ ] `mailocations_get_option()` returns stale values after `mailocations_update_option()` in the same request, and warns on an unknown key.
 - [ ] Labels and base are sanitised only on first call; later calls return the raw filtered value. The filtered base uses `sanitize_html_class()`, the saved one `sanitize_title_with_dashes()`.
 

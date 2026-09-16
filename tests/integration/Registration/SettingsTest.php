@@ -109,7 +109,7 @@ final class SettingsTest extends TestCase {
 		$this->assertSame( mailocations_sanitize_options( $input ), $this->settings()->sanitize_callback( $input ) );
 	}
 
-	public function test_pins_bug_units_select_echoes_selected_attribute_outside_the_option(): void {
+	public function test_units_select_marks_the_saved_unit(): void {
 		$settings = $this->settings();
 		$settings->init();
 
@@ -125,8 +125,9 @@ final class SettingsTest extends TestCase {
 		$this->assertStringContainsString( '<input type="number" name="mai_locations[distance]" id="distance" value="100">', $html );
 		$this->assertStringContainsString( '<input class="regular-text" type="password" name="mai_locations[google_api_key]" id="google_api_key" value="">', $html );
 
-		// selected() echoes as well as returning, so the attribute is printed once before the tag. It should only appear inside the tag.
-		$this->assertStringContainsString( "<select name=\"mai_locations[units]\"> selected='selected'<option value=\"mi\" selected='selected'>Miles</option><option value=\"km\">Kilometers</option></select>", $html );
+		// Fixed September 16, 2026. selected() used to echo as well as return, printing a stray
+		// selected='selected' between the select tag and its first option.
+		$this->assertStringContainsString( "<select name=\"mai_locations[units]\"><option value=\"mi\" selected='selected'>Miles</option><option value=\"km\">Kilometers</option></select>", $html );
 	}
 
 	public function test_add_menu_item_adds_settings_submenu_for_admins(): void {
@@ -176,7 +177,11 @@ final class SettingsTest extends TestCase {
 		$this->assertSame( [], $settings->acf_google_map_api( [] ) );
 	}
 
-	public function test_pins_bug_saved_key_always_overwrites_acf_key(): void {
+	/**
+	 * Fixed September 16, 2026. The condition was `isset( $api['key'] ) || empty( $api['key'] )`,
+	 * always true, so a key saved here replaced whatever ACF already had.
+	 */
+	public function test_saved_key_fills_in_only_what_acf_is_missing(): void {
 		$result = $this->run_scenario(
 			[
 				'options' => [
@@ -186,9 +191,22 @@ final class SettingsTest extends TestCase {
 			]
 		);
 
-		// `isset( $api['key'] ) || empty( $api['key'] )` is always true. Should only fill the key when ACF has none.
-		$this->assertSame( [ 'key' => 'plugin-key', 'signature' => 'plugin-signature' ], $result['acf_api_with_key'] );
+		$this->assertSame( [ 'key' => 'acf-key', 'signature' => 'acf-signature' ], $result['acf_api_with_key'] );
 		$this->assertSame( [ 'key' => 'plugin-key', 'signature' => 'plugin-signature' ], $result['acf_api_empty'] );
+	}
+
+	public function test_settings_values_are_escaped_into_attributes(): void {
+		$result = $this->run_scenario(
+			[
+				'probe'   => 'settings_page',
+				'options' => [ 'label_plural' => 'Say "hi"', 'base' => 'places' ],
+			]
+		);
+
+		// Fixed September 16, 2026. The saved value went into value="" unescaped, so a double
+		// quote in a label closed the attribute and broke the field.
+		$this->assertStringContainsString( 'id="label_plural" value="Say &quot;hi&quot;">', $result['html'] );
+		$this->assertStringNotContainsString( 'value="Say "hi"">', $result['html'] );
 	}
 
 	private function settings(): Mai_Locations_Settings {

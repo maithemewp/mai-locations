@@ -6,6 +6,9 @@
 * Removed: Social media fields (Facebook, Twitter, YouTube, LinkedIn, Instagram, Pinterest, TikTok) and the `mailocations_social_fields` filter. They were switched off in 1.0.0 and never displayed anywhere. No site had any data saved in them.
 * Added: `--skip_excerpt` and `--skip_image` for `wp mailocations update_locations_from_website`, so a run can fetch only images or only excerpts.
 * Changed: Administrators and editors can now use the front-end edit form and see Edit buttons on any location, matching what they can already do in the Dashboard. Location owners keep editing their own locations whatever their role.
+* Fixed: Settings values went into the form unescaped, so a label containing a double quote broke its field.
+* Fixed: The Default Units dropdown printed a stray `selected='selected'` before its first option.
+* Fixed: A Google API key saved in the settings replaced the key ACF already had. It now fills in only what ACF is missing.
 * Fixed: The upgrade routines ran twice on every Dashboard page load, because a function copy and a class copy were both hooked. One copy runs now, and the old function names still work.
 * Fixed: `[mai_location_place]` now prints its `style` attribute, which it accepted and ignored, and escapes the Place ID it puts in the link.
 * Fixed: `[mai_location_phone]` escapes its `style` attribute, as the other shortcodes already did.

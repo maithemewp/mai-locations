@@ -103,6 +103,18 @@ switch ( $scenario['probe'] ?? 'content_types' ) {
 		];
 		break;
 
+	case 'settings_page':
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		$settings = mailoc_reg_hooked_instance( 'admin_init', 'Mai_Locations_Settings' );
+		$settings->init();
+
+		ob_start();
+		$settings->add_content();
+
+		$result = [ 'html' => (string) ob_get_clean() ];
+		break;
+
 	case 'upgrade':
 		$writes = [];
 
