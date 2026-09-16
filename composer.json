@@ -1,5 +1,6 @@
 {
     "require": {
+        "php": ">=8.3",
         "yahnis-elsts/plugin-update-checker": "^5",
         "giggsey/libphonenumber-for-php": "^9.0"
     },

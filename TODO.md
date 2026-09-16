@@ -164,5 +164,6 @@ Mike asked, September 15, 2026, whether to convert to PHP-only core blocks. Not 
   - **Watch for namespaced function calls.** A missing global function called from a namespaced class reports as `Mai\Locations\the_function()`, which is what the `mai_post_grid_query()` fatal test caught. Same behaviour, different message.
   - **Dead code found on the way, not deleted yet:** `Queries::mai_post_grid_query()` is unhooked and calls a function that does not exist. Deleting it removes a public method, so it needs Mike's yes. Three tests pin it today.
 - [ ] Fix the open bugs above, each by flipping its pinned test.
-- [ ] Raise the PHP floor and write the changelog.
+- [x] Raise the PHP floor. 8.3, Mike's call, September 16, 2026, after checking two things: PHPStan analysing the whole plugin with `phpVersion: 80200` reports no errors, so nothing in the code needs 8.3, and no bundled dependency asks for more than `^8.1`. Every fleet site measured that day ran 8.3.30 or newer, three on 8.4. So the floor is a forward-looking choice about what we may write, not a requirement. `Requires PHP` and `composer.json` moved together.
+- [ ] Write the changelog and release.
 - [ ] Release.
