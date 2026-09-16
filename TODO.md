@@ -133,8 +133,11 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 
 - [x] Test harness: PHPUnit 9.6 with the WordPress 7.1 test suite and ACF Pro loaded, plus PHPStan level 6 with WordPress, WP-CLI and ACF Pro stubs and a baseline of 224 existing errors. September 15, 2026.
 - [x] Characterisation tests for the post type, taxonomy, settings, fields, import, CLI commands, blocks, forms and the public names. 578 tests. September 15, 2026.
-- [ ] Composer PSR-4 autoload under a namespace, following `wp-plugin-scaffold`.
-- [ ] Move classes one at a time behind the tests, keeping public function names working until the release. Make the static caches resettable as each file moves.
+- [x] PHP moved into `inc/`, and Composer PSR-4 autoload wired for `Mai\Locations\` to `inc/classes/`, following `wp-plugin-scaffold`. September 15, 2026. Two commits, kept apart: the directory move, then the autoload wiring.
+- [ ] Move classes one at a time behind the tests, keeping public names working until the release. Make the static caches resettable as each file moves.
+  - Each migrated class keeps its old global name in `inc/aliases.php`, which the bootstrap picks up through its `inc/*.php` glob. `PublicNamesTest::test_migrated_classes_keep_their_old_names_as_aliases()` fails if an alias breaks.
+  - [x] `Mai_Locations_Block_Bindings` to `Mai\Locations\BlockBindings`. September 15, 2026.
+  - [ ] The remaining 14 classes in `inc/classes/`, then the 9 block classes.
 - [ ] Fix the open bugs above, each by flipping its pinned test.
 - [ ] Raise the PHP floor and write the changelog.
 - [ ] Release.

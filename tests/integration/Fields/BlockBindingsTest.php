@@ -9,7 +9,10 @@ use Mai_Locations_Block_Bindings;
 use WP_Block;
 
 /**
- * Pins the mai/locations block bindings source in classes/class-block-bindings.php.
+ * Pins the mai/locations block bindings source in inc/classes/BlockBindings.php.
+ *
+ * Deliberately still written against the old Mai_Locations_Block_Bindings name, so it also
+ * proves the alias in inc/aliases.php keeps working for sites using that name.
  */
 final class BlockBindingsTest extends TestCase {
 

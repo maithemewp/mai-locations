@@ -286,13 +286,7 @@ parameters:
 			message: '#^Callback expects 0 parameters, \$accepted_args is set to 3\.$#'
 			identifier: arguments.count
 			count: 1
-			path: ../inc/classes/class-block-bindings.php
-
-		-
-			message: '#^Method Mai_Locations_Block_Bindings\:\:get_source_value\(\) has parameter \$source_args with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-block-bindings.php
+			path: ../inc/classes/BlockBindings.php
 
 		-
 			message: '#^Method Mai_Geo_Query\:\:get_distance\(\) should return float but returns false\.$#'

@@ -141,6 +141,22 @@ final class PublicNamesTest extends TestCase {
 		$this->assertTrue( class_exists( $name ), "Public class {$name} is gone" );
 	}
 
+	/**
+	 * Classes that have moved under Mai\Locations\, each keeping its old global name as an
+	 * alias in inc/aliases.php. Add a line here as each class moves.
+	 */
+	public function test_migrated_classes_keep_their_old_names_as_aliases(): void {
+		$migrated = [
+			'Mai_Locations_Block_Bindings' => \Mai\Locations\BlockBindings::class,
+		];
+
+		foreach ( $migrated as $old => $new ) {
+			$this->assertTrue( class_exists( $new ), "{$new} is missing" );
+			$this->assertTrue( class_exists( $old ), "{$old} no longer resolves" );
+			$this->assertSame( $new, ( new \ReflectionClass( $old ) )->getName(), "{$old} is not an alias of {$new}" );
+		}
+	}
+
 	public function test_constants_are_defined(): void {
 		foreach ( [ 'MAI_LOCATIONS_VERSION', 'MAI_LOCATIONS_PLUGIN_DIR', 'MAI_LOCATIONS_PLUGIN_URL', 'MAI_LOCATIONS_PLUGIN_FILE', 'MAI_LOCATIONS_BASENAME' ] as $name ) {
 			$this->assertTrue( defined( $name ), "Constant {$name} is gone" );
