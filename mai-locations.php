@@ -133,10 +133,7 @@ final class Mai_Locations_Plugin {
 
 		// Classes.
 		include_once __DIR__ . '/inc/classes/class-location-fields.php';
-		include_once __DIR__ . '/inc/classes/class-location-form.php'; // Must be before create/edit.
-		include_once __DIR__ . '/inc/classes/class-location-form-edit.php';
 		include_once __DIR__ . '/inc/classes/class-location-form-listener.php';
-		include_once __DIR__ . '/inc/classes/class-location-form-submit.php';
 		include_once __DIR__ . '/inc/classes/class-location-import.php';
 		include_once __DIR__ . '/inc/classes/class-locations-cli.php';
 

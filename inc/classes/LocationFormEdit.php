@@ -1,17 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Location_Form_Edit extends Mai_Locations_Location_Form {
+/**
+ * The front-end form for editing an existing location.
+ *
+ * Was Mai_Locations_Location_Form_Edit in classes/class-location-form-edit.php. That name
+ * still works, via inc/aliases.php.
+ *
+ * @since TBD
+ */
+class LocationFormEdit extends LocationForm {
+
 	/**
-	 * Gets location edit form.
+	 * Gets the location edit form.
 	 *
 	 * @since TBD
 	 *
-	 * @return string
+	 * @return string|null
 	 */
-	function get_form() {
+	public function get_form() {
 		// Bail if no location ID.
 		if ( ! $this->args['location_id'] ) {
 			return;
@@ -20,6 +33,8 @@ class Mai_Locations_Location_Form_Edit extends Mai_Locations_Location_Form {
 		// Get it started.
 		$html     = '';
 		$singular = mailocations_get_singular_label( get_post_type( $this->args['location_id'] ) );
+		// TODO: reads $GET, not $_GET, so the Back link never shows. Pinned in LocationFormTest
+		// until the fix lands. See TODO.md.
 		$referrer = isset( $GET['referrer'] ) ? sanitize_text_field( $GET['referrer'] ) : '';
 
 		// Maybe add back link.
@@ -72,7 +87,7 @@ class Mai_Locations_Location_Form_Edit extends Mai_Locations_Location_Form {
 		acf_form( $args );
 		$html .= ob_get_clean();
 
-		// Remove filters.
+		// Remove filters. The extra arguments are ignored by PHP; kept as they were.
 		remove_filter( 'acf/load_value/key=mai_location_title',   [ $this, 'load_location_title_value' ], 10, 3 );
 		remove_filter( 'acf/load_value/key=mai_location_excerpt', [ $this, 'load_location_excerpt_value' ], 10, 3 );
 		remove_filter( 'acf/load_value/key=mai_location_image',   [ $this, 'load_location_image_value' ], 10, 3 );
@@ -81,47 +96,47 @@ class Mai_Locations_Location_Form_Edit extends Mai_Locations_Location_Form {
 	}
 
 	/**
-	 * Loads location title as the title field value.
+	 * Loads the location title as the title field value.
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param int   $value   The existing field value.
-	 * @param int   $post_id The post ID.
-	 * @param array $field   The existing field array.
+	 * @param mixed                $value   The existing field value.
+	 * @param int|string           $post_id The post ID.
+	 * @param array<string, mixed> $field   The existing field array.
 	 *
 	 * @return string
 	 */
-	function load_location_title_value( $value, $post_id, $field ) {
+	public function load_location_title_value( $value, $post_id, $field ) {
 		return get_the_title( $this->args['location_id'] );
 	}
 
 	/**
-	 * Loads location excerpt as the excerpt field value.
+	 * Loads the location excerpt as the excerpt field value.
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param int   $value   The existing field value.
-	 * @param int   $post_id The post ID.
-	 * @param array $field   The existing field array.
+	 * @param mixed                $value   The existing field value.
+	 * @param int|string           $post_id The post ID.
+	 * @param array<string, mixed> $field   The existing field array.
 	 *
 	 * @return string
 	 */
-	function load_location_excerpt_value( $value, $post_id, $field ) {
+	public function load_location_excerpt_value( $value, $post_id, $field ) {
 		return get_post_field( 'post_excerpt', $this->args['location_id'] );
 	}
 
 	/**
-	 * Loads featured image as the image field value.
+	 * Loads the featured image as the image field value.
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param int   $value   The existing field value.
-	 * @param int   $post_id The post ID.
-	 * @param array $field   The existing field array.
+	 * @param mixed                $value   The existing field value.
+	 * @param int|string           $post_id The post ID.
+	 * @param array<string, mixed> $field   The existing field array.
 	 *
 	 * @return int
 	 */
-	function load_location_image_value( $value, $post_id, $field ) {
+	public function load_location_image_value( $value, $post_id, $field ) {
 		return get_post_thumbnail_id( $this->args['location_id'] );
 	}
 }

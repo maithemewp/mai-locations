@@ -1,18 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Location_Form_Submit extends Mai_Locations_Location_Form {
+/**
+ * The front-end form for submitting a new location.
+ *
+ * Was Mai_Locations_Location_Form_Submit in classes/class-location-form-submit.php. That name
+ * still works, via inc/aliases.php.
+ *
+ * @since TBD
+ */
+class LocationFormSubmit extends LocationForm {
 
 	/**
-	 * Gets location edit form.
+	 * Gets the location submission form.
 	 *
 	 * @since TBD
 	 *
 	 * @return string
 	 */
-	function get_form() {
+	public function get_form() {
 		// Get it started.
 		$html = '';
 
@@ -44,7 +56,8 @@ class Mai_Locations_Location_Form_Submit extends Mai_Locations_Location_Form {
 			return $html;
 		}
 
-		// Form args.
+		// Form args. The status comes from the submission block's own setting, which is how a
+		// site decides what a new submission arrives as.
 		$args = [
 			'id'                => 'mailocations-form',
 			'post_id'           => 'new_post',

@@ -1,9 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
+use WP_HTML_Tag_Processor;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Location_Form {
+/**
+ * Shared wrapper for the front-end location forms. The child classes build the form itself.
+ *
+ * Was Mai_Locations_Location_Form in classes/class-location-form.php. That name still works,
+ * via inc/aliases.php.
+ *
+ * @since TBD
+ */
+class LocationForm {
+
+	/**
+	 * The form args.
+	 *
+	 * @var array<string, mixed>
+	 */
 	protected $args;
 
 	/**
@@ -11,9 +31,9 @@ class Mai_Locations_Location_Form {
 	 *
 	 * @since TBD
 	 *
-	 * @param array $args The args.
+	 * @param array<string, mixed> $args The args.
 	 */
-	function __construct( $args ) {
+	public function __construct( $args ) {
 		$args = wp_parse_args( $args,
 			[
 				'location_id' => 0,
@@ -42,28 +62,31 @@ class Mai_Locations_Location_Form {
 	}
 
 	/**
-	 * Remove conditional logic.
+	 * Removes conditional logic from a field.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $field The field.
+	 * @param array<string, mixed> $field The field.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function remove_conditions( $field ) {
+	public function remove_conditions( $field ) {
 		$field['conditional_logic'] = 0;
 
 		return $field;
 	}
 
 	/**
-	 * Gets form.
+	 * Gets the wrapped form.
+	 *
+	 * TODO: returns null, not '', when there are no fields, and a custom class runs into the
+	 * default one because trim() removes the space that was just added. See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @return string
+	 * @return string|null
 	 */
-	function get() {
+	public function get() {
 		// Bail if no fields.
 		if ( ! $this->args['fields'] ) {
 			return;
@@ -139,13 +162,13 @@ class Mai_Locations_Location_Form {
 	}
 
 	/**
-	 * Gets the form. Must be implemented in child class.
+	 * Gets the form itself. Implemented by the child classes.
 	 *
 	 * @since TBD
 	 *
 	 * @return string
 	 */
-	function get_form() {
+	public function get_form() {
 		return '';
 	}
 }

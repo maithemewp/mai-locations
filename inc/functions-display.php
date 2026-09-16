@@ -30,7 +30,7 @@ function mailocations_get_locations_table( $args = [] ) {
  * @return string
  */
 function mailocations_get_location_edit_form( $args ) {
-	$form = new Mai_Locations_Location_Form_Edit( $args );
+	$form = new Mai\Locations\LocationFormEdit( $args );
 	return $form->get();
 }
 
@@ -44,7 +44,7 @@ function mailocations_get_location_edit_form( $args ) {
  * @return string
  */
 function mailocations_get_location_submission_form( $args ) {
-	$form = new Mai_Locations_Location_Form_Submit( $args );
+	$form = new Mai\Locations\LocationFormSubmit( $args );
 	return $form->get();
 }
 
