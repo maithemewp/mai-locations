@@ -37,11 +37,13 @@ final class OptionsTest extends TestCase {
 		$this->assertSame( 100, mailocations_get_option_default( 'distance' ) );
 	}
 
-	public function test_pins_warning_get_option_default_with_unknown_key(): void {
+	/**
+	 * Fixed September 16, 2026. An unknown key warned.
+	 */
+	public function test_get_option_default_with_unknown_key_returns_null(): void {
 		$warnings = $this->capture_warnings( fn() => $this->assertNull( mailocations_get_option_default( 'nope' ) ) );
 
-		// Should return null or a fallback without a warning.
-		$this->assertSame( [ 'Undefined array key "nope"' ], $warnings );
+		$this->assertSame( [], $warnings );
 	}
 
 	public function test_get_options_returns_sanitized_defaults_when_nothing_saved(): void {
@@ -61,11 +63,13 @@ final class OptionsTest extends TestCase {
 		$this->assertSame( 'mi', mailocations_get_option( 'units', false ) );
 	}
 
-	public function test_pins_warning_get_option_with_unknown_key(): void {
+	/**
+	 * Fixed September 16, 2026. An unknown key warned.
+	 */
+	public function test_get_option_with_unknown_key_returns_null(): void {
 		$warnings = $this->capture_warnings( fn() => $this->assertNull( mailocations_get_option( 'nope' ) ) );
 
-		// Should return null without a warning.
-		$this->assertSame( [ 'Undefined array key "nope"' ], $warnings );
+		$this->assertSame( [], $warnings );
 		$this->assertNull( mailocations_get_option( 'nope', false ) );
 	}
 
@@ -93,13 +97,20 @@ final class OptionsTest extends TestCase {
 		$this->assertSame( [ 'base' => 'Not A Slug!' ], get_option( 'mai_locations' ) );
 	}
 
-	public function test_pins_stale_cache_get_option_ignores_updates_in_the_same_request(): void {
+	/**
+	 * Fixed September 16, 2026. The cache in mailocations_get_options() was never cleared, so a
+	 * value saved during a request was not seen until the next one.
+	 */
+	public function test_get_option_sees_an_update_from_the_same_request(): void {
 		mailocations_update_option( 'label_plural', 'Places' );
 
-		// The static cache in mailocations_get_options() is never cleared, so the new value is not seen until the next request.
-		$this->assertSame( 'Locations', mailocations_get_option( 'label_plural' ) );
+		$this->assertSame( 'Places', mailocations_get_option( 'label_plural' ) );
 	}
 
+	/**
+	 * Changed September 16, 2026. A blank distance stored 0, which means no limit, and blank
+	 * units stored an empty string. Both fall back to their defaults now.
+	 */
 	public function test_sanitize_fills_missing_keys_with_empty_values(): void {
 		$this->assertSame(
 			[
@@ -110,13 +121,17 @@ final class OptionsTest extends TestCase {
 				'google_api_key'       => '',
 				'google_api_signature' => '',
 				'google_map_id'        => '',
-				'distance'             => 0,
-				'units'                => '',
+				'distance'             => 100,
+				'units'                => 'mi',
 				'version_first'        => '',
 				'version_db'           => '',
 			],
 			mailocations_sanitize_options( [] )
 		);
+	}
+
+	public function test_sanitize_keeps_a_distance_of_zero(): void {
+		$this->assertSame( 0, mailocations_sanitize_options( [ 'distance' => '0' ] )['distance'] );
 	}
 
 	public function test_sanitize_cleans_each_field(): void {
@@ -144,13 +159,18 @@ final class OptionsTest extends TestCase {
 		$this->assertSame( 'sig', $result['google_api_signature'] );
 		$this->assertSame( 'map', $result['google_map_id'] );
 		$this->assertSame( 25, $result['distance'] );
-		$this->assertSame( '&lt;b&gt;km&lt;/b&gt;', $result['units'] );
+		// Not one of the two units, so the default is used.
+		$this->assertSame( 'mi', $result['units'] );
 		$this->assertSame( '1.0.0 &amp; up', $result['version_first'] );
 		$this->assertSame( '1.1.0', $result['version_db'] );
 	}
 
-	public function test_sanitize_does_not_restrict_units_to_mi_or_km(): void {
-		$this->assertSame( 'furlongs', mailocations_sanitize_options( [ 'units' => 'furlongs' ] )['units'] );
+	/**
+	 * Fixed September 16, 2026. Any text was stored as the unit.
+	 */
+	public function test_sanitize_restricts_units_to_mi_or_km(): void {
+		$this->assertSame( 'mi', mailocations_sanitize_options( [ 'units' => 'furlongs' ] )['units'] );
+		$this->assertSame( 'km', mailocations_sanitize_options( [ 'units' => 'km' ] )['units'] );
 	}
 
 	public function test_sanitize_keeps_quotes_in_labels(): void {
@@ -158,10 +178,14 @@ final class OptionsTest extends TestCase {
 		$this->assertSame( 'Say "hi"', mailocations_sanitize_options( [ 'label_plural' => 'Say "hi"' ] )['label_plural'] );
 	}
 
-	public function test_sanitize_keeps_unknown_keys_untouched(): void {
-		$result = mailocations_sanitize_options( [ 'extra' => '<b>kept</b>' ] );
+	/**
+	 * Fixed September 16, 2026. An unknown key was stored exactly as typed.
+	 */
+	public function test_sanitize_keeps_unknown_keys_and_cleans_them(): void {
+		$result = mailocations_sanitize_options( [ 'extra' => '<b>kept</b>', 'list' => [ 'a' ] ] );
 
-		$this->assertSame( '<b>kept</b>', $result['extra'] );
+		$this->assertSame( 'kept', $result['extra'] );
+		$this->assertSame( [ 'a' ], $result['list'] );
 	}
 
 	public function test_sanitize_accepts_a_query_string(): void {

@@ -91,7 +91,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [x] `mailocations_add_location_to_user()` adds duplicates. Now `array_unique()`, with the keys renumbered. `inc/functions-locations.php`. Fixed September 16, 2026.
 - [x] The Google geocoding address never includes country or state, because it tests `$countries[ $key ]` instead of the value. Both now test the value. `inc/functions-locations.php`. Fixed September 16, 2026, pinned by a child-process scenario test, since the API key is cached at boot and cannot be set inside a test.
 - [x] `mailocations_get_address_meta_from_components()` warned on a geocoding result with no country. It treats a missing country as non-US now. Fixed September 16, 2026.
-- [ ] Saving an empty settings form stores a distance of 0; units are not limited to `mi` and `km`; unknown keys are kept unsanitised.
+- [x] Saving an empty settings form stores a distance of 0; units are not limited to `mi` and `km`; unknown keys are kept unsanitised. All three fixed September 16, 2026. A blank distance falls back to the default, a `0` typed on purpose still means no limit, units accept only `mi` or `km`, and an unknown scalar key is kept but run through `sanitize_text_field()`. `inc/functions-utility.php`.
 - [x] Both upgrade routines ran on every hook, one copy in `includes/upgrade.php` and one in `classes/class-upgrade.php`, so a fresh install wrote the version option four times. Only `Mai\Locations\Admin\Upgrade` is hooked now, and the global functions stay as public names that call it, so there is one implementation rather than two. Fixed September 16, 2026.
 - [ ] Migrated option values are still saved unsanitised, so a base of `Our Places!` goes in as-is.
 
@@ -110,7 +110,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [x] `acf_google_map_api()` tested `isset( $api['key'] ) || empty( $api['key'] )`, always true, so a key saved in the settings replaced whatever ACF already had, and the signature check had the same bug. Both are plain `empty()` now, so the saved values fill in only what ACF is missing. Fixed September 16, 2026.
 - [x] The units dropdown printed `selected='selected'` between the select tag and its first option, because `selected()` echoes as well as returning. Now passed `false` as its third argument. Fixed September 16, 2026.
 - [x] Settings values went into `value=""` unescaped, so a label with a double quote broke its field. All eight printed values are wrapped in `esc_attr()` now, with a scenario test that renders the page from a saved option holding a quote. Fixed September 16, 2026.
-- [ ] `mailocations_get_option()` returns stale values after `mailocations_update_option()` in the same request, and warns on an unknown key.
+- [x] `mailocations_get_option()` returns stale values after `mailocations_update_option()` in the same request, and warns on an unknown key. Both fixed September 16, 2026. `mailocations_get_options()` takes a `$reset` argument, the updater calls it, and an unknown key returns null. This is the first of the static caches to become resettable, so the test case resets it before each test; without that, one test's saved value outlived the database rollback. `inc/functions-utility.php` and `tests/TestCase.php`.
 - [ ] Labels and base are sanitised only on first call; later calls return the raw filtered value. The filtered base uses `sanitize_html_class()`, the saved one `sanitize_title_with_dashes()`.
 
 ### Security

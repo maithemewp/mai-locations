@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+* Fixed: Saving the settings with the distance field empty stored a distance of 0, which searches with no limit at all. An empty field now keeps the default, and a 0 entered on purpose still means no limit.
+* Fixed: The Default Units setting accepted any text. It now accepts only miles or kilometres.
+* Fixed: A setting saved during a request was not seen again until the next one.
+* Fixed: Asking for a setting that does not exist logged a warning.
 * Fixed: A CSV import that could not create a location counted it as imported. Failed rows are now counted and the reason is shown.
 * Fixed: A location created in code with a country of its own was saved as US, because the field defaults overwrote what the caller passed.
 * Fixed: A user's list of locations gained a duplicate entry every time the same location was added again.

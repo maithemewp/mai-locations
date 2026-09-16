@@ -78,7 +78,8 @@ function mailocations_get_option( $key, $fallback = true ) {
 	$options  = mailocations_get_options();
 	$return   = isset( $options[ $key ] ) && '' !== $options[ $key ] && ! is_null( $options[ $key ] ) ? $options[ $key ] : null;
 
-	return is_null( $return ) && $fallback ? $defaults[ $key ] : $return;
+	// An unknown key used to warn here. It returns null now. Fixed September 16, 2026.
+	return is_null( $return ) && $fallback ? ( $defaults[ $key ] ?? null ) : $return;
 }
 
 /**
@@ -86,10 +87,18 @@ function mailocations_get_option( $key, $fallback = true ) {
  *
  * @since TBD
  *
+ * @param bool $reset Whether to drop the cached copy first.
+ *
  * @return array
  */
-function mailocations_get_options() {
+function mailocations_get_options( bool $reset = false ) {
 	static $cache = null;
+
+	// The cache lasts the whole request, so a value saved during it was never seen again.
+	// mailocations_update_option() clears it now. Fixed September 16, 2026.
+	if ( $reset ) {
+		$cache = null;
+	}
 
 	if ( ! is_null( $cache ) ) {
 		return $cache;
@@ -116,7 +125,8 @@ function mailocations_get_options() {
 function mailocations_get_option_default( $key ) {
 	$defaults = mailocations_get_options_defaults();
 
-	return $defaults[ $key ];
+	// An unknown key used to warn here. It returns null now. Fixed September 16, 2026.
+	return $defaults[ $key ] ?? null;
 }
 
 /**
@@ -166,6 +176,9 @@ function mailocations_update_option( $option, $value ) {
 	$options[ $option ] = $value;
 
 	update_option( 'mai_locations', $options );
+
+	// Drop the cached copy, so a later read in this request sees the new value.
+	mailocations_get_options( true );
 }
 
 /**
@@ -178,7 +191,7 @@ function mailocations_update_option( $option, $value ) {
  */
 function mailocations_sanitize_options( $options ) {
 	// Parse.
-	$options = wp_parse_args( $options, [
+	$defaults = [
 		'label_plural'         => '',
 		'label_singular'       => '',
 		'base'                 => '',
@@ -190,7 +203,8 @@ function mailocations_sanitize_options( $options ) {
 		'units'                => '',
 		'version_first'        => '',
 		'version_db'           => '',
-	] );
+	];
+	$options  = wp_parse_args( $options, $defaults );
 
 	// Sanitize.
 	$options['label_plural']         = sanitize_text_field( $options['label_plural'] );
@@ -200,10 +214,22 @@ function mailocations_sanitize_options( $options ) {
 	$options['google_api_key']       = sanitize_text_field( $options['google_api_key'] );
 	$options['google_api_signature'] = sanitize_text_field( $options['google_api_signature'] );
 	$options['google_map_id']        = sanitize_text_field( $options['google_map_id'] );
-	$options['distance']             = absint( $options['distance'] );
-	$options['units']                = esc_html( $options['units'] );
+	// A blank distance used to be stored as 0, which means no limit at all. Blank now means the
+	// default, while a 0 typed on purpose still means no limit. Fixed September 16, 2026.
+	$options['distance']             = '' === trim( (string) $options['distance'] ) ? (int) mailocations_get_option_default( 'distance' ) : absint( $options['distance'] );
+	// Only the two units the settings page offers. Anything else used to be stored as typed.
+	$options['units']                = in_array( $options['units'], [ 'mi', 'km' ], true ) ? $options['units'] : (string) mailocations_get_option_default( 'units' );
 	$options['version_first']        = esc_html( $options['version_first'] );
 	$options['version_db']           = esc_html( $options['version_db'] );
+
+	// Anything a filter or an older version added is kept, but no longer stored as typed.
+	foreach ( $options as $key => $value ) {
+		if ( isset( $defaults[ $key ] ) || ! is_scalar( $value ) ) {
+			continue;
+		}
+
+		$options[ $key ] = sanitize_text_field( (string) $value );
+	}
 
 	return $options;
 }

@@ -12,6 +12,19 @@ use WP_UnitTestCase;
 abstract class TestCase extends WP_UnitTestCase {
 
 	/**
+	 * Drops the plugin's cached options before each test.
+	 *
+	 * The cache used to last the whole process, so every test saw whatever was read during
+	 * bootstrap. Saving an option clears it now, which is the point, but it also means one
+	 * test's saved value would otherwise outlive the database rollback that follows it.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+
+		mailocations_get_options( true );
+	}
+
+	/**
 	 * Creates a location post with meta saved under the plugin's field names.
 	 *
 	 * The plugin reads location data with get_post_meta() on the field name, such as
