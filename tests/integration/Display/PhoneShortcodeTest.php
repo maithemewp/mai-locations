@@ -82,12 +82,15 @@ final class PhoneShortcodeTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_style_is_not_escaped(): void {
+	/**
+	 * Fixed September 16, 2026. style went into the attribute unescaped, so a quote in it could
+	 * add attributes of its own.
+	 */
+	public function test_style_is_escaped(): void {
 		$this->use_location( [ 'location_phone' => '914-631-8200', 'address_country' => 'US' ] );
 
-		// Correct would be esc_attr() on style, as [mai_location_url] and [mai_location_email] do.
 		$this->assertSame(
-			'<div class="mai-location-phone" style="x" onclick="alert(1)">(914) 631-8200</div>',
+			'<div class="mai-location-phone" style="x&quot; onclick=&quot;alert(1)">(914) 631-8200</div>',
 			mailocation_location_phone_shortcode( [ 'style' => 'x" onclick="alert(1)', 'link' => 'false' ] )
 		);
 	}

@@ -52,8 +52,9 @@ function mailocation_location_phone_shortcode( $atts ) {
 		return;
 	}
 
-	// Start the HTML.
-	$html = sprintf( '<div class="mai-location-phone"%s>', $atts['style'] ? sprintf( ' style="%s"', $atts['style'] ) : '' );
+	// Start the HTML. style is escaped here, as [mai_location_url] and [mai_location_email] do.
+	$atts['style'] = esc_attr( $atts['style'] );
+	$html          = sprintf( '<div class="mai-location-phone"%s>', $atts['style'] ? sprintf( ' style="%s"', $atts['style'] ) : '' );
 		$html .= $atts['before'];
 
 		// Fallbacks, used whenever the number cannot be formatted. Set before the country branch
@@ -270,9 +271,12 @@ function mailocation_location_place_shortcode( $atts ) {
 	$atts['after']  = esc_html( $atts['after'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
 	$atts['text']   = sanitize_text_field( $atts['text'] );
 
-	return sprintf( '<div class="mai-location-place">%s<a target="_blank" href="https://www.google.com/maps/place/?q=place_id:%s">%s</a>%s</div>',
+	// The style arg is printed, as the other shortcodes do, and the place ID is escaped before it
+	// goes into the href. Both fixed September 16, 2026.
+	return sprintf( '<div class="mai-location-place"%s>%s<a target="_blank" href="https://www.google.com/maps/place/?q=place_id:%s">%s</a>%s</div>',
+		$atts['style'] ? sprintf( ' style="%s"', $atts['style'] ) : '',
 		$atts['before'],
-		$place_id,
+		esc_attr( $place_id ),
 		$atts['text'],
 		$atts['after']
 	);

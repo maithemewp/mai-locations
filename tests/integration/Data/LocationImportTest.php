@@ -427,7 +427,12 @@ final class LocationImportTest extends TestCase {
 		$this->assertNull( term_exists( 'Missing', 'mai_location_cat' ) );
 	}
 
-	public function test_pins_bug_default_status_is_public_when_status_not_posted(): void {
+	/**
+	 * Fixed September 16, 2026. The fallback was 'public', which is not a post status, so an
+	 * import posted without the status field saved every location under a status WordPress does
+	 * not know.
+	 */
+	public function test_default_status_is_publish_when_status_not_posted(): void {
 		$this->setExpectedDeprecated( 'get_page_by_title' );
 		$file_id = self::factory()->attachment->create_object( [ 'file' => self::FIXTURES . '/import-categories.csv', 'post_mime_type' => 'text/csv' ] );
 
@@ -445,8 +450,8 @@ final class LocationImportTest extends TestCase {
 			E_DEPRECATED
 		);
 
-		// Correct behaviour: default to 'publish', which the status field also defaults to.
-		$this->assertSame( 'public', $this->location_by_title( 'Headless Horseman Bridge' )->post_status );
+		// Matches what the status field itself defaults to.
+		$this->assertSame( 'publish', $this->location_by_title( 'Headless Horseman Bridge' )->post_status );
 	}
 
 	public function test_pins_bug_blank_line_in_csv_throws_value_error(): void {

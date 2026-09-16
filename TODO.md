@@ -84,7 +84,8 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 ### Wrong data saved
 
 - [x] The CSV importer ran every meta value through `esc_html()`, so URLs were stored with `&amp;`. The per-type sanitizers lived in a variable that only existed inside `get_fields()`. Now a shared `get_sanitizers()` map, looked up by the field's type, with `url` on `esc_url_raw` rather than `esc_url` because the value is stored, not printed. `get_fields()` also stops reading the type of a field it just unset. Mike's call, September 15, 2026. Values imported before this stay mangled; a repair command is a separate job if anyone wants one.
-- [ ] The importer's default status is `public`, which is not a post status (`:279`). Its failed count can never rise, because `wp_insert_post()` is called without `$wp_error` (`includes/functions-locations.php:82`). The shipped template CSV repeats `address_street`, so the second line overwrites the street.
+- [x] The importer's default status was `public`, which is not a post status, so an import posted without the status field saved locations under a status WordPress does not know. Now `publish`, with a test. Fixed September 16, 2026.
+- [ ] The importer's failed count can never rise, because `wp_insert_post()` is called without `$wp_error` (`inc/functions-locations.php:82`). The shipped template CSV repeats `address_street`, so the second line overwrites the street.
 - [ ] `mailocations_create_location()` lets field defaults override `meta_input` passed in, so an explicit `CA` becomes `US`. `includes/functions-locations.php:74`.
 - [ ] `mailocations_add_location_to_user()` adds duplicates.
 - [ ] The Google geocoding address never includes country or state, because it tests `$countries[ $key ]` instead of the value. `includes/functions-locations.php:291`. Read in code only.
@@ -111,7 +112,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 
 ### Security
 
-- [ ] `[mai_location_phone]` prints `style` unescaped (`includes/shortcodes.php:56`). `[mai_location_place]` prints `place_id` unescaped (`:262`).
+- [x] `[mai_location_phone]` printed `style` unescaped, and `[mai_location_place]` printed `place_id` unescaped while ignoring `style` entirely. Both escape now, and the place shortcode prints its style like the others. `inc/shortcodes.php`. Fixed September 16, 2026.
 - [ ] `mailocations_get_query_params()` escapes the value and then overwrites it with the raw `$_GET` value. `includes/functions-filters.php:61`.
 
 ### Smaller

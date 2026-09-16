@@ -158,21 +158,26 @@ final class ContactShortcodesTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_place_ignores_style(): void {
+	/**
+	 * Both fixed September 16, 2026. The style arg was accepted and then never printed, and the
+	 * place ID went into the href unescaped.
+	 */
+	public function test_place_prints_style(): void {
 		$this->use_location( [ 'place_id' => 'abc' ] );
 
-		// Correct would output style="color:red;" on the wrapper, as the other shortcodes do.
 		$this->assertSame(
-			'<div class="mai-location-place"><a target="_blank" href="https://www.google.com/maps/place/?q=place_id:abc">View on Google</a></div>',
+			'<div class="mai-location-place" style="color:red;"><a target="_blank" href="https://www.google.com/maps/place/?q=place_id:abc">View on Google</a></div>',
 			mailocation_location_place_shortcode( [ 'style' => 'color:red;' ] )
 		);
 	}
 
-	public function test_pins_bug_place_id_is_not_escaped(): void {
+	public function test_place_id_is_escaped(): void {
 		$this->use_location( [ 'place_id' => 'a"><script>' ] );
 
-		// Correct would be esc_attr() on the place ID.
-		$this->assertStringContainsString( 'place_id:a"><script>">', mailocation_location_place_shortcode( [] ) );
+		$html = mailocation_location_place_shortcode( [] );
+
+		$this->assertStringContainsString( 'place_id:a&quot;&gt;&lt;script&gt;">', $html );
+		$this->assertStringNotContainsString( '<script>', $html );
 	}
 
 	public function test_place_empty_returns_null(): void {

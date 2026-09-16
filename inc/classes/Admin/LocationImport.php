@@ -325,7 +325,10 @@ class LocationImport {
 
 		// Store the submitted data.
 		$this->file_id      = isset( $_POST['acf']['mailocations_import_file'] ) ? absint( $_POST['acf']['mailocations_import_file'] ) : false;
-		$this->post_status  = isset( $_POST['acf']['mailocations_location_import_status'] ) ? esc_html( $_POST['acf']['mailocations_location_import_status'] ) : 'public';
+		// 'publish', not 'public'. The old fallback was not a post status at all, so an import
+		// posted without the status field saved every location under a status WordPress does not
+		// know. Fixed September 16, 2026.
+		$this->post_status  = isset( $_POST['acf']['mailocations_location_import_status'] ) ? esc_html( $_POST['acf']['mailocations_location_import_status'] ) : 'publish';
 		$this->create_users = isset( $_POST['acf']['mailocations_location_import_users'] ) ? absint( $_POST['acf']['mailocations_location_import_users'] ) : false;
 		$this->user_role    = isset( $_POST['acf']['mailocations_location_import_user_role'] ) ? esc_html( $_POST['acf']['mailocations_location_import_user_role'] ) : 'subscriber';
 

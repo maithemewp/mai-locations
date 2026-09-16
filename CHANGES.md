@@ -6,6 +6,9 @@
 * Removed: Social media fields (Facebook, Twitter, YouTube, LinkedIn, Instagram, Pinterest, TikTok) and the `mailocations_social_fields` filter. They were switched off in 1.0.0 and never displayed anywhere. No site had any data saved in them.
 * Added: `--skip_excerpt` and `--skip_image` for `wp mailocations update_locations_from_website`, so a run can fetch only images or only excerpts.
 * Changed: Administrators and editors can now use the front-end edit form and see Edit buttons on any location, matching what they can already do in the Dashboard. Location owners keep editing their own locations whatever their role.
+* Fixed: `[mai_location_place]` now prints its `style` attribute, which it accepted and ignored, and escapes the Place ID it puts in the link.
+* Fixed: `[mai_location_phone]` escapes its `style` attribute, as the other shortcodes already did.
+* Fixed: A CSV import submitted without choosing a status saved every location as "public", which is not a real post status. It now falls back to Published.
 * Fixed: `[mai_location_phone]` could take a page down when a location's phone field held text rather than a number, such as "Call us". The text now prints as entered.
 * Fixed: `[mai_location_phone]` linked to only the first group of digits when the location had no country set, so `914-631-8200` dialled `914`.
 * Fixed: a phone number that is not valid for its country printed an empty link and logged warnings. It now falls back to the number as entered.
