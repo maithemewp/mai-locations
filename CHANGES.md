@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+* Fixed: `[mai_location_email link="false"]` still printed a link. `[mai_location_phone]` already handled this.
+* Fixed: `[mai_location_distance]` printed "3.1mi away" instead of "3.1 mi away". Spaces in `before` and `after` are kept now.
+* Fixed: `[mai_location_distance]` printed nothing for a location under half a unit away. It now prints "0 mi away".
+* Changed: `[mai_location_distance]` escapes HTML in `before` and `after` instead of stripping it, matching every other location shortcode.
+* Fixed: An address hiding the country printed the US state on a location outside the US, so a Canadian address showed a US state code.
+* Fixed: An address with nothing but a country printed an empty div above it.
 * Changed: PHP 8.3 or newer is now required. WordPress will not offer the update on a site below that.
 * Removed: `Mai_Locations_Queries::mai_post_grid_query()`, which was never hooked up and called a function that does not exist.
 * Removed: Social media fields (Facebook, Twitter, YouTube, LinkedIn, Instagram, Pinterest, TikTok) and the `mailocations_social_fields` filter. They were switched off in 1.0.0 and never displayed anywhere. No site had any data saved in them.

@@ -127,13 +127,14 @@ final class AddressTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_country_only_prints_empty_address_item(): void {
+	/**
+	 * Fixed September 16, 2026. An empty <div class="mai-address-item"></div> printed before it.
+	 */
+	public function test_country_only_prints_no_empty_address_item(): void {
 		$id = $this->create_location( [ 'address_country' => 'US' ] );
 
-		// Correct would be no empty <div class="mai-address-item"></div> before the country.
 		$this->assertSame(
 			self::OPEN
-			. '<div class="mai-address-item"></div>'
 			. '<div class="mai-address-item" itemprop="addressCountry">United States</div>'
 			. '</div>',
 			mailocations_get_address( [], $id )
@@ -188,7 +189,10 @@ final class AddressTest extends TestCase {
 		);
 	}
 
-	public function test_pins_bug_hiding_country_on_non_us_record_shows_us_state_field(): void {
+	/**
+	 * Fixed September 16, 2026. Hiding the country sent a non-US record to the US state field.
+	 */
+	public function test_hiding_country_keeps_the_international_state(): void {
 		$id = $this->create_location(
 			[
 				'address_city'      => 'Toronto',
@@ -198,9 +202,8 @@ final class AddressTest extends TestCase {
 			]
 		);
 
-		// Correct would be Ontario: hiding the country should not change which state field is read.
 		$this->assertSame(
-			self::OPEN . '<div class="mai-address-item"><span class="locality" itemprop="addressLocality">Toronto</span><span class="region" itemprop="addressRegion">&nbsp;NY</span></div></div>',
+			self::OPEN . '<div class="mai-address-item"><span class="locality" itemprop="addressLocality">Toronto</span><span class="region" itemprop="addressRegion">&nbsp;Ontario</span></div></div>',
 			mailocations_get_address( [ 'hide' => 'country' ], $id )
 		);
 	}

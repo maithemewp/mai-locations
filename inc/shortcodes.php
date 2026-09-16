@@ -210,6 +210,9 @@ function mailocation_location_email_shortcode( $atts ) {
 	$atts['style']  = esc_attr( $atts['style'] );
 	$atts['before'] = esc_html( $atts['before'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
 	$atts['after']  = esc_html( $atts['after'] ); // Don't trim() and don't use sanitize_text_field(). We want spaces.
+	// Shortcode attributes arrive as strings, and "false" is truthy, so link="false" used to link
+	// anyway. [mai_location_phone] has always done this. Fixed September 16, 2026.
+	$atts['link']   = rest_sanitize_boolean( $atts['link'] );
 	$email          = get_post_meta( get_the_ID(), 'location_email', true );
 	$email          = sanitize_email( $email );
 	$email          = antispambot( $email );
@@ -306,37 +309,24 @@ add_shortcode( 'mai_location_distance', function( $atts ) {
 		'mai_location_distance'
 	);
 
-	// Sanitize.
+	// Sanitize. Don't trim() and don't use sanitize_text_field(). We want spaces, and the default
+	// after starts with one. This matches the other location shortcodes. Fixed September 16, 2026.
 	$atts = [
-		'before' => sanitize_text_field( $atts['before'] ),
-		'after'  => sanitize_text_field( $atts['after'] ),
+		'before' => esc_html( $atts['before'] ),
+		'after'  => esc_html( $atts['after'] ),
 		'round'  => absint( $atts['round'] ),
 	];
 
-	// Get the distance.
+	// Get the distance, already rounded.
 	$distance = mailocations_get_distance( null, $atts['round'] );
 
-	// Bail if no distance.
-	if ( ! $distance ) {
-		return;
+	// Bail if this post has no distance. A distance of 0 is a real distance, so check the value
+	// rather than its truthiness. Fixed September 16, 2026.
+	if ( ! is_numeric( $distance ) ) {
+		return '';
 	}
 
-	// Rounding.
-	if ( $atts['round'] ) {
-		$distance = round( $distance, $atts['round'] );
-	}
-
-	// Add content before.
-	if ( $atts['before'] ) {
-		$distance = $atts['before'] . $distance;
-	}
-
-	// Add content after.
-	if ( $atts['after'] ) {
-		$distance .= $atts['after'];
-	}
-
-	return $distance;
+	return $atts['before'] . (string) $distance . $atts['after'];
 });
 
 add_shortcode( 'mai_locations_table', 'mailocation_location_table_shortcode' );

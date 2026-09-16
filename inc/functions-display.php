@@ -84,8 +84,11 @@ function mailocations_get_address( $args = [], $post_id = 0 ) {
 	$state     = ! isset( $hide['state'] ) ? get_post_meta( $post_id, 'address_state', true ) : '';
 	$state_int = ! isset( $hide['state'] ) ? get_post_meta( $post_id, 'address_state_int', true ) : '';
 	$postcode  = ! isset( $hide['postcode'] ) ? get_post_meta( $post_id, 'address_postcode', true ) : '';
-	$country   = ! isset( $hide['country'] ) ? get_post_meta( $post_id, 'address_country', true ) : '';
-	$state     = $country && 'US' !== $country ? $state_int : $state; // Use state_int if non-US.
+	$code      = get_post_meta( $post_id, 'address_country', true );
+	$country   = ! isset( $hide['country'] ) ? $code : '';
+	// Read the country whether or not it is displayed. Hiding it used to send a Canadian address
+	// back to the US state field. Fixed September 16, 2026.
+	$state     = $code && 'US' !== $code ? $state_int : $state; // Use state_int if non-US.
 
 	// Bail if no address.
 	if ( ! ( $street || $street_2 || $city || $state || $postcode || $country ) ) {
@@ -103,7 +106,8 @@ function mailocations_get_address( $args = [], $post_id = 0 ) {
 			$html .= sprintf( '<div class="mai-address-item"><span class="street-address-2">%s</span></div>', esc_html( $street_2 ) );
 		}
 
-		if ( $city || $state || $postcode || $country ) {
+		// The country prints in its own item below, so it must not open an empty one here.
+		if ( $city || $state || $postcode ) {
 			$html .= '<div class="mai-address-item">';
 
 				if ( $city ) {

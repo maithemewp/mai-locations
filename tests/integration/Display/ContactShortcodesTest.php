@@ -125,11 +125,13 @@ final class ContactShortcodesTest extends TestCase {
 		$this->assertSame( 'Email: info@example.com <', html_entity_decode( $html === null ? '' : wp_strip_all_tags( $html ) ) );
 	}
 
-	public function test_pins_bug_email_link_string_false_still_links(): void {
+	/**
+	 * Fixed September 16, 2026. The string "false" is truthy, so link="false" linked anyway.
+	 */
+	public function test_email_link_false_prints_no_link(): void {
 		$this->use_location( [ 'location_email' => 'info@example.com' ] );
 
-		// Correct would match [mai_location_phone], which runs rest_sanitize_boolean() on link.
-		$this->assertStringContainsString( '<a href="mailto:', do_shortcode( '[mai_location_email link="false"]' ) );
+		$this->assertStringNotContainsString( '<a href="mailto:', do_shortcode( '[mai_location_email link="false"]' ) );
 	}
 
 	public function test_email_invalid_or_empty_returns_null(): void {

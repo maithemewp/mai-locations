@@ -64,10 +64,10 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [x] `[mai_location_url]` stripped every leading "w", so `www.washingtonirving.org` showed as `ashingtonirving.org`. `ltrim()` takes a character list, not a prefix. Now `preg_replace( '#^www\.#i', ... )`. `includes/shortcodes.php:138`. Fixed September 15, 2026 on Mike's call, with the pinned test flipped and cases added for a host starting with "w" and for an uppercase WWW.
 - [x] `[mai_location_phone]` with no country linked to `tel://914` for `914-631-8200`, because `(int)` stopped at the first dash. Now every digit is kept. `inc/shortcodes.php`. Fixed September 16, 2026.
 - [x] `[mai_location_phone]` left `$tel` and `$formatted` undefined when a country was set but the number was not valid for it, giving two warnings and an empty link. Both now default to the raw value before the country branch runs. `inc/shortcodes.php`. Fixed September 16, 2026.
-- [ ] `[mai_location_email link="false"]` still links, because the string "false" is truthy. `includes/shortcodes.php:190`.
-- [ ] `[mai_location_distance]` loses the spaces in `before` and `after` (`3.1mi away`), returns a float when `after` is empty, and prints nothing for a distance that rounds to 0. `includes/shortcodes.php:294`.
-- [ ] `mailocations_get_address()` with `hide="country"` on a non-US record shows the US state field, not the international one. `includes/functions-display.php:88`.
-- [ ] An address with only a country prints an empty `mai-address-item` div. `includes/functions-display.php:106`.
+- [x] `[mai_location_email link="false"]` still links, because the string "false" is truthy. It runs `rest_sanitize_boolean()` now, like the phone shortcode always has. `inc/shortcodes.php`. Fixed September 16, 2026.
+- [x] `[mai_location_distance]` loses the spaces in `before` and `after` (`3.1mi away`), returns a float when `after` is empty, and prints nothing for a distance that rounds to 0. All three fixed September 16, 2026. `before` and `after` are escaped now instead of stripped, matching every other location shortcode. `inc/shortcodes.php`.
+- [x] `mailocations_get_address()` with `hide="country"` on a non-US record shows the US state field, not the international one. The country is read whether or not it is displayed. `inc/functions-display.php`. Fixed September 16, 2026.
+- [x] An address with only a country prints an empty `mai-address-item` div. The country has its own item below. `inc/functions-display.php`. Fixed September 16, 2026.
 - [ ] A geo query with no distance limit drops a location sitting exactly at the search point, because the WHERE clause treats a distance of 0 as false. `classes/class-geo-query.php:191`.
 - [ ] The geo query order fallback never applies, because concatenation runs before `?:`. `classes/class-geo-query.php:225`.
 - [ ] A filter latitude of `0` counts as no geo query. `includes/functions-filters.php:133`.
