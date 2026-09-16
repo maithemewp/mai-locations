@@ -20,6 +20,10 @@ class ComposerStaticInit15a83dc919f8db61c7a4325dc93d224e
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
         ),
+        'M' =>
+        array (
+            'Mai\\Locations\\' => 14,
+        ),
         'G' =>
         array (
             'Giggsey\\Locale\\' => 15,
@@ -34,6 +38,10 @@ class ComposerStaticInit15a83dc919f8db61c7a4325dc93d224e
         'Symfony\\Polyfill\\Mbstring\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
+        'Mai\\Locations\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/inc/classes',
         ),
         'Giggsey\\Locale\\' =>
         array (

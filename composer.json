@@ -12,6 +12,11 @@
     "require-dev": {
         "bizbudding/deployable-guard": "^1"
     },
+    "autoload": {
+        "psr-4": {
+            "Mai\\Locations\\": "inc/classes/"
+        }
+    },
     "scripts": {
         "test-setup": "composer install -d tests",
         "test": "tests/vendor/bin/phpunit --configuration tests/phpunit.xml.dist",

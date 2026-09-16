@@ -8,5 +8,6 @@ $baseDir = dirname($vendorDir);
 return array(
     'libphonenumber\\' => array($vendorDir . '/giggsey/libphonenumber-for-php/src'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
+    'Mai\\Locations\\' => array($baseDir . '/inc/classes'),
     'Giggsey\\Locale\\' => array($vendorDir . '/giggsey/locale/src'),
 );
