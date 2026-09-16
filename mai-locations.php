@@ -385,12 +385,19 @@ final class Mai_Locations_Plugin {
 	function no_results_text( $text ) {
 		global $wp_query;
 
+		// Bail if there is no query to read. This guard used to sit after $wp_query->get(), so it
+		// never helped and a null query was a fatal. Fixed September 16, 2026.
+		if ( ! $wp_query instanceof WP_Query ) {
+			return $text;
+		}
+
 		// Get post types that support locations.
 		$post_types = mailocations_get_location_post_types();
 		$post_type  = $wp_query->get( 'post_type' );
 
-		// Bail if not for locations.
-		if ( ! $wp_query || ! $post_type || ! isset( $post_types[ $post_type ] ) ) {
+		// Bail if not for locations. A query for several post types is not one location archive,
+		// and the array used to be passed to isset() as a key, which is a TypeError.
+		if ( ! $post_type || ! is_string( $post_type ) || ! isset( $post_types[ $post_type ] ) ) {
 			return $text;
 		}
 

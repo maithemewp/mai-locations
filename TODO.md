@@ -55,9 +55,9 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 
 - [x] A failed image re-download crashed `update_locations_from_website`: `wp_delete_file()` got the `WP_Error` from `download_url()` and `unlink()` threw a `TypeError`. Now it deletes only the staged file and returns 0, so the run carries on. `inc/functions-website.php`. Fixed September 16, 2026. The underlying re-download through the site's own uploads URL is still there, below.
 - [x] `[mai_location_phone]` threw an uncaught `NumberParseException` when a country was set and the phone text could not be parsed, such as "Call us", taking the page with it. Now caught, and the raw text prints with no link, because there is nothing to dial. `inc/shortcodes.php`. Fixed September 16, 2026.
-- [ ] One blank line in an import CSV stops the import with a `ValueError`. `classes/class-location-import.php:303`.
-- [ ] `no_results_text()` fatals on a null `$wp_query`, because `->get()` runs before the null check, and throws a `TypeError` on an array `post_type`. `mai-locations.php:399`.
-- [ ] `add_acf_form_head()` in the WooCommerce tabs class calls `is_account_page()` without checking WooCommerce is active. Not live today, since the class is not instantiated.
+- [x] One blank line in an import CSV stopped the whole import with a `ValueError` out of `array_combine()`. Rows that do not line up with the header are skipped now. `inc/classes/Admin/LocationImport.php`. Fixed September 16, 2026.
+- [x] `no_results_text()` fataled on a null `$wp_query`, because `->get()` ran before the null check, and threw a `TypeError` on an array `post_type`. The guard comes first now, and a query for several post types keeps the original text. `mai-locations.php`. Fixed September 16, 2026.
+- [x] `add_acf_form_head()` in the WooCommerce tabs class called `is_account_page()` without checking WooCommerce is active, so the class fataled on any site without it. It checks first and returns quietly now. `inc/classes/Integrations/WooCommerceAccountTabs.php`. Fixed September 16, 2026. The class is still not instantiated by the plugin.
 
 ### Wrong output on the front end
 

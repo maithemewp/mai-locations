@@ -39,31 +39,28 @@ final class NoResultsTextTest extends TestCase {
 		$this->assertSame( 'Original', apply_filters( 'genesis_noposts_text', 'Original' ) );
 	}
 
-	public function test_pins_bug_fatal_when_wp_query_is_null(): void {
-		$saved              = $GLOBALS['wp_query'];
+	/**
+	 * Both fixed September 16, 2026. The null guard sat after $wp_query->get(), so it never
+	 * helped, and an array post_type was used as an array key, which is a TypeError.
+	 */
+	public function test_no_query_keeps_the_original_text(): void {
+		$saved               = $GLOBALS['wp_query'];
 		$GLOBALS['wp_query'] = null;
 
 		try {
-			$this->expectException( \Error::class );
-			$this->expectExceptionMessage( 'Call to a member function get() on null' );
-
-			// The `! $wp_query` guard comes after $wp_query->get(), so it never helps. The guard should come first.
-			mai_locations_plugin()->no_results_text( 'Original' );
+			$this->assertSame( 'Original', mai_locations_plugin()->no_results_text( 'Original' ) );
 		} finally {
 			$GLOBALS['wp_query'] = $saved;
 		}
 	}
 
-	public function test_pins_bug_fatal_when_post_type_query_var_is_an_array(): void {
+	public function test_array_post_type_query_var_keeps_the_original_text(): void {
 		$saved               = $GLOBALS['wp_query'];
 		$GLOBALS['wp_query'] = new WP_Query();
 		$GLOBALS['wp_query']->set( 'post_type', [ 'mai_location', 'post' ] );
 
 		try {
-			$this->expectException( \TypeError::class );
-
-			// An array is used as an array key. Should handle multiple post types or return the original text.
-			mai_locations_plugin()->no_results_text( 'Original' );
+			$this->assertSame( 'Original', mai_locations_plugin()->no_results_text( 'Original' ) );
 		} finally {
 			$GLOBALS['wp_query'] = $saved;
 		}

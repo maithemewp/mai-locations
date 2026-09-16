@@ -454,11 +454,16 @@ final class LocationImportTest extends TestCase {
 		$this->assertSame( 'publish', $this->location_by_title( 'Headless Horseman Bridge' )->post_status );
 	}
 
-	public function test_pins_bug_blank_line_in_csv_throws_value_error(): void {
-		$this->expectException( \ValueError::class );
-		$this->expectExceptionMessage( 'array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements' );
+	/**
+	 * Fixed September 16, 2026. array_combine() threw a ValueError on the blank line most editors
+	 * leave at the end of a file, which stopped the whole import.
+	 */
+	public function test_blank_line_in_csv_is_skipped(): void {
+		$this->setExpectedDeprecated( 'get_page_by_title' );
 
-		// Correct behaviour: skip blank lines.
-		$this->run_import( self::FIXTURES . '/import-blank-line.csv' );
+		$result = $this->run_import( self::FIXTURES . '/import-blank-line.csv' );
+
+		$this->assertSame( '1', $result['query']['imported'] );
+		$this->assertSame( 'Sleepy Hollow', get_post_meta( $this->location_by_title( 'Philipsburg Manor' )->ID, 'address_city', true ) );
 	}
 }

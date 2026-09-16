@@ -127,18 +127,6 @@ parameters:
 			path: ../inc/classes/Forms/LocationFormListener.php
 
 		-
-			message: '#^Function is_account_page not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: ../inc/classes/Integrations/WooCommerceAccountTabs.php
-
-		-
-			message: '#^Function is_wc_endpoint_url not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: ../inc/classes/Integrations/WooCommerceAccountTabs.php
-
-		-
 			message: '#^Ternary operator condition is always true\.$#'
 			identifier: ternary.alwaysTrue
 			count: 1

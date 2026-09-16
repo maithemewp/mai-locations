@@ -177,13 +177,19 @@ class WooCommerceAccountTabs {
 	/**
 	 * Loads the ACF form head where the account page needs it.
 	 *
-	 * TODO: calls is_account_page() without checking WooCommerce is active. See TODO.md.
+	 * Checks WooCommerce is there before asking it anything. Until September 16, 2026 this called
+	 * is_account_page() outright, so the class fataled on any site without WooCommerce, which is
+	 * why the plugin never instantiated it.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
 	public function add_acf_form_head(): void {
+		if ( ! function_exists( 'is_account_page' ) || ! function_exists( 'is_wc_endpoint_url' ) ) {
+			return;
+		}
+
 		if ( ! is_account_page() ) {
 			return;
 		}

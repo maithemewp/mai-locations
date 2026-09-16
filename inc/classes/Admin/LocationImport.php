@@ -351,9 +351,18 @@ class LocationImport {
 		// Load csv into array.
 		$csv = array_map( 'str_getcsv', file( $file_path ) );
 
+		$header = $csv[0];
+
+		// Drop rows that do not line up with the header, such as the blank line most editors
+		// leave at the end of a file. array_combine() used to throw a ValueError on one of those
+		// and stop the whole import. Fixed September 16, 2026.
+		$csv = array_values(
+			array_filter( $csv, static fn( $row ): bool => is_array( $row ) && count( $row ) === count( $header ) )
+		);
+
 		// Map header values as each item key.
-		array_walk( $csv, function ( &$a ) use ( $csv ) {
-			$a = array_combine( $csv[0], $a );
+		array_walk( $csv, static function ( &$row ) use ( $header ): void {
+			$row = array_combine( $header, $row );
 		} );
 
 		// Remove column header.
