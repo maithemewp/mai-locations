@@ -1,18 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations\Blocks;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
 /**
- * The locations filter block class.
+ * The filters form block, which wraps the search, filter and button blocks in a form.
+ *
+ * Was Mai_Locations_Filters_Block in blocks/location-filters/block.php. That name still works,
+ * via inc/aliases.php. block.json stays in blocks/location-filters/.
  *
  * @since TBD
  */
-class Mai_Locations_Filters_Block {
+class FiltersBlock {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -23,21 +31,21 @@ class Mai_Locations_Filters_Block {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'acf/init',                               [ $this, 'register_block' ] );
 		add_action( 'admin_post_mailocations_filters',        [ $this, 'post_action' ] );
 		add_action( 'admin_post_nopriv_mailocations_filters', [ $this, 'post_action' ] );
 	}
 
 	/**
-	 * Registers block.
+	 * Registers the block.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	function register_block() {
-		register_block_type( __DIR__ . '/block.json',
+	public function register_block(): void {
+		register_block_type( MAI_LOCATIONS_PLUGIN_DIR . 'blocks/location-filters',
 			[
 				'render_callback' => [ $this, 'render_block' ],
 			]
@@ -45,20 +53,20 @@ class Mai_Locations_Filters_Block {
 	}
 
 	/**
-	 * Callback function to render the block.
+	 * Renders the block.
 	 *
 	 * @since TBD
 	 *
-	 * @param array    $attributes The block attributes.
-	 * @param string   $content The block content.
-	 * @param bool     $is_preview Whether or not the block is being rendered for editing preview.
-	 * @param int      $post_id The current post being edited or viewed.
-	 * @param WP_Block $wp_block The block instance (since WP 5.5).
-	 * @param array    $context The block context array.
+	 * @param array<string, mixed> $attributes The block attributes.
+	 * @param string               $content    The block content.
+	 * @param bool                 $is_preview Whether the block is rendering for an editor preview.
+	 * @param int                  $post_id    The current post being edited or viewed.
+	 * @param \WP_Block            $wp_block   The block instance.
+	 * @param array<string, mixed> $context    The block context array.
 	 *
 	 * @return void
 	 */
-	function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
+	public function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ): void {
 		// Output the form.
 		printf( '<form class="mai-locations-filters" method="post" action="%s">', esc_url( admin_url( 'admin-post.php' ) ) );
 			// Hidden inputs and nonce.
@@ -72,13 +80,13 @@ class Mai_Locations_Filters_Block {
 	}
 
 	/**
-	 * Listener for generating default ads.
+	 * Handles the filter form submission, and redirects with the chosen filters as query args.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function post_action() {
+	public function post_action(): void {
 		// Bail if not a valid request.
 		if ( ! ( isset( $_POST['mailocations_filters_nonce'] ) && wp_verify_nonce( $_POST['mailocations_filters_nonce'], 'mailocations_filters' ) ) ) {
 			return;
@@ -125,13 +133,13 @@ class Mai_Locations_Filters_Block {
 	}
 
 	/**
-	 * Get the block template.
+	 * Gets the inner block template.
 	 *
 	 * @since TBD
 	 *
-	 * @return array
+	 * @return array<int, mixed>
 	 */
-	function get_template() {
+	public function get_template() {
 		return [
 			[
 				'acf/mai-locations-address-search',

@@ -1,18 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations\Blocks;
+
+use WP_HTML_Tag_Processor;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
 /**
- * The clear filters block class.
+ * The clear filters button, a core/button variation.
+ *
+ * Was Mai_Locations_Filter_Clear_Block in blocks/location-filter-clear/block.php. That name
+ * still works, via inc/aliases.php. This block has no block.json, because it is a variation of
+ * a core block rather than a block of its own.
  *
  * @since TBD
  */
-class Mai_Locations_Filter_Clear_Block {
+class FilterClearBlock {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -23,28 +34,27 @@ class Mai_Locations_Filter_Clear_Block {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_filter( 'register_block_type_args',  [ $this, 'add_block_attribute' ], 10, 2 );
 		add_filter( 'get_block_type_variations', [ $this, 'add_block_variation' ], 10, 2 );
 		add_filter( 'render_block_core/button',  [ $this, 'render_block_variation' ], 10, 3 );
 	}
 
 	/**
-	 * Registers custom block attribute.
+	 * Registers the custom block attribute.
 	 *
 	 * @since TBD
 	 *
-	 * @param array  $args
-	 * @param string $block_type
+	 * @param array<string, mixed> $args       The block type args.
+	 * @param string               $block_type The block type name.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function add_block_attribute( $args, $block_type ) {
+	public function add_block_attribute( $args, $block_type ) {
 		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 			return $args;
 		}
 
-		// if ( 'core/buttons' !== $block_type ) {
 		if ( 'core/button' !== $block_type ) {
 			return $args;
 		}
@@ -55,18 +65,20 @@ class Mai_Locations_Filter_Clear_Block {
 	}
 
 	/**
-	 * Registers block variation.
+	 * Registers the block variation.
+	 *
+	 * Core passes a WP_Block_Type object here, not a string, whatever the old docblock said.
 	 *
 	 * @since TBD
 	 *
 	 * @link https://developer.wordpress.org/news/2024/03/14/how-to-register-block-variations-with-php/
 	 *
-	 * @param array  $variations
-	 * @param string $block_type
+	 * @param array<int, array<string, mixed>> $variations The existing variations.
+	 * @param \WP_Block_Type                   $block_type The block type.
 	 *
-	 * @return array
+	 * @return array<int, array<string, mixed>>
 	 */
-	function add_block_variation( $variations, $block_type ) {
+	public function add_block_variation( $variations, $block_type ) {
 		if ( 'core/button' !== $block_type->name ) {
 			return $variations;
 		}
@@ -94,17 +106,17 @@ class Mai_Locations_Filter_Clear_Block {
 	}
 
 	/**
-	 * Modifies the url of the button to clear filters.
+	 * Points the button at the current URL with the filters stripped off.
 	 *
 	 * @since TBD
 	 *
-	 * @param string   $block_content The block content.
-	 * @param array    $block         The full block, including name and attributes.
-	 * @param WP_Block $instance      The block instance.
+	 * @param string               $block_content The block content.
+	 * @param array<string, mixed> $parsed_block  The full block, including name and attributes.
+	 * @param \WP_Block            $wp_block      The block instance.
 	 *
 	 * @return string
 	 */
-	function render_block_variation( $block_content, $parsed_block, $wp_block ) {
+	public function render_block_variation( $block_content, $parsed_block, $wp_block ) {
 		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 			return $block_content;
 		}

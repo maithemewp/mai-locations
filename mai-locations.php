@@ -133,17 +133,6 @@ final class Mai_Locations_Plugin {
 
 		// Classes.
 
-		// Blocks.
-		include_once __DIR__ . '/blocks/location-address-search/block.php';
-		include_once __DIR__ . '/blocks/location-count/block.php';
-		include_once __DIR__ . '/blocks/location-filter/block.php';
-		include_once __DIR__ . '/blocks/location-filter-clear/block.php';
-		include_once __DIR__ . '/blocks/location-filter-submit/block.php';
-		include_once __DIR__ . '/blocks/location-filters/block.php';
-		include_once __DIR__ . '/blocks/location-map/block.php';
-		include_once __DIR__ . '/blocks/location-submission/block.php';
-		include_once __DIR__ . '/blocks/location-table/block.php';
-
 		// Instantiate classes.
 		new Mai\Locations\Display\BlockBindings;
 		new Mai\Locations\Fields\LocationFields;
@@ -169,16 +158,17 @@ final class Mai_Locations_Plugin {
 			WP_CLI::add_command( 'mailocations', Mai\Locations\Cli\CLI::class );
 		});
 
-		// Instantiate blocks.
-		new Mai_Locations_Address_Search_Block;
-		new Mai_Locations_Count_Block;
-		new Mai_Locations_Filter_Block;
-		new Mai_Locations_Filter_Clear_Block;
-		new Mai_Locations_Filter_Submit_Block;
-		new Mai_Locations_Filters_Block;
-		new Mai_Locations_Submission_Block;
-		new Mai_Locations_Table_Block;
-		new Mai_Locations_Map_Block;
+		// Instantiate blocks. Their block.json files stay in blocks/<name>/, and each class
+		// points register_block_type() at that folder.
+		new Mai\Locations\Blocks\AddressSearchBlock;
+		new Mai\Locations\Blocks\CountBlock;
+		new Mai\Locations\Blocks\FilterBlock;
+		new Mai\Locations\Blocks\FilterClearBlock;
+		new Mai\Locations\Blocks\FilterSubmitBlock;
+		new Mai\Locations\Blocks\FiltersBlock;
+		new Mai\Locations\Blocks\SubmissionBlock;
+		new Mai\Locations\Blocks\TableBlock;
+		new Mai\Locations\Blocks\MapBlock;
 
 		// Disabled for now. The menu item(s) need to be conditionally added.
 		// We need to think this through more.

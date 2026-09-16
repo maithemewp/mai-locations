@@ -1,18 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations\Blocks;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
 /**
- * The locations filter block class.
+ * A single taxonomy filter, as a select, radio group or checkbox list.
+ *
+ * Was Mai_Locations_Filter_Block in blocks/location-filter/block.php. That name still works,
+ * via inc/aliases.php. block.json stays in blocks/location-filter/.
  *
  * @since TBD
  */
-class Mai_Locations_Filter_Block {
+class FilterBlock {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -23,21 +31,21 @@ class Mai_Locations_Filter_Block {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'acf/init',                                         [ $this, 'register_block' ] );
 		add_action( 'acf/init',                                         [ $this, 'register_field_group' ] );
 		add_filter( 'acf/load_field/key=mailocations_locations_filter', [ $this, 'load_locations_filter_field' ] );
 	}
 
 	/**
-	 * Registers block.
+	 * Registers the block.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	function register_block() {
-		register_block_type( __DIR__ . '/block.json',
+	public function register_block(): void {
+		register_block_type( MAI_LOCATIONS_PLUGIN_DIR . 'blocks/location-filter',
 			[
 				'render_callback' => [ $this, 'render_block' ],
 			]
@@ -45,20 +53,20 @@ class Mai_Locations_Filter_Block {
 	}
 
 	/**
-	 * Callback function to render the block.
+	 * Renders the block.
 	 *
 	 * @since TBD
 	 *
-	 * @param array    $attributes The block attributes.
-	 * @param string   $content The block content.
-	 * @param bool     $is_preview Whether or not the block is being rendered for editing preview.
-	 * @param int      $post_id The current post being edited or viewed.
-	 * @param WP_Block $wp_block The block instance (since WP 5.5).
-	 * @param array    $context The block context array.
+	 * @param array<string, mixed> $attributes The block attributes.
+	 * @param string               $content    The block content.
+	 * @param bool                 $is_preview Whether the block is rendering for an editor preview.
+	 * @param int                  $post_id    The current post being edited or viewed.
+	 * @param \WP_Block            $wp_block   The block instance.
+	 * @param array<string, mixed> $context    The block context array.
 	 *
 	 * @return void
 	 */
-	function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
+	public function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ): void {
 		$taxonomy = get_field( 'filter' );
 		$type     = get_field( 'type' );
 		$type     = $type ?: 'select';
@@ -117,20 +125,20 @@ class Mai_Locations_Filter_Block {
 	}
 
 	/**
-	 * Gets checkbox and radio filter markup.
+	 * Gets the checkbox and radio filter markup.
 	 *
 	 * @access private
 	 *
 	 * @since TBD
 	 *
-	 * @param  string    $taxonomy
-	 * @param  WP_Term[] $terms
-	 * @param  array     $selected
-	 * @param  string    $type
+	 * @param string               $taxonomy The taxonomy name.
+	 * @param array<int, \WP_Term> $terms    The terms.
+	 * @param array<string, int>   $selected The selected term slugs.
+	 * @param string               $type     checkbox or radio.
 	 *
 	 * @return string
 	 */
-	function get_choice_filter( $taxonomy, $terms, $selected, $type ) {
+	public function get_choice_filter( $taxonomy, $terms, $selected, $type ) {
 		$html = sprintf( '<ul class="mailocations-filter-list"%s>', is_admin() ? ' style="list-style-type:none;margin-left:0;padding-left:0;"' : '' );
 
 		foreach ( $terms as $term ) {
@@ -150,20 +158,19 @@ class Mai_Locations_Filter_Block {
 	}
 
 	/**
-	 * Gets choice filter markup.
+	 * Gets the select filter markup.
 	 *
 	 * @access private
 	 *
 	 * @since TBD
 	 *
-	 * @param  string    $taxonomy
-	 * @param  WP_Term[] $terms
-	 * @param  array     $selected
-	 * @param  string    $type
+	 * @param string               $taxonomy The taxonomy name.
+	 * @param array<int, \WP_Term> $terms    The terms.
+	 * @param array<string, int>   $selected The selected term slugs.
 	 *
 	 * @return string
 	 */
-	function get_select_filter( $taxonomy, $terms, $selected ) {
+	public function get_select_filter( $taxonomy, $terms, $selected ) {
 		$html = sprintf( '<select class="mailocations-filter" tabindex="0" data-filter="_%s" name="mailocations_filters[_%s]">', $taxonomy, $taxonomy );
 			$html .= sprintf( '<option value="">%s %s</option>', __( 'All', 'mai-locations' ), get_taxonomy( $taxonomy )->labels->name );
 
@@ -181,13 +188,13 @@ class Mai_Locations_Filter_Block {
 	}
 
 	/**
-	 * Register field group.
+	 * Registers the block's field group.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function register_field_group() {
+	public function register_field_group(): void {
 		if ( ! function_exists( 'acf_add_local_field_group' ) ) {
 			return;
 		}
@@ -241,15 +248,15 @@ class Mai_Locations_Filter_Block {
 	}
 
 	/**
-	 * Load the taxonomy filter with all taxonomies registered to locations.
+	 * Loads the taxonomy filter with every taxonomy registered to locations.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $field
+	 * @param array<string, mixed> $field The field.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function load_locations_filter_field( $field ) {
+	public function load_locations_filter_field( $field ) {
 		if ( ! is_admin() ) {
 			return $field;
 		}

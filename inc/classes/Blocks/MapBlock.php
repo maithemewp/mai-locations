@@ -1,18 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations\Blocks;
+
+use WP_Query;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
 /**
- * The locations map block class.
+ * The locations map block.
+ *
+ * Was Mai_Locations_Map_Block in blocks/location-map/block.php. That name still works, via
+ * inc/aliases.php. block.json stays in blocks/location-map/.
  *
  * @since TBD
  */
-class Mai_Locations_Map_Block {
+class MapBlock {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -23,20 +33,20 @@ class Mai_Locations_Map_Block {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'acf/init', [ $this, 'register_block' ] );
 		add_action( 'acf/init', [ $this, 'register_field_group' ] );
 	}
 
 	/**
-	 * Registers block.
+	 * Registers the block.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	function register_block() {
-		register_block_type( __DIR__ . '/block.json',
+	public function register_block(): void {
+		register_block_type( MAI_LOCATIONS_PLUGIN_DIR . 'blocks/location-map',
 			[
 				'render_callback' => [ $this, 'render_block' ],
 			]
@@ -44,20 +54,24 @@ class Mai_Locations_Map_Block {
 	}
 
 	/**
-	 * Callback function to render the block.
+	 * Renders the block.
+	 *
+	 * TODO: "All locations" builds its query from the main query, so on a page that is not a
+	 * location archive it looks up regular posts and shows nothing. The directions link uses
+	 * ref= instead of rel=. See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @param array    $attributes The block attributes.
-	 * @param string   $content The block content.
-	 * @param bool     $is_preview Whether or not the block is being rendered for editing preview.
-	 * @param int      $post_id The current post being edited or viewed.
-	 * @param WP_Block $wp_block The block instance (since WP 5.5).
-	 * @param array    $context The block context array.
+	 * @param array<string, mixed> $attributes The block attributes.
+	 * @param string               $content    The block content.
+	 * @param bool                 $is_preview Whether the block is rendering for an editor preview.
+	 * @param int                  $post_id    The current post being edited or viewed.
+	 * @param \WP_Block            $wp_block   The block instance.
+	 * @param array<string, mixed> $context    The block context array.
 	 *
 	 * @return void
 	 */
-	function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
+	public function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ): void {
 		// Maybe enqueue scripts.
 		if ( ! $is_preview ) {
 			wp_enqueue_script( 'mai-locations-markerclusterer' );
@@ -137,7 +151,7 @@ class Mai_Locations_Map_Block {
 		else {
 			// Get posts as array of ids.
 			$posts = (array) $wp_query->posts;
-			$posts = array_map( function( $post ) {
+			$posts = array_map( function ( $post ) {
 				return $post->ID;
 			}, $posts );
 
@@ -165,15 +179,15 @@ class Mai_Locations_Map_Block {
 	}
 
 	/**
-	 * Get markers data.
+	 * Gets the marker data.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $posts Array of post ids.
+	 * @param array<int, int> $posts Array of post ids.
 	 *
-	 * @return array
+	 * @return array<int, array<string, mixed>>
 	 */
-	function get_markers( $posts ) {
+	public function get_markers( $posts ) {
 		$data = [];
 
 		// Loop through posts to build marker data.
@@ -201,13 +215,13 @@ class Mai_Locations_Map_Block {
 	}
 
 	/**
-	 * Register field group.
+	 * Registers the block's field group.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function register_field_group() {
+	public function register_field_group(): void {
 		if ( ! function_exists( 'acf_add_local_field_group' ) ) {
 			return;
 		}

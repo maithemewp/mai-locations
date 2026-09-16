@@ -1,18 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations\Blocks;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
 /**
- * The locations filter block class.
+ * The locations count block.
+ *
+ * Was Mai_Locations_Count_Block in blocks/location-count/block.php. That name still works, via
+ * inc/aliases.php. block.json stays in blocks/location-count/, and register_block_type() takes
+ * that folder.
  *
  * @since TBD
  */
-class Mai_Locations_Count_Block {
+class CountBlock {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -23,20 +32,20 @@ class Mai_Locations_Count_Block {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'acf/init', [ $this, 'register_block' ] );
 		add_action( 'acf/init', [ $this, 'register_field_group' ] );
 	}
 
 	/**
-	 * Registers block.
+	 * Registers the block.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	function register_block() {
-		register_block_type( __DIR__ . '/block.json',
+	public function register_block(): void {
+		register_block_type( MAI_LOCATIONS_PLUGIN_DIR . 'blocks/location-count',
 			[
 				'render_callback' => [ $this, 'render_block' ],
 			]
@@ -44,20 +53,23 @@ class Mai_Locations_Count_Block {
 	}
 
 	/**
-	 * Callback function to render the block.
+	 * Renders the block.
+	 *
+	 * TODO: unset settings come back as null from get_field(), so the defaults in block.json are
+	 * lost and an empty block renders "0  0". See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @param array    $attributes The block attributes.
-	 * @param string   $content The block content.
-	 * @param bool     $is_preview Whether or not the block is being rendered for editing preview.
-	 * @param int      $post_id The current post being edited or viewed.
-	 * @param WP_Block $wp_block The block instance (since WP 5.5).
-	 * @param array    $context The block context array.
+	 * @param array<string, mixed> $attributes The block attributes.
+	 * @param string               $content    The block content.
+	 * @param bool                 $is_preview Whether the block is rendering for an editor preview.
+	 * @param int                  $post_id    The current post being edited or viewed.
+	 * @param \WP_Block            $wp_block   The block instance.
+	 * @param array<string, mixed> $context    The block context array.
 	 *
 	 * @return void
 	 */
-	function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
+	public function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ): void {
 		if ( $is_preview ) {
 			$number = 123;
 			$total  = 456;
@@ -77,13 +89,13 @@ class Mai_Locations_Count_Block {
 	}
 
 	/**
-	 * Register field group.
+	 * Registers the block's field group.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function register_field_group() {
+	public function register_field_group(): void {
 		if ( ! function_exists( 'acf_add_local_field_group' ) ) {
 			return;
 		}

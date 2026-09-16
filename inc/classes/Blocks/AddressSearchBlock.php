@@ -1,18 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations\Blocks;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
 /**
- * The locations filter block class.
+ * The address search block, which drives proximity search.
+ *
+ * Was Mai_Locations_Address_Search_Block in blocks/location-address-search/block.php. That name
+ * still works, via inc/aliases.php. block.json stays in blocks/location-address-search/.
  *
  * @since TBD
  */
-class Mai_Locations_Address_Search_Block {
+class AddressSearchBlock {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -23,20 +31,20 @@ class Mai_Locations_Address_Search_Block {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'acf/init', [ $this, 'register_block' ] );
 		add_action( 'acf/init', [ $this, 'register_field_group' ] );
 	}
 
 	/**
-	 * Registers block.
+	 * Registers the block.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	function register_block() {
-		register_block_type( __DIR__ . '/block.json',
+	public function register_block(): void {
+		register_block_type( MAI_LOCATIONS_PLUGIN_DIR . 'blocks/location-address-search',
 			[
 				'render_callback' => [ $this, 'render_block' ],
 			]
@@ -44,20 +52,23 @@ class Mai_Locations_Address_Search_Block {
 	}
 
 	/**
-	 * Callback function to render the block.
+	 * Renders the block.
+	 *
+	 * TODO: distance options keep the space from a "10, 20" setting, so one option's value is
+	 * " 20". See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @param array    $attributes The block attributes.
-	 * @param string   $content The block content.
-	 * @param bool     $is_preview Whether or not the block is being rendered for editing preview.
-	 * @param int      $post_id The current post being edited or viewed.
-	 * @param WP_Block $wp_block The block instance (since WP 5.5).
-	 * @param array    $context The block context array.
+	 * @param array<string, mixed> $attributes The block attributes.
+	 * @param string               $content    The block content.
+	 * @param bool                 $is_preview Whether the block is rendering for an editor preview.
+	 * @param int                  $post_id    The current post being edited or viewed.
+	 * @param \WP_Block            $wp_block   The block instance.
+	 * @param array<string, mixed> $context    The block context array.
 	 *
 	 * @return void
 	 */
-	function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ) {
+	public function render_block( $attributes, $content, $is_preview, $post_id, $wp_block, $context ): void {
 		$params      = wp_parse_args( mailocations_get_query_params(), mailocations_get_query_defaults() );
 		$placeholder = get_field( 'placeholder' );
 		$placeholder = $placeholder ?: __( 'Enter your address', 'mai-locations' );
@@ -81,7 +92,7 @@ class Mai_Locations_Address_Search_Block {
 		// Build HTML.
 		echo '<div class="mailocations-autocomplete-container">';
 			echo '<div class="mailocations-autocomplete-input-container">';
-				// Autocomplete container — PlaceAutocompleteElement is appended here via JS.
+				// Autocomplete container. PlaceAutocompleteElement is appended here via JS.
 				printf( '<div class="mailocations-autocomplete" data-countries="%s" data-placeholder="%s" data-value="%s"></div>',
 					implode( ',', $countries ),
 					esc_attr( $placeholder ),
@@ -100,7 +111,7 @@ class Mai_Locations_Address_Search_Block {
 				]
 			);
 
-			// Hidden input for $_POST data, outside of input-container for so clear button CSS hides correctly.
+			// Hidden input for $_POST data, outside of input-container so the clear button CSS hides correctly.
 			printf( '<input type="hidden" class="mailocations-address" name="mailocations_address" value="%s">', esc_attr( $address_encoded ) );
 
 			// If we have distances.
@@ -129,7 +140,7 @@ class Mai_Locations_Address_Search_Block {
 								$value    = ! $is_preview ? sprintf( ' value="%s"', $raw ) : '';
 								$selected = ! $is_preview && $raw === $unit ? ' selected' : '';
 
-								printf ( '<option %s%s>%s</option>', $value, $selected, $raw );
+								printf( '<option %s%s>%s</option>', $value, $selected, $raw );
 							}
 						echo '</select>';
 					}
@@ -147,13 +158,15 @@ class Mai_Locations_Address_Search_Block {
 	}
 
 	/**
-	 * Register field group.
+	 * Registers the block's field group.
+	 *
+	 * TODO: the missing-key message uses the text domain "mailocations". See TODO.md.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function register_field_group() {
+	public function register_field_group(): void {
 		if ( ! function_exists( 'acf_add_local_field_group' ) ) {
 			return;
 		}

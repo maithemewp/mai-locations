@@ -148,7 +148,8 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
   - [x] `Mai_Locations_CLI` to `Mai\Locations\CLI`. September 15, 2026. Its two public global functions, `mailocations_get_data_from_website()` and `mailocations_upload_image()`, moved to `inc/functions-website.php` and stay global, because Visit Sleepy Hollow calls both from its own scripts. The command registration and the discarded instantiation that used to run at the top of the class file moved to the bootstrap. `wp mailocations` is unchanged; only the class the command is registered with changed.
   - [x] **All 15 classes in `inc/classes/` are namespaced.**
   - [x] **Grouped into role subfolders**, September 15, 2026, on Mike's call after surveying all 26 plugins: `Admin/`, `Cli/`, `Display/`, `Fields/`, `Forms/`, `Integrations/`, `Query/`, with `Blocks/` to come. Every recent plugin groups by role (`mai-text-to-speech`, `mai-post-aggregator`, the three springwire plugins), and `inc/classes/` with subfolders already exists in `eurweb-plugin` and `hmg-sharpspring`. So this follows both the scaffold's root and the newer plugins' grouping. Namespaces gained a level, for example `Mai\Locations\Forms\LocationFormEdit`; the old global names are unchanged.
-  - [ ] The 9 block classes in `blocks/*/block.php`, moving to `inc/classes/Blocks/`. `block.json` stays in `blocks/<name>/`, and `register_block_type()` takes that folder path, which is what mai-auth does.
+  - [x] **The 9 block classes**, now `Mai\Locations\Blocks\*` in `inc/classes/Blocks/`. September 15, 2026. Each `block.json` stays in `blocks/<name>/`, and `register_block_type()` takes that folder path, which is what mai-auth does. The two button variations have no `block.json` at all.
+  - [x] **Every class in the plugin is namespaced.** 24 classes, all with their old global names kept in `inc/aliases.php`.
 
 ## Blocks stay on ACF for this rework
 

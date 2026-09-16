@@ -1,18 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations\Blocks;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
 /**
- * The locations map block class.
+ * The locations table block, which shows a user their own locations.
+ *
+ * Was Mai_Locations_Table_Block in blocks/location-table/block.php. That name still works, via
+ * inc/aliases.php. block.json stays in blocks/location-table/.
  *
  * @since TBD
  */
-class Mai_Locations_Table_Block {
+class TableBlock {
+
 	/**
 	 * Construct the class.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -23,21 +31,21 @@ class Mai_Locations_Table_Block {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'acf/init',                               [ $this, 'register_block' ] );
 		add_action( 'acf/init',                               [ $this, 'register_field_group' ] );
 		add_filter( 'acf/load_field/key=field_6071bfebbddbg', [ $this, 'load_post_type_choices' ] );
 	}
 
 	/**
-	 * Registers block.
+	 * Registers the block.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	function register_block() {
-		register_block_type( __DIR__ . '/block.json',
+	public function register_block(): void {
+		register_block_type( MAI_LOCATIONS_PLUGIN_DIR . 'blocks/location-table',
 			[
 				'render_callback' => [ $this, 'render_block' ],
 			]
@@ -45,19 +53,19 @@ class Mai_Locations_Table_Block {
 	}
 
 	/**
-	 * Callback function to render the Mai Location Table block.
+	 * Renders the Mai Locations Table block.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array    $attributes The block attributes.
-	 * @param string   $content    The block content.
-	 * @param bool     $is_preview Whether or not the block is being rendered for editing preview.
-	 * @param int      $post_id    The current post being edited or viewed.
-	 * @param WP_Block $block      The block instance (since WP 5.5).
+	 * @param array<string, mixed> $attributes The block attributes.
+	 * @param string               $content    The block content.
+	 * @param bool                 $is_preview Whether the block is rendering for an editor preview.
+	 * @param int                  $post_id    The current post being edited or viewed.
+	 * @param \WP_Block            $block      The block instance.
 	 *
 	 * @return void
 	 */
-	function render_block( $attributes, $content, $is_preview, $post_id, $block ) {
+	public function render_block( $attributes, $content, $is_preview, $post_id, $block ): void {
 		$args = [
 			'post_type'  => get_field( 'locations_table_post_type' ),
 			'title'      => get_field( 'locations_table_title' ),
@@ -76,13 +84,17 @@ class Mai_Locations_Table_Block {
 	}
 
 	/**
-	 * Add field group.
+	 * Registers the block's field group.
+	 *
+	 * TODO: mai_location_redirect and mai_location_fields are the same keys the submission block
+	 * registers, so ACF keeps whichever loads first and this block shows that block's labels.
+	 * Two labels here also use the text domain "mai-location". See TODO.md.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	function register_field_group() {
+	public function register_field_group(): void {
 		// Locations Table block.
 		acf_add_local_field_group(
 			[
@@ -117,7 +129,7 @@ class Mai_Locations_Table_Block {
 						'rows'  => 2,
 					],
 					[
-						// This field has to match what's in locations-table/block.php.
+						// This field has to match what's in location-submission/block.php.
 						'label'        => __( 'Redirect', 'mai-locations' ),
 						'instructions' => __( 'Redirect to this URL after saving.', 'mai-locations' ),
 						'key'          => 'mai_location_redirect',
@@ -156,20 +168,20 @@ class Mai_Locations_Table_Block {
 	}
 
 	/**
-	 * Load the post type choices.
+	 * Loads the post type choices.
 	 *
 	 * @since TBD
 	 *
-	 * @param array $field
+	 * @param array<string, mixed> $field The field.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function load_post_type_choices( $field ) {
+	public function load_post_type_choices( $field ) {
 		if ( ! is_admin() ) {
 			return $field;
 		}
 
-		$field['choices'] = array_map( function( $name ) {
+		$field['choices'] = array_map( function ( $name ) {
 			return $name['plural'];
 		}, mailocations_get_location_post_types() );
 
