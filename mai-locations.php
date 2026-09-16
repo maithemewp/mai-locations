@@ -327,7 +327,9 @@ final class Mai_Locations_Plugin {
 				'show_in_rest'               => true,
 				'show_tagcloud'              => true,
 				'show_ui'                    => true,
-				'rewrite'                    => [ 'slug' => $cat_base, 'with_front' => false ],
+				// The taxonomy is hierarchical, so its rewrite has to be too. Without this a
+				// child term's URL gets no rewrite rule. Fixed September 16, 2026.
+				'rewrite'                    => [ 'slug' => $cat_base, 'with_front' => false, 'hierarchical' => true ],
 			]
 		) );
 	}

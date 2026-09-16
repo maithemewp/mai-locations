@@ -151,8 +151,8 @@ final class LocationImportTest extends TestCase {
 		$this->assertSame(
 			[
 				'mailocations_import_description'         => [ '', 'message', '' ],
-				// The label's mismatched bracket is in the code today.
-				'mailocations_import_file'                => [ 'location_import_file', 'file', 'File (.csv]' ],
+				// The label's mismatched bracket was fixed September 16, 2026.
+				'mailocations_import_file'                => [ 'location_import_file', 'file', 'File (.csv)' ],
 				'mailocations_location_import_status'     => [ 'location_status', 'radio', 'Status' ],
 				'mailocations_location_import_users'      => [ 'location_users', 'true_false', 'Create/Update Users' ],
 				'mailocations_location_import_user_role'  => [ 'location_user_role', 'radio', 'User Role' ],
@@ -161,8 +161,8 @@ final class LocationImportTest extends TestCase {
 		);
 
 		$message = acf_get_local_field( 'mailocations_import_description' )['message'];
-		// The download link has a stray quote after the download attribute.
-		$this->assertStringContainsString( 'assets/csv/mai-locations-import-template.csv" target="_blank" download">Download example CSV file</a>', $message );
+		// Fixed September 16, 2026. A stray quote followed the download attribute.
+		$this->assertStringContainsString( 'assets/csv/mai-locations-import-template.csv" target="_blank" download>Download example CSV file</a>', $message );
 	}
 
 	public function test_load_roles_and_statuses_leave_field_alone_outside_admin(): void {

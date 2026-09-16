@@ -117,7 +117,7 @@ class LocationImport {
 		}
 
 		// Example download link.
-		$download_link = sprintf( '<a href="%sassets/csv/mai-locations-import-template.csv" target="_blank" download">%s</a>', MAI_LOCATIONS_PLUGIN_URL, __( 'Download example CSV file', 'mai-locations' ) );
+		$download_link = sprintf( '<a href="%sassets/csv/mai-locations-import-template.csv" target="_blank" download>%s</a>', MAI_LOCATIONS_PLUGIN_URL, __( 'Download example CSV file', 'mai-locations' ) );
 
 		// TODO: Add field for post type.
 
@@ -136,7 +136,7 @@ class LocationImport {
 					],
 					[
 						'key'           => 'mailocations_import_file',
-						'label'         => __( 'File (.csv]', 'mai-locations' ),
+						'label'         => __( 'File (.csv)', 'mai-locations' ),
 						'name'          => 'location_import_file',
 						'type'          => 'file',
 						'required'      => 1,
@@ -275,12 +275,12 @@ class LocationImport {
 
 		// Set results.
 		$results = [
-			esc_html__( 'Locations imported', 'mai-location' ) => filter_input( INPUT_GET, 'imported', FILTER_VALIDATE_INT ),
-			esc_html__( 'Locations skipped', 'mai-location' )  => filter_input( INPUT_GET, 'skipped', FILTER_VALIDATE_INT ),
-			esc_html__( 'Locations failed', 'mai-location' )   => filter_input( INPUT_GET, 'failed', FILTER_VALIDATE_INT ),
-			esc_html__( 'Users imported', 'mai-location' )     => filter_input( INPUT_GET, 'users_imported', FILTER_VALIDATE_INT ),
-			esc_html__( 'Users skipped', 'mai-location' )      => filter_input( INPUT_GET, 'users_skipped', FILTER_VALIDATE_INT ),
-			esc_html__( 'Users failed', 'mai-location' )       => filter_input( INPUT_GET, 'users_failed', FILTER_VALIDATE_INT ),
+			esc_html__( 'Locations imported', 'mai-locations' ) => filter_input( INPUT_GET, 'imported', FILTER_VALIDATE_INT ),
+			esc_html__( 'Locations skipped', 'mai-locations' )  => filter_input( INPUT_GET, 'skipped', FILTER_VALIDATE_INT ),
+			esc_html__( 'Locations failed', 'mai-locations' )   => filter_input( INPUT_GET, 'failed', FILTER_VALIDATE_INT ),
+			esc_html__( 'Users imported', 'mai-locations' )     => filter_input( INPUT_GET, 'users_imported', FILTER_VALIDATE_INT ),
+			esc_html__( 'Users skipped', 'mai-locations' )      => filter_input( INPUT_GET, 'users_skipped', FILTER_VALIDATE_INT ),
+			esc_html__( 'Users failed', 'mai-locations' )       => filter_input( INPUT_GET, 'users_failed', FILTER_VALIDATE_INT ),
 		];
 
 		// Display notice.

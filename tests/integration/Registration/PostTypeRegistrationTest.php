@@ -71,7 +71,9 @@ final class PostTypeRegistrationTest extends TestCase {
 		$this->assertTrue( $taxonomy->show_in_rest );
 		$this->assertTrue( $taxonomy->show_tagcloud );
 		$this->assertFalse( $taxonomy->meta_box_cb );
-		$this->assertSame( [ 'slug' => 'location-category', 'with_front' => false ], $taxonomy->rewrite );
+		// Fixed September 16, 2026. The taxonomy is hierarchical, so its rewrite has to be too,
+		// or a child term's URL gets no rewrite rule.
+		$this->assertSame( [ 'slug' => 'location-category', 'with_front' => false, 'hierarchical' => true ], $taxonomy->rewrite );
 	}
 
 	public function test_taxonomy_labels(): void {
@@ -113,8 +115,9 @@ final class PostTypeRegistrationTest extends TestCase {
 			$this->assertTrue( taxonomy_exists( 'mai_location_cat' ) );
 			$this->assertIsArray( $rules );
 			$this->assertArrayHasKey( 'locations/?$', $rules );
-			// The taxonomy is hierarchical but its rewrite is not, so child term paths get no rule.
-			$this->assertArrayHasKey( 'location-category/([^/]+)/?$', $rules );
+			// Fixed September 16, 2026. The rewrite is hierarchical now, so a child term path
+			// gets a rule, which the old single-segment pattern could not match.
+			$this->assertArrayHasKey( 'location-category/(.+?)/?$', $rules );
 		} finally {
 			// Registering under pretty permalinks bakes them into the global post type and taxonomy
 			// objects, which outlive this test and change permalinks in every test that runs after it.

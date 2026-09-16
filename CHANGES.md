@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+* Fixed: A location category nested under another had no working URL. Visit Settings > Permalinks and press Save once after updating.
+* Fixed: The map's marker grouping script was not declared as a requirement of the map script, so it only happened to load in time.
+* Fixed: The Settings link on the Plugins page was missing on any site where the plugin folder had been renamed.
+* Fixed: The import page's file field was labelled "File (.csv]", its example CSV link carried a stray quote, and eight labels used the wrong text domain, so they were never translated.
 * Fixed: CSV imports logged a PHP 8.4 deprecation notice for every line of the file.
 * Changed: Checking whether a location already exists no longer uses a function WordPress deprecated. A location in the trash with the same title no longer counts as existing, so importing that row creates a new location.
 * Fixed: Users created by a CSV import were created with no password at all, which WordPress warns about. They now get a generated one and set their own through the lost password form.

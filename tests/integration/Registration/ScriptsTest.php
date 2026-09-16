@@ -61,13 +61,14 @@ final class ScriptsTest extends TestCase {
 		$this->assertFalse( wp_scripts()->get_data( 'mai-locations-markerclusterer', 'strategy' ) );
 
 		$this->assertSame( MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations.js', $locations->src );
-		$this->assertSame( $this->asset( 'mai-locations' )['dependencies'], $locations->deps );
+		$this->assertSame( array_merge( $this->asset( 'mai-locations' )['dependencies'], [ 'mai-locations-markerclusterer' ] ), $locations->deps );
 		$this->assertSame( $this->asset( 'mai-locations' )['version'], $locations->ver );
 		$this->assertSame( 1, wp_scripts()->get_data( 'mai-locations', 'group' ) );
 		$this->assertFalse( wp_scripts()->get_data( 'mai-locations', 'strategy' ) );
 
-		// The map script does not declare the clusterer as a dependency.
-		$this->assertNotContains( 'mai-locations-markerclusterer', $locations->deps );
+		// Fixed September 16, 2026. The map script clusters markers but did not declare the
+		// clusterer as a dependency, so it only happened to load in time.
+		$this->assertContains( 'mai-locations-markerclusterer', $locations->deps );
 		$this->assertFalse( wp_script_is( 'mai-locations', 'enqueued' ) );
 	}
 

@@ -55,9 +55,13 @@ class Scripts {
 		wp_register_style( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations-styles.css', [], $locations_style_asset['version'] );
 
 		// Scripts. No defer on the map scripts, because of Google Maps callback timing.
-		// TODO: mai-locations does not list the clusterer as a dependency. See TODO.md.
 		wp_register_script( 'mai-locations-markerclusterer', MAI_LOCATIONS_PLUGIN_URL . 'build/markerclusterer.js', $clusterer_asset['dependencies'], $clusterer_asset['version'], [ 'in_footer' => true ] );
-		wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations.js', $locations_asset['dependencies'], $locations_asset['version'], [ 'in_footer' => true ] );
+
+		// The map code clusters markers, so the clusterer has to load first. It was left out of
+		// the dependencies and only happened to load in time. Fixed September 16, 2026.
+		$locations_deps = array_merge( $locations_asset['dependencies'], [ 'mai-locations-markerclusterer' ] );
+
+		wp_register_script( 'mai-locations', MAI_LOCATIONS_PLUGIN_URL . 'build/mai-locations.js', $locations_deps, $locations_asset['version'], [ 'in_footer' => true ] );
 
 		$localize = [
 			'params'     => mailocations_get_query_params(),

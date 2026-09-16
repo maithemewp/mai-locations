@@ -38,7 +38,9 @@ class Settings {
 		add_action( 'admin_menu',                                          [ $this, 'add_menu_item' ], 12 );
 		add_action( 'admin_init',                                          [ $this, 'init' ] );
 		add_filter( 'acf/fields/google_map/api',                           [ $this, 'acf_google_map_api' ], 99 );
-		add_filter( 'plugin_action_links_mai-locations/mai-locations.php', [ $this, 'add_settings_link' ], 10, 4 );
+		// Built from the plugin's own file, not the folder name, which used to be hardcoded and
+		// so failed on any site that renamed the folder. Fixed September 16, 2026.
+		add_filter( 'plugin_action_links_' . plugin_basename( MAI_LOCATIONS_PLUGIN_FILE ), [ $this, 'add_settings_link' ], 10, 4 );
 	}
 
 	/**

@@ -52,8 +52,9 @@ final class SettingsTest extends TestCase {
 		$this->assertSame( 10, has_action( 'admin_init', [ $settings, 'init' ] ) );
 		$this->assertSame( 99, has_filter( 'acf/fields/google_map/api', [ $settings, 'acf_google_map_api' ] ) );
 
-		// The hook name hardcodes the plugin folder, so the link is missing if the folder is named differently.
-		$this->assertSame( 10, has_filter( 'plugin_action_links_mai-locations/mai-locations.php', [ $settings, 'add_settings_link' ] ) );
+		// Fixed September 16, 2026. The hook name hardcoded the plugin folder, so the Settings
+		// link went missing on a site that renamed it. It is built from the plugin file now.
+		$this->assertSame( 10, has_filter( 'plugin_action_links_' . plugin_basename( MAI_LOCATIONS_PLUGIN_FILE ), [ $settings, 'add_settings_link' ] ) );
 	}
 
 	public function test_init_registers_the_setting(): void {
