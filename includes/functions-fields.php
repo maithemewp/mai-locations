@@ -79,8 +79,7 @@ function mailocations_get_fields_raw() {
 
 	$general  = mailocations_get_general_fields();
 	$location = mailocations_get_address_fields();
-	$social   = mailocations_get_social_fields();
-	$fields   = array_merge( $general, $location, $social );
+	$fields   = array_merge( $general, $location );
 	$fields   = apply_filters( 'mailocations_fields', $fields );
 
 	return $fields;
@@ -313,80 +312,6 @@ function mailocations_get_address_fields() {
 
 	return $fields;
 }
-
-/**
- * Gets social media fields.
- * TODO: These are pointless without any output.
- *
- * @since 0.1.0
- *
- * @return array
- */
-function mailocations_get_social_fields() {
-	return [];
-
-	static $fields = null;
-
-	if ( ! is_null( $fields ) ) {
-		return $fields;
-	}
-
-	$fields = [
-		'location_social_tab' => [
-			'key'       => 'mai_location_social_tab',
-			'label'     => __( 'Social Media', 'mai-locations' ),
-			'type'      => 'tab',
-			'placement' => 'left',
-		],
-		'facebook' => [
-			'key'          => 'mai_location_facebook',
-			'label'        => 'Facebook',
-			'type'         => 'url',
-			'instructions' => __( 'Enter URL', 'mai-locations' ),
-		],
-		'twitter' => [
-			'key'          => 'mai_location_twitter',
-			'label'        => 'Twitter',
-			'type'         => 'text',
-			'instructions' => __( 'Enter username without the @ symbol', 'mai-locations' ),
-		],
-		'youtube' => [
-			'key'          => 'mai_location_youtube',
-			'label'        => 'YouTube',
-			'type'         => 'url',
-			'instructions' => __( 'Enter URL', 'mai-locations' ),
-		],
-		'linkedin' => [
-			'key'          => 'mai_location_linkedin',
-			'label'        => 'LinkedIn',
-			'type'         => 'url',
-			'instructions' => __( 'Enter URL', 'mai-locations' ),
-		],
-		'instagram' => [
-			'key'          => 'mai_location_instagram',
-			'label'        => 'Instagram',
-			'type'         => 'text',
-			'instructions' => __( 'Enter username only', 'mai-locations' ),
-		],
-		'pinterest' => [
-			'key'          => 'mai_location_pinterest',
-			'label'        => 'Pinterest',
-			'type'         => 'url',
-			'instructions' => __( 'Enter URL', 'mai-locations' ),
-		],
-		'tiktok' => [
-			'key'          => 'mai_location_tiktok',
-			'label'        => 'TikTok',
-			'type'         => 'text',
-			'instructions' => __( 'Enter username only', 'mai-locations' ),
-		],
-	];
-
-	$fields = apply_filters( 'mailocations_social_fields', $fields );
-
-	return $fields;
-}
-
 
 /**
  * Gets state field choices.

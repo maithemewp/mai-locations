@@ -110,7 +110,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [ ] PHP 8.4 deprecations: `str_getcsv()` without `$escape` (`class-location-import.php:300`), `get_page_by_title()` (`:463`). Users are created without a password (`:361`).
 - [ ] Typos: `File (.csv]` label (`:96`), stray quote in the download link (`:77`), text domain `mai-location` in two places.
 - [ ] Wrong docblocks: `mailocations_get_distance()` and `mailocations_add_location_to_user()` say void but return values; `Mai_Geo_Query::get_distance()` says float but returns false; `should_update()` can return null; the rule-match screen is an array, not `WP_Screen`.
-- [ ] Dead code: `Mai_Locations_Queries::mai_post_grid_query()` is unhooked and calls `mailocations_get_geo_query_args()`, which does not exist. `mailocations_get_social_fields()` returns `[]` on its first line, so social fields and their filter are off. Decide whether social fields come back or go.
+- [ ] Dead code: `Mai_Locations_Queries::mai_post_grid_query()` is unhooked and calls `mailocations_get_geo_query_args()`, which does not exist. Social fields: removed September 15, 2026 on Mike's call. They were switched off in 1.0.0, displayed nowhere, and the fleet survey found no saved data on any site, including the one still on 0.4.0 where they were live. naturesoma.com's `mailocations_social_fields` callback returned an empty array too, so its hook can go whenever that theme is touched.
 
 ## Steps
 

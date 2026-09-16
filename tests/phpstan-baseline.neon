@@ -1009,20 +1009,8 @@ parameters:
 			path: ../includes/functions-fields.php
 
 		-
-			message: '#^Function mailocations_get_social_fields\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../includes/functions-fields.php
-
-		-
 			message: '#^Function mailocations_get_state_choices\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: ../includes/functions-fields.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
 			count: 1
 			path: ../includes/functions-fields.php
 

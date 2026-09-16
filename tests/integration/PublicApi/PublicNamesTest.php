@@ -72,7 +72,6 @@ final class PublicNamesTest extends TestCase {
 			'mailocations_get_query_params',
 			'mailocations_get_singular',
 			'mailocations_get_singular_label',
-			'mailocations_get_social_fields',
 			'mailocations_get_state_choices',
 			'mailocations_get_stylesheet_link',
 			'mailocations_is_archive',
@@ -171,7 +170,6 @@ final class PublicNamesTest extends TestCase {
 			'mailocations_plural',
 			'mailocations_post_args',
 			'mailocations_singular',
-			'mailocations_social_fields',
 			'mailocations_taxonomy_base',
 			'mailocations_taxonomy_plural',
 			'mailocations_taxonomy_singular',
@@ -236,12 +234,12 @@ final class PublicNamesTest extends TestCase {
 	}
 
 	/**
-	 * mailocations_get_social_fields() returns [] before its field list, so the social fields
-	 * and the mailocations_social_fields filter are switched off today. If they come back,
-	 * that is a visible change on every site and belongs in the changelog.
+	 * The social fields were switched off in 1.0.0 and removed on September 15, 2026 on Mike's
+	 * call, after a fleet survey found no saved data on any site. Bringing them back is a
+	 * visible change everywhere and needs its own changelog entry.
 	 */
-	public function test_social_fields_are_switched_off(): void {
-		$this->assertSame( [], mailocations_get_social_fields() );
+	public function test_social_fields_are_gone(): void {
+		$this->assertFalse( function_exists( 'mailocations_get_social_fields' ) );
 		$this->assertArrayNotHasKey( 'facebook', mailocations_get_fields_raw() );
 	}
 

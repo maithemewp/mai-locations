@@ -162,10 +162,6 @@ final class FieldFunctionsTest extends TestCase {
 		$this->assertSame( $expected, mailocations_get_address_fields() );
 	}
 
-	public function test_social_fields_return_empty_before_the_dead_code(): void {
-		$this->assertSame( [], mailocations_get_social_fields() );
-	}
-
 	public function test_fields_raw_is_general_then_address_keyed_by_name(): void {
 		$this->assertSame(
 			array_merge( mailocations_get_general_fields(), mailocations_get_address_fields() ),
@@ -323,11 +319,10 @@ final class FieldFunctionsTest extends TestCase {
 	}
 
 	public function test_each_field_filter_ran_exactly_once_at_boot(): void {
-		// One run each proves the static cache; social is 0 because its function returns first.
+		// One run each proves the static cache.
 		$this->assertSame( 1, did_filter( 'mailocations_general_fields' ) );
 		$this->assertSame( 1, did_filter( 'mailocations_address_fields' ) );
 		$this->assertSame( 1, did_filter( 'mailocations_fields' ) );
-		$this->assertSame( 0, did_filter( 'mailocations_social_fields' ) );
 	}
 
 	public function test_general_fields_filter_added_after_boot_has_no_effect(): void {
