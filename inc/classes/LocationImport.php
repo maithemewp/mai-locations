@@ -1,23 +1,63 @@
 <?php
 
-// Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) exit;
+declare(strict_types=1);
 
-class Mai_Locations_Location_Import {
+namespace Mai\Locations;
+
+// Prevent direct file access.
+defined( 'ABSPATH' ) || die;
+
+/**
+ * The Location Import options page: takes a CSV of locations, and optionally creates users.
+ *
+ * Was Mai_Locations_Location_Import in classes/class-location-import.php. That name still
+ * works, via inc/aliases.php.
+ *
+ * @since TBD
+ */
+class LocationImport {
+
+	/**
+	 * The uploaded file's attachment ID.
+	 *
+	 * @var int|false
+	 */
 	protected $file_id;
+
+	/**
+	 * The post status for imported locations.
+	 *
+	 * @var string
+	 */
 	protected $post_status;
+
+	/**
+	 * Whether to create or update users.
+	 *
+	 * @var int|false
+	 */
 	protected $create_users;
+
+	/**
+	 * The role for newly created users.
+	 *
+	 * @var string
+	 */
 	protected $user_role;
+
+	/**
+	 * The parsed CSV rows.
+	 *
+	 * @var array<int, array<string, string>>
+	 */
 	protected $csv;
 
 	/**
 	 * Construct the class.
 	 *
 	 * @since TBD
-	 *
-	 * @return void
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->hooks();
 	}
 
@@ -28,7 +68,7 @@ class Mai_Locations_Location_Import {
 	 *
 	 * @return void
 	 */
-	function hooks() {
+	public function hooks(): void {
 		add_action( 'acf/init',                                                  [ $this, 'register_page' ], 12 );
 		add_action( 'acf/init',                                                  [ $this, 'register_fields' ] );
 		add_filter( 'acf/load_field/key=mailocations_location_import_user_role', [ $this, 'load_roles' ] );
@@ -38,13 +78,13 @@ class Mai_Locations_Location_Import {
 	}
 
 	/**
-	 * Registers settings page.
+	 * Registers the settings page.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function register_page() {
+	public function register_page(): void {
 		if ( ! function_exists( 'acf_add_options_sub_page' ) ) {
 			return;
 		}
@@ -62,13 +102,16 @@ class Mai_Locations_Location_Import {
 	}
 
 	/**
-	 * Registers fields.
+	 * Registers the import fields.
+	 *
+	 * TODO: the file label reads "File (.csv]" and the download link carries a stray quote.
+	 * See TODO.md.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function register_fields() {
+	public function register_fields(): void {
 		if ( ! function_exists( 'acf_add_options_sub_page' ) ) {
 			return;
 		}
@@ -165,11 +208,11 @@ class Mai_Locations_Location_Import {
 	 *
 	 * @since TBD
 	 *
-	 * @param array $field The field data.
+	 * @param array<string, mixed> $field The field data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function load_roles( $field ) {
+	public function load_roles( $field ) {
 		if ( ! is_admin() ) {
 			return $field;
 		}
@@ -200,11 +243,11 @@ class Mai_Locations_Location_Import {
 	 *
 	 * @since TBD
 	 *
-	 * @param array $field The field data.
+	 * @param array<string, mixed> $field The field data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function load_statuses( $field ) {
+	public function load_statuses( $field ) {
 		if ( ! is_admin() ) {
 			return $field;
 		}
@@ -216,13 +259,15 @@ class Mai_Locations_Location_Import {
 	}
 
 	/**
-	 * Displays confirmation notice.
+	 * Displays the confirmation notice.
+	 *
+	 * TODO: text domain reads mai-location here. See TODO.md.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function confirmation() {
+	public function confirmation(): void {
 		// Bail if no confirmation.
 		if ( ! filter_input( INPUT_GET, 'confirmation', FILTER_VALIDATE_INT ) ) {
 			return;
@@ -247,7 +292,11 @@ class Mai_Locations_Location_Import {
 	}
 
 	/**
-	 * Maybe imports locations and creates associtated users.
+	 * Maybe imports locations and creates the associated users.
+	 *
+	 * TODO: the status falls back to "public", which is not a post status, and one blank line in
+	 * the CSV stops the import with a ValueError. str_getcsv() is also called without its
+	 * $escape argument, which PHP 8.4 deprecates. See TODO.md.
 	 *
 	 * @since TBD
 	 *
@@ -255,7 +304,7 @@ class Mai_Locations_Location_Import {
 	 *
 	 * @return void
 	 */
-	function maybe_import_locations( $post_id ) {
+	public function maybe_import_locations( $post_id ): void {
 		// Bail if no data.
 		if ( ! isset( $_POST['acf'] ) || empty( $_POST['acf'] ) ) {
 			return;
@@ -300,9 +349,9 @@ class Mai_Locations_Location_Import {
 		$csv = array_map( 'str_getcsv', file( $file_path ) );
 
 		// Map header values as each item key.
-		array_walk( $csv, function( &$a ) use ( $csv ) {
+		array_walk( $csv, function ( &$a ) use ( $csv ) {
 			$a = array_combine( $csv[0], $a );
-		});
+		} );
 
 		// Remove column header.
 		array_shift( $csv );
@@ -315,13 +364,17 @@ class Mai_Locations_Location_Import {
 	}
 
 	/**
-	 * Imports locations and creates associtated users.
+	 * Imports the locations and creates the associated users.
+	 *
+	 * TODO: the failed count can never rise, because mailocations_create_location() calls
+	 * wp_insert_post() without $wp_error. get_page_by_title() is deprecated, and users are
+	 * created without a password. See TODO.md.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	function import() {
+	public function import(): void {
 		$users_imported = [];
 		$users_skipped  = [];
 		$users_failed   = [];
@@ -496,7 +549,7 @@ class Mai_Locations_Location_Import {
 			}
 		}
 
-		// Handle Confimration and redirect.
+		// Handle confirmation and redirect.
 		$redirect = add_query_arg(
 			[
 				'confirmation'   => 1,
@@ -516,13 +569,13 @@ class Mai_Locations_Location_Import {
 	}
 
 	/**
-	 * Gets allowed fields for import, with sanitization type.
+	 * Gets the fields that can be imported, which is those whose type has a sanitizer.
 	 *
 	 * @since TBD
 	 *
-	 * @return array
+	 * @return array<string, array<string, mixed>>
 	 */
-	function get_fields() {
+	public function get_fields() {
 		$fields     = mailocations_get_fields_raw();
 		$sanitizers = $this->get_sanitizers();
 
@@ -550,7 +603,7 @@ class Mai_Locations_Location_Import {
 	 *
 	 * @return array<string, string> Field type to callable name.
 	 */
-	function get_sanitizers() {
+	public function get_sanitizers() {
 		return [
 			'email'      => 'sanitize_email',
 			'number'     => 'intval',

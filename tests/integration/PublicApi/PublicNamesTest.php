@@ -151,6 +151,7 @@ final class PublicNamesTest extends TestCase {
 			'Mai_Geo_Query'               => \Mai\Locations\GeoQuery::class,
 			'Mai_Locations_Location_Fields'      => \Mai\Locations\LocationFields::class,
 			'Mai_Locations_Location_Form'        => \Mai\Locations\LocationForm::class,
+			'Mai_Locations_Location_Import'      => \Mai\Locations\LocationImport::class,
 			'Mai_Locations_Location_Form_Edit'   => \Mai\Locations\LocationFormEdit::class,
 			'Mai_Locations_Location_Form_Listener' => \Mai\Locations\LocationFormListener::class,
 			'Mai_Locations_Location_Form_Submit' => \Mai\Locations\LocationFormSubmit::class,
