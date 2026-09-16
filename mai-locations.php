@@ -139,8 +139,6 @@ final class Mai_Locations_Plugin {
 		include_once __DIR__ . '/inc/classes/class-location-form-submit.php';
 		include_once __DIR__ . '/inc/classes/class-location-import.php';
 		include_once __DIR__ . '/inc/classes/class-locations-cli.php';
-		include_once __DIR__ . '/inc/classes/class-locations-table.php';
-		include_once __DIR__ . '/inc/classes/class-settings.php';
 		include_once __DIR__ . '/inc/classes/class-woocommerce-account-tabs.php';
 
 		// Blocks.
@@ -162,6 +160,10 @@ final class Mai_Locations_Plugin {
 		new Mai\Locations\Scripts;
 		new Mai\Locations\Queries;
 		new Mai\Locations\Upgrade;
+
+		// Was instantiated at the top of classes/class-settings.php, which autoloading no longer
+		// runs for us.
+		new Mai\Locations\Settings;
 
 		// Starts the geo query filters. Was a call at the top of classes/class-geo-query.php,
 		// which autoloading no longer runs for us.

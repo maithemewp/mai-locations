@@ -1,10 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
+use WP_Query;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
-class Mai_Locations_Locations_Table {
+/**
+ * Builds the table of a user's locations, with View and Edit buttons.
+ *
+ * Was Mai_Locations_Locations_Table in classes/class-locations-table.php. That name still
+ * works, via inc/aliases.php.
+ *
+ * @since TBD
+ */
+class LocationsTable {
+
+	/**
+	 * The current user ID.
+	 *
+	 * @var int
+	 */
 	protected $user_id;
+
+	/**
+	 * The table and form args.
+	 *
+	 * @var array<string, mixed>
+	 */
 	protected $args;
 
 	/**
@@ -12,9 +38,9 @@ class Mai_Locations_Locations_Table {
 	 *
 	 * @since TBD
 	 *
-	 * @param array $args The table/form args.
+	 * @param array<string, mixed> $args The table/form args.
 	 */
-	function __construct( $args = [] ) {
+	public function __construct( $args = [] ) {
 		$this->user_id = get_current_user_id();
 		$args          = shortcode_atts(
 			[
@@ -31,6 +57,8 @@ class Mai_Locations_Locations_Table {
 		);
 
 		// Sanitize.
+		// TODO: unset args arrive as null from get_field(), which wp_kses_post() warns about on
+		// PHP 8.4. See TODO.md.
 		$args = [
 			'post_type'  => sanitize_key( $args['post_type'] ),
 			'title'      => esc_html( $args['title'] ),
@@ -49,16 +77,17 @@ class Mai_Locations_Locations_Table {
 	}
 
 	/**
-	 * Gets a locations table.
-	 * Displays view/edit buttons.
-	 * When editing a location the table is replaced
-	 * with the ACF location fields.
+	 * Gets a locations table, with View and Edit buttons. While editing a location the table is
+	 * replaced by the ACF location fields.
+	 *
+	 * TODO: returns null, not '', when there is no user, and the title h2 sits inside the table
+	 * element. The `class` arg is never printed. See TODO.md.
 	 *
 	 * @since TBD
 	 *
-	 * @return string
+	 * @return string|null
 	 */
-	function get() {
+	public function get() {
 		// Bail if no user.
 		if ( ! $this->user_id ) {
 			return;
@@ -105,8 +134,8 @@ class Mai_Locations_Locations_Table {
 		}
 
 		// Set up HTML.
-		$html         = '';
-		$location_id  = filter_input( INPUT_GET, 'location_id', FILTER_SANITIZE_NUMBER_INT );
+		$html        = '';
+		$location_id = filter_input( INPUT_GET, 'location_id', FILTER_SANITIZE_NUMBER_INT );
 
 		// If on front end and user can edit this location.
 		if ( ! $is_admin && ( $location_id && mailocations_user_can_edit( $location_id ) ) ) {
@@ -197,6 +226,7 @@ class Mai_Locations_Locations_Table {
 							$html .= '</td>';
 
 							// Get edit url.
+							// TODO: the referrer is not URL encoded. See TODO.md.
 							$edit_url = home_url( add_query_arg( null, null ) );
 							$edit_url = add_query_arg(
 								[

@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return string
  */
 function mailocations_get_locations_table( $args = [] ) {
-	$table = new Mai_Locations_Locations_Table( $args );
+	$table = new Mai\Locations\LocationsTable( $args );
 	return $table->get();
 }
 
