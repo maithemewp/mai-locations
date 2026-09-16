@@ -129,24 +129,24 @@ final class Mai_Locations_Plugin {
 		require_once __DIR__ . '/vendor/autoload.php';
 
 		// Includes.
-		foreach ( glob( MAI_LOCATIONS_PLUGIN_DIR . 'includes/' . '*.php' ) as $file ) { include $file; }
+		foreach ( glob( MAI_LOCATIONS_PLUGIN_DIR . 'inc/' . '*.php' ) as $file ) { include $file; }
 
 		// Classes.
-		include_once __DIR__ . '/classes/class-block-bindings.php';
-		include_once __DIR__ . '/classes/class-geo-query.php';
-		include_once __DIR__ . '/classes/class-location-fields.php';
-		include_once __DIR__ . '/classes/class-location-form.php'; // Must be before create/edit.
-		include_once __DIR__ . '/classes/class-location-form-edit.php';
-		include_once __DIR__ . '/classes/class-location-form-listener.php';
-		include_once __DIR__ . '/classes/class-location-form-submit.php';
-		include_once __DIR__ . '/classes/class-location-import.php';
-		include_once __DIR__ . '/classes/class-locations-cli.php';
-		include_once __DIR__ . '/classes/class-locations-scripts.php';
-		include_once __DIR__ . '/classes/class-locations-table.php';
-		include_once __DIR__ . '/classes/class-locations-queries.php';
-		include_once __DIR__ . '/classes/class-settings.php';
-		include_once __DIR__ . '/classes/class-upgrade.php';
-		include_once __DIR__ . '/classes/class-woocommerce-account-tabs.php';
+		include_once __DIR__ . '/inc/classes/class-block-bindings.php';
+		include_once __DIR__ . '/inc/classes/class-geo-query.php';
+		include_once __DIR__ . '/inc/classes/class-location-fields.php';
+		include_once __DIR__ . '/inc/classes/class-location-form.php'; // Must be before create/edit.
+		include_once __DIR__ . '/inc/classes/class-location-form-edit.php';
+		include_once __DIR__ . '/inc/classes/class-location-form-listener.php';
+		include_once __DIR__ . '/inc/classes/class-location-form-submit.php';
+		include_once __DIR__ . '/inc/classes/class-location-import.php';
+		include_once __DIR__ . '/inc/classes/class-locations-cli.php';
+		include_once __DIR__ . '/inc/classes/class-locations-scripts.php';
+		include_once __DIR__ . '/inc/classes/class-locations-table.php';
+		include_once __DIR__ . '/inc/classes/class-locations-queries.php';
+		include_once __DIR__ . '/inc/classes/class-settings.php';
+		include_once __DIR__ . '/inc/classes/class-upgrade.php';
+		include_once __DIR__ . '/inc/classes/class-woocommerce-account-tabs.php';
 
 		// Blocks.
 		include_once __DIR__ . '/blocks/location-address-search/block.php';

@@ -7,8 +7,7 @@ parameters:
     tmpDir: ../.phpunit.cache/phpstan
     paths:
         - ../mai-locations.php
-        - ../classes
-        - ../includes
+        - ../inc
         - ../blocks
     bootstrapFiles:
         # Plugin constants are define()'d inside a method at runtime, which PHPStan cannot follow.

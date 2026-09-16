@@ -91,7 +91,7 @@ final class CliCommandTest extends TestCase {
 
 		foreach ( $wp_filter['cli_init']->callbacks as $priority => $callbacks ) {
 			foreach ( $callbacks as $callback ) {
-				if ( $callback['function'] instanceof \Closure && str_ends_with( (string) ( new \ReflectionFunction( $callback['function'] ) )->getFileName(), 'classes/class-locations-cli.php' ) ) {
+				if ( $callback['function'] instanceof \Closure && str_ends_with( (string) ( new \ReflectionFunction( $callback['function'] ) )->getFileName(), 'inc/classes/class-locations-cli.php' ) ) {
 					$found[] = [ $priority, $callback['function'] ];
 				}
 			}

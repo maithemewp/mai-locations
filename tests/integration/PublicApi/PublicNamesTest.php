@@ -272,7 +272,7 @@ final class PublicNamesTest extends TestCase {
 		$root   = dirname( __DIR__, 3 );
 		$source = (string) file_get_contents( $root . '/mai-locations.php' );
 
-		foreach ( [ 'classes', 'includes', 'blocks', 'inc' ] as $dir ) {
+		foreach ( [ 'inc', 'blocks' ] as $dir ) {
 			if ( ! is_dir( $root . '/' . $dir ) ) {
 				continue;
 			}
