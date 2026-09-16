@@ -289,130 +289,130 @@ parameters:
 			path: ../inc/aliases.php
 
 		-
-			message: '#^Callback expects 0 parameters, \$accepted_args is set to 3\.$#'
-			identifier: arguments.count
-			count: 1
-			path: ../inc/classes/BlockBindings.php
-
-		-
 			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
 			identifier: argument.templateType
 			count: 3
-			path: ../inc/classes/CLI.php
+			path: ../inc/classes/Cli/CLI.php
 
 		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 3\.$#'
+			identifier: arguments.count
 			count: 1
-			path: ../inc/classes/GeoQuery.php
+			path: ../inc/classes/Display/BlockBindings.php
 
 		-
-			message: '#^Method Mai\\Locations\\LocationForm\:\:get\(\) should return string\|null but empty return statement found\.$#'
+			message: '#^Method Mai\\Locations\\Display\\LocationsTable\:\:get\(\) should return string\|null but empty return statement found\.$#'
 			identifier: return.empty
 			count: 1
-			path: ../inc/classes/LocationForm.php
+			path: ../inc/classes/Display/LocationsTable.php
+
+		-
+			message: '#^Parameter \#1 \$location_id of function mailocations_user_can_edit expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: ../inc/classes/Display/LocationsTable.php
+
+		-
+			message: '#^Method Mai\\Locations\\Forms\\LocationForm\:\:get\(\) should return string\|null but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: ../inc/classes/Forms/LocationForm.php
 
 		-
 			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
 			identifier: argument.templateType
 			count: 1
-			path: ../inc/classes/LocationForm.php
+			path: ../inc/classes/Forms/LocationForm.php
 
 		-
 			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
 			identifier: arguments.count
 			count: 3
-			path: ../inc/classes/LocationFormEdit.php
+			path: ../inc/classes/Forms/LocationFormEdit.php
 
 		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
 			count: 1
-			path: ../inc/classes/LocationFormEdit.php
+			path: ../inc/classes/Forms/LocationFormEdit.php
 
 		-
-			message: '#^Method Mai\\Locations\\LocationFormEdit\:\:get_form\(\) should return string\|null but empty return statement found\.$#'
+			message: '#^Method Mai\\Locations\\Forms\\LocationFormEdit\:\:get_form\(\) should return string\|null but empty return statement found\.$#'
 			identifier: return.empty
 			count: 1
-			path: ../inc/classes/LocationFormEdit.php
+			path: ../inc/classes/Forms/LocationFormEdit.php
 
 		-
 			message: '#^Undefined variable\: \$GET$#'
 			identifier: variable.undefined
 			count: 1
-			path: ../inc/classes/LocationFormEdit.php
+			path: ../inc/classes/Forms/LocationFormEdit.php
 
 		-
 			message: '#^Variable \$GET in isset\(\) is never defined\.$#'
 			identifier: isset.variable
 			count: 1
-			path: ../inc/classes/LocationFormEdit.php
+			path: ../inc/classes/Forms/LocationFormEdit.php
 
 		-
 			message: '#^Action callback returns mixed but should not return anything\.$#'
 			identifier: return.void
 			count: 1
-			path: ../inc/classes/LocationFormListener.php
+			path: ../inc/classes/Forms/LocationFormListener.php
 
 		-
 			message: '#^Function is_account_page not found\.$#'
 			identifier: function.notFound
 			count: 1
-			path: ../inc/classes/LocationFormListener.php
+			path: ../inc/classes/Forms/LocationFormListener.php
 
 		-
-			message: '#^Method Mai\\Locations\\LocationFormListener\:\:should_update\(\) should return bool\|null but empty return statement found\.$#'
+			message: '#^Method Mai\\Locations\\Forms\\LocationFormListener\:\:should_update\(\) should return bool\|null but empty return statement found\.$#'
 			identifier: return.empty
 			count: 1
-			path: ../inc/classes/LocationFormListener.php
+			path: ../inc/classes/Forms/LocationFormListener.php
 
 		-
 			message: '#^Parameter \#1 \$location_id of function mailocations_user_can_edit expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
-			path: ../inc/classes/LocationFormListener.php
+			path: ../inc/classes/Forms/LocationFormListener.php
 
 		-
 			message: '#^Parameter \#2 \$user_id of function get_the_author_meta expects int\|false, string given\.$#'
 			identifier: argument.type
 			count: 1
-			path: ../inc/classes/LocationFormListener.php
+			path: ../inc/classes/Forms/LocationFormListener.php
 
 		-
 			message: '#^Undefined variable\: \$post_type$#'
 			identifier: variable.undefined
 			count: 1
-			path: ../inc/classes/LocationFormListener.php
-
-		-
-			message: '#^Method Mai\\Locations\\LocationsTable\:\:get\(\) should return string\|null but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: ../inc/classes/LocationsTable.php
-
-		-
-			message: '#^Parameter \#1 \$location_id of function mailocations_user_can_edit expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: ../inc/classes/LocationsTable.php
-
-		-
-			message: '#^Function mailocations_get_geo_query_args not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: ../inc/classes/Queries.php
+			path: ../inc/classes/Forms/LocationFormListener.php
 
 		-
 			message: '#^Function is_account_page not found\.$#'
 			identifier: function.notFound
 			count: 1
-			path: ../inc/classes/WooCommerceAccountTabs.php
+			path: ../inc/classes/Integrations/WooCommerceAccountTabs.php
 
 		-
 			message: '#^Function is_wc_endpoint_url not found\.$#'
 			identifier: function.notFound
 			count: 1
-			path: ../inc/classes/WooCommerceAccountTabs.php
+			path: ../inc/classes/Integrations/WooCommerceAccountTabs.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: ../inc/classes/Query/GeoQuery.php
+
+		-
+			message: '#^Function mailocations_get_geo_query_args not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: ../inc/classes/Query/Queries.php
 
 		-
 			message: '#^Function mailocations_get_address\(\) has parameter \$args with no value type specified in iterable type array\.$#'
@@ -793,7 +793,7 @@ parameters:
 			path: ../inc/upgrade.php
 
 		-
-			message: '#^Call to new Mai\\Locations\\CLI\(\) on a separate line has no effect\.$#'
+			message: '#^Call to new Mai\\Locations\\Cli\\CLI\(\) on a separate line has no effect\.$#'
 			identifier: new.resultUnused
 			count: 1
 			path: ../mai-locations.php

@@ -147,21 +147,21 @@ final class PublicNamesTest extends TestCase {
 	 */
 	public function test_migrated_classes_keep_their_old_names_as_aliases(): void {
 		$migrated = [
-			'Mai_Locations_Block_Bindings' => \Mai\Locations\BlockBindings::class,
-			'Mai_Geo_Query'               => \Mai\Locations\GeoQuery::class,
-			'Mai_Locations_CLI'           => \Mai\Locations\CLI::class,
-			'Mai_Locations_Location_Fields'      => \Mai\Locations\LocationFields::class,
-			'Mai_Locations_Location_Form'        => \Mai\Locations\LocationForm::class,
-			'Mai_Locations_Location_Import'      => \Mai\Locations\LocationImport::class,
-			'Mai_Locations_Location_Form_Edit'   => \Mai\Locations\LocationFormEdit::class,
-			'Mai_Locations_Location_Form_Listener' => \Mai\Locations\LocationFormListener::class,
-			'Mai_Locations_Location_Form_Submit' => \Mai\Locations\LocationFormSubmit::class,
-			'Mai_Locations_Locations_Table' => \Mai\Locations\LocationsTable::class,
-			'Mai_Locations_Queries'       => \Mai\Locations\Queries::class,
-			'Mai_Locations_Scripts'       => \Mai\Locations\Scripts::class,
-			'Mai_Locations_Settings'      => \Mai\Locations\Settings::class,
-			'Mai_Locations_Upgrade'       => \Mai\Locations\Upgrade::class,
-			'Mai_Locations_WooCommerce_Account_Tabs' => \Mai\Locations\WooCommerceAccountTabs::class,
+			'Mai_Locations_Block_Bindings' => \Mai\Locations\Display\BlockBindings::class,
+			'Mai_Geo_Query'               => \Mai\Locations\Query\GeoQuery::class,
+			'Mai_Locations_CLI'           => \Mai\Locations\Cli\CLI::class,
+			'Mai_Locations_Location_Fields'      => \Mai\Locations\Fields\LocationFields::class,
+			'Mai_Locations_Location_Form'        => \Mai\Locations\Forms\LocationForm::class,
+			'Mai_Locations_Location_Import'      => \Mai\Locations\Admin\LocationImport::class,
+			'Mai_Locations_Location_Form_Edit'   => \Mai\Locations\Forms\LocationFormEdit::class,
+			'Mai_Locations_Location_Form_Listener' => \Mai\Locations\Forms\LocationFormListener::class,
+			'Mai_Locations_Location_Form_Submit' => \Mai\Locations\Forms\LocationFormSubmit::class,
+			'Mai_Locations_Locations_Table' => \Mai\Locations\Display\LocationsTable::class,
+			'Mai_Locations_Queries'       => \Mai\Locations\Query\Queries::class,
+			'Mai_Locations_Scripts'       => \Mai\Locations\Display\Scripts::class,
+			'Mai_Locations_Settings'      => \Mai\Locations\Admin\Settings::class,
+			'Mai_Locations_Upgrade'       => \Mai\Locations\Admin\Upgrade::class,
+			'Mai_Locations_WooCommerce_Account_Tabs' => \Mai\Locations\Integrations\WooCommerceAccountTabs::class,
 		];
 
 		foreach ( $migrated as $old => $new ) {

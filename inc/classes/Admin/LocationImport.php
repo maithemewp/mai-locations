@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mai\Locations;
+namespace Mai\Locations\Admin;
 
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;

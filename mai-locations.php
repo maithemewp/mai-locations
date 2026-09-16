@@ -145,28 +145,28 @@ final class Mai_Locations_Plugin {
 		include_once __DIR__ . '/blocks/location-table/block.php';
 
 		// Instantiate classes.
-		new Mai\Locations\BlockBindings;
-		new Mai\Locations\LocationFields;
-		new Mai\Locations\LocationFormListener;
-		new Mai\Locations\LocationImport;
-		new Mai\Locations\Scripts;
-		new Mai\Locations\Queries;
-		new Mai\Locations\Upgrade;
+		new Mai\Locations\Display\BlockBindings;
+		new Mai\Locations\Fields\LocationFields;
+		new Mai\Locations\Forms\LocationFormListener;
+		new Mai\Locations\Admin\LocationImport;
+		new Mai\Locations\Display\Scripts;
+		new Mai\Locations\Query\Queries;
+		new Mai\Locations\Admin\Upgrade;
 
 		// Was instantiated at the top of classes/class-settings.php, which autoloading no longer
 		// runs for us.
-		new Mai\Locations\Settings;
+		new Mai\Locations\Admin\Settings;
 
 		// Starts the geo query filters. Was a call at the top of classes/class-geo-query.php,
 		// which autoloading no longer runs for us.
-		Mai\Locations\GeoQuery::instance();
+		Mai\Locations\Query\GeoQuery::instance();
 
 		// Registers `wp mailocations`. Was at the top of classes/class-locations-cli.php, along
 		// with an instantiation whose result was discarded; both kept as they were.
-		new Mai\Locations\CLI;
+		new Mai\Locations\Cli\CLI;
 
 		add_action( 'cli_init', function() {
-			WP_CLI::add_command( 'mailocations', Mai\Locations\CLI::class );
+			WP_CLI::add_command( 'mailocations', Mai\Locations\Cli\CLI::class );
 		});
 
 		// Instantiate blocks.
@@ -195,7 +195,7 @@ final class Mai_Locations_Plugin {
 				return;
 			}
 
-			new Mai\Locations\WooCommerceAccountTabs;
+			new Mai\Locations\Integrations\WooCommerceAccountTabs;
 		}
 	}
 

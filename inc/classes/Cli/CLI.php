@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mai\Locations;
+namespace Mai\Locations\Cli;
 
 use WP_CLI;
 use WP_Query;

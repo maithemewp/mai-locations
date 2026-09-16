@@ -147,7 +147,16 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
   - [x] `Mai_Locations_Location_Import` to `Mai\Locations\LocationImport`. September 15, 2026.
   - [x] `Mai_Locations_CLI` to `Mai\Locations\CLI`. September 15, 2026. Its two public global functions, `mailocations_get_data_from_website()` and `mailocations_upload_image()`, moved to `inc/functions-website.php` and stay global, because Visit Sleepy Hollow calls both from its own scripts. The command registration and the discarded instantiation that used to run at the top of the class file moved to the bootstrap. `wp mailocations` is unchanged; only the class the command is registered with changed.
   - [x] **All 15 classes in `inc/classes/` are namespaced.**
-  - [ ] The 9 block classes in `blocks/*/block.php`.
+  - [x] **Grouped into role subfolders**, September 15, 2026, on Mike's call after surveying all 26 plugins: `Admin/`, `Cli/`, `Display/`, `Fields/`, `Forms/`, `Integrations/`, `Query/`, with `Blocks/` to come. Every recent plugin groups by role (`mai-text-to-speech`, `mai-post-aggregator`, the three springwire plugins), and `inc/classes/` with subfolders already exists in `eurweb-plugin` and `hmg-sharpspring`. So this follows both the scaffold's root and the newer plugins' grouping. Namespaces gained a level, for example `Mai\Locations\Forms\LocationFormEdit`; the old global names are unchanged.
+  - [ ] The 9 block classes in `blocks/*/block.php`, moving to `inc/classes/Blocks/`. `block.json` stays in `blocks/<name>/`, and `register_block_type()` takes that folder path, which is what mai-auth does.
+
+## Blocks stay on ACF for this rework
+
+Mike asked, September 15, 2026, whether to convert to PHP-only core blocks. Not in this rework.
+
+- All seven `block.json` files already declare `"apiVersion": 3`, so there is nothing to bump. The other two blocks are `core/button` variations with no `block.json`.
+- Six of the nine read `get_field()`, in 24 places. Converting means new block names, a different attribute payload, a JS editor script per block, and a deprecation path, because saved content on live pages is `<!-- wp:acf/mai-locations-map {"data":{...}} /-->`.
+- That is a migration across 11 sites, one of them holding 3,655 locations, so it is its own project with its own release, not part of a rework whose rule is that behaviour does not change.
   - **The CLI file also holds two public global functions**, `mailocations_get_data_from_website()` and `mailocations_upload_image()`, which Visit Sleepy Hollow calls from its own scripts. They stay global, in a procedural file under `inc/`, when that class moves.
   - **Watch for files that run code on load.** Several classes instantiate themselves at the top or bottom of their file, which autoloading never runs. Each one moves to the bootstrap as its class moves.
   - **Watch for values arriving as strings.** `declare(strict_types=1)` turns coercion that used to happen silently into a `TypeError`. `GeoQuery::get_distance()` caught it: MySQL returns the computed distance column as a string, and `round()` then refused it, breaking nine tests. Cast at the boundary as each file moves.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mai\Locations;
+namespace Mai\Locations\Forms;
 
 use WP_HTML_Tag_Processor;
 

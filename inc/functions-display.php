@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return string
  */
 function mailocations_get_locations_table( $args = [] ) {
-	$table = new Mai\Locations\LocationsTable( $args );
+	$table = new Mai\Locations\Display\LocationsTable( $args );
 	return $table->get();
 }
 
@@ -30,7 +30,7 @@ function mailocations_get_locations_table( $args = [] ) {
  * @return string
  */
 function mailocations_get_location_edit_form( $args ) {
-	$form = new Mai\Locations\LocationFormEdit( $args );
+	$form = new Mai\Locations\Forms\LocationFormEdit( $args );
 	return $form->get();
 }
 
@@ -44,7 +44,7 @@ function mailocations_get_location_edit_form( $args ) {
  * @return string
  */
 function mailocations_get_location_submission_form( $args ) {
-	$form = new Mai\Locations\LocationFormSubmit( $args );
+	$form = new Mai\Locations\Forms\LocationFormSubmit( $args );
 	return $form->get();
 }
 

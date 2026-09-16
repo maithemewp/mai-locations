@@ -104,7 +104,7 @@ final class CliCommandTest extends TestCase {
 
 		// The command is registered with the namespaced class since September 15, 2026. The
 		// command name, `wp mailocations`, is unchanged, which is the part sites depend on.
-		$this->assertSame( [ [ 'add_command', [ 'mailocations', \Mai\Locations\CLI::class ] ] ], WP_CLI::$calls );
+		$this->assertSame( [ [ 'add_command', [ 'mailocations', \Mai\Locations\Cli\CLI::class ] ] ], WP_CLI::$calls );
 	}
 
 	public function test_subcommands_are_the_three_public_methods_and_there_is_no_constructor(): void {
