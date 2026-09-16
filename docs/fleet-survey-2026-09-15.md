@@ -33,9 +33,29 @@ Nothing on the fleet calls the CLI commands, the importer, the geo query, or the
 
 ## Two things the survey settles
 
-**The field filters are load-bearing.** naturesoma's entire events feature rides on `mailocations_general_fields` and `mailocations_address_fields`. These are the same filters the tests cannot exercise because the field functions cache in statics. Breaking them breaks a live site silently, so the rework must keep them working and should make them testable.
+**The field filters are used to trim the edit screen, not to extend it.** naturesoma's code, read September 15, 2026:
 
-**Nobody has social data.** `mailocations_social_fields` is hooked by naturesoma but never fires, and no location on any site has a `facebook`, `twitter` or `instagram` meta value. Turning the social fields back on would add empty fields to every site's edit screen and hand naturesoma a filter that suddenly starts working.
+```php
+function social_fields( $fields ) {
+	return [];
+}
+
+function general_fields( $fields ) {
+	unset( $fields['location_phone'] );
+	unset( $fields['location_phone_2'] );
+	unset( $fields['location_email'] );
+	return $fields;
+}
+
+function address_fields( $fields ) {
+	$fields['location_address_tab']['label'] = __( 'Location', 'mai-locations' );
+	return $fields;
+}
+```
+
+So the filters hide three fields and rename a tab. That site's event fields (`event_url`, `event_type`, coordinators) come from its own ACF field group, not from ours. The filters still have to keep working, because a site that loses them suddenly shows fields its editors were told to ignore, and the tests cannot exercise them while the field functions cache in statics.
+
+**Nobody has social data, and the one site hooking the filter also switches the fields off.** No location on any site has a `facebook`, `twitter` or `instagram` meta value, including the site still running 0.4.0, where the fields were live. naturesoma's `social_fields` returns an empty array, the same result the plugin already produces. Deleting the social fields matches what the only interested site wants.
 
 ## What the survey cannot see
 

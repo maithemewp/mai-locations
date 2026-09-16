@@ -20,7 +20,7 @@ Follow `wp-plugin-scaffold` for layout and the global modern PHP rules: `declare
 
 ## Who else runs this plugin
 
-`docs/fleet-survey-2026-09-15.md` has the full survey. The short version: 11 fleet sites, biggest is pregnancybydesign.com with 3,655 locations. Third-party code calls `mailocations_update_google_map_from_address()` on 5 sites, `[mai_location_address]` in 4 themes, and on naturesoma.com the field filters `mailocations_general_fields` and `mailocations_address_fields`, which carry that site's whole events feature. No site has social field data. Two sites are behind, on 0.4.0 and 1.0.0, so the upgrade path from 0.4.0 has to work.
+`docs/fleet-survey-2026-09-15.md` has the full survey. The short version: 11 fleet sites, biggest is pregnancybydesign.com with 3,655 locations. Third-party code calls `mailocations_update_google_map_from_address()` on 5 sites, `[mai_location_address]` in 4 themes, and on naturesoma.com the field filters `mailocations_general_fields` and `mailocations_address_fields`, which it uses to hide the phone and email fields and rename a tab. No site has social field data, and naturesoma's `mailocations_social_fields` callback returns an empty array too. Two sites are behind, on 0.4.0 and 1.0.0, so the upgrade path from 0.4.0 has to work.
 
 ## How the tests work
 
