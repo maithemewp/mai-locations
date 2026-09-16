@@ -17,18 +17,22 @@ final class UpgradeTest extends TestCase {
 
 	use ScenarioRunner;
 
-	public function test_pins_duplicate_both_copies_are_hooked_on_admin_init(): void {
-		$this->assertSame( 10, has_action( 'admin_init', 'mailocations_do_upgrade' ) );
+	/**
+	 * Fixed September 16, 2026. Both copies used to be hooked, so every upgrade ran twice. The
+	 * global functions remain, as public names, and now call the class rather than holding a
+	 * second copy of the logic.
+	 */
+	public function test_only_the_class_copy_is_hooked_on_admin_init(): void {
+		$this->assertFalse( has_action( 'admin_init', 'mailocations_do_upgrade' ) );
 		$this->assertSame( 10, has_action( 'admin_init', [ $this->upgrade(), 'do_upgrade' ] ) );
 
-		// The function copy is hooked first, because includes/ loads before classes/. One copy should go.
-		$this->assertSame( [ 'mailocations_do_upgrade', 'do_upgrade' ], $this->plugin_callbacks( 'admin_init', [ 'mailocations_do_upgrade', 'do_upgrade' ] ) );
+		$this->assertSame( [ 'do_upgrade' ], $this->plugin_callbacks( 'admin_init', [ 'mailocations_do_upgrade', 'do_upgrade' ] ) );
 	}
 
-	public function test_pins_duplicate_both_copies_are_hooked_on_upgrader_process_complete(): void {
-		$this->assertSame( 10, has_action( 'upgrader_process_complete', 'mailocations_upgrade_completed' ) );
+	public function test_only_the_class_copy_is_hooked_on_upgrader_process_complete(): void {
+		$this->assertFalse( has_action( 'upgrader_process_complete', 'mailocations_upgrade_completed' ) );
 		$this->assertSame( 10, has_action( 'upgrader_process_complete', [ $this->upgrade(), 'upgrade_completed' ] ) );
-		$this->assertSame( [ 'mailocations_upgrade_completed', 'upgrade_completed' ], $this->plugin_callbacks( 'upgrader_process_complete', [ 'mailocations_upgrade_completed', 'upgrade_completed' ] ) );
+		$this->assertSame( [ 'upgrade_completed' ], $this->plugin_callbacks( 'upgrader_process_complete', [ 'mailocations_upgrade_completed', 'upgrade_completed' ] ) );
 
 		foreach ( $GLOBALS['wp_filter']['upgrader_process_complete']->callbacks[10] as $callback ) {
 			if ( in_array( $this->callback_name( $callback['function'] ), [ 'mailocations_upgrade_completed', 'upgrade_completed' ], true ) ) {
@@ -42,18 +46,18 @@ final class UpgradeTest extends TestCase {
 		$this->assertNull( $this->upgrade()->upgrade_0_7_0() );
 	}
 
-	public function test_pins_duplicate_do_upgrade_on_fresh_install_writes_both_versions_twice(): void {
+	public function test_do_upgrade_on_fresh_install_writes_both_versions_once(): void {
 		delete_option( 'mai_locations' );
 
 		$writes = $this->count_option_writes(
-			function (): void {
+			static function (): void {
 				mailocations_do_upgrade();
-				$this->upgrade()->do_upgrade();
 			}
 		);
 
-		// Options are cached for the request, so the second copy still sees empty versions and writes again. One run should be enough.
-		$this->assertSame( 4, $writes );
+		// version_first and version_db, one write each. Before September 16, 2026 both copies were
+		// hooked, so a fresh install wrote four times.
+		$this->assertSame( 2, $writes );
 		$this->assertSame( [ 'version_first' => MAI_LOCATIONS_VERSION, 'version_db' => MAI_LOCATIONS_VERSION ], get_option( 'mai_locations' ) );
 	}
 

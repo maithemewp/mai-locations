@@ -47,6 +47,20 @@ class Upgrade {
 	 * @return void
 	 */
 	public function do_upgrade(): void {
+		self::run();
+	}
+
+	/**
+	 * The upgrade itself, callable without an instance.
+	 *
+	 * The global mailocations_do_upgrade() calls this, so the two public entry points share one
+	 * implementation instead of holding a copy each. Only this class is hooked.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public static function run(): void {
 		$version    = MAI_LOCATIONS_VERSION;
 		$version_db = mailocations_get_option( 'version_db' );
 
@@ -98,6 +112,20 @@ class Upgrade {
 	 * @return void
 	 */
 	public function upgrade_completed( $upgrader_object, $options ): void {
+		self::run_completed( $upgrader_object, $options );
+	}
+
+	/**
+	 * The migration itself, callable without an instance. See run() above.
+	 *
+	 * @since TBD
+	 *
+	 * @param mixed                $upgrader_object The upgrader.
+	 * @param array<string, mixed> $options         The upgrade options.
+	 *
+	 * @return void
+	 */
+	public static function run_completed( $upgrader_object, $options ): void {
 		// Bail if we already have an option value.
 		if ( get_option( 'mai_locations' ) ) {
 			return;

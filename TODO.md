@@ -90,7 +90,8 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [ ] `mailocations_add_location_to_user()` adds duplicates.
 - [ ] The Google geocoding address never includes country or state, because it tests `$countries[ $key ]` instead of the value. `includes/functions-locations.php:291`. Read in code only.
 - [ ] Saving an empty settings form stores a distance of 0; units are not limited to `mi` and `km`; unknown keys are kept unsanitised.
-- [ ] Both upgrade routines run on every hook: `includes/upgrade.php` and `classes/class-upgrade.php`. A fresh install writes the version option four times, and migrated values are saved unsanitised. Delete one copy.
+- [x] Both upgrade routines ran on every hook, one copy in `includes/upgrade.php` and one in `classes/class-upgrade.php`, so a fresh install wrote the version option four times. Only `Mai\Locations\Admin\Upgrade` is hooked now, and the global functions stay as public names that call it, so there is one implementation rather than two. Fixed September 16, 2026.
+- [ ] Migrated option values are still saved unsanitised, so a base of `Our Places!` goes in as-is.
 
 ### CLI and website data
 
