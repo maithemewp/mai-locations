@@ -56,35 +56,46 @@ function mailocation_location_phone_shortcode( $atts ) {
 	$html = sprintf( '<div class="mai-location-phone"%s>', $atts['style'] ? sprintf( ' style="%s"', $atts['style'] ) : '' );
 		$html .= $atts['before'];
 
+		// Fallbacks, used whenever the number cannot be formatted. Set before the country branch
+		// so an invalid or unparseable number prints the raw value instead of raising warnings.
+		// Every digit is kept: (int) used to stop at the first dash, so 914-631-8200 linked to 914.
+		$tel       = (string) preg_replace( '/[^0-9+]/', '', $phone );
+		$formatted = $phone;
+
 		// Use country to format.
 		if ( $country ) {
 			$phonelib = \libphonenumber\PhoneNumberUtil::getInstance();
-			$proto    = $phonelib->parse( $phone, $country );
 
-			if ( $phonelib->isValidNumber( $proto ) ) {
-				$tel = $phonelib->format( $proto, \libphonenumber\PhoneNumberFormat::INTERNATIONAL );
+			try {
+				$proto = $phonelib->parse( $phone, $country );
 
-				if ( 'US' === $country ) {
-					$formatted = $phonelib->format( $proto, \libphonenumber\PhoneNumberFormat::NATIONAL );
-				} else {
-					$formatted = $phonelib->format( $proto, \libphonenumber\PhoneNumberFormat::E164 );
+				if ( $phonelib->isValidNumber( $proto ) ) {
+					$tel = $phonelib->format( $proto, \libphonenumber\PhoneNumberFormat::INTERNATIONAL );
+
+					if ( 'US' === $country ) {
+						$formatted = $phonelib->format( $proto, \libphonenumber\PhoneNumberFormat::NATIONAL );
+					} else {
+						$formatted = $phonelib->format( $proto, \libphonenumber\PhoneNumberFormat::E164 );
+					}
 				}
 			}
-
+			// Text libphonenumber cannot read at all, such as "Call us". It used to throw out of
+			// the shortcode and take the page with it.
+			catch ( \libphonenumber\NumberParseException $e ) {
+				// Keep the raw fallbacks set above.
+			}
 		}
-		// Fallback, no formatting.
-		else {
-			$tel       = (int) filter_var( $phone, FILTER_SANITIZE_NUMBER_INT );
-			$formatted = $phone;
-		}
 
-		if ( $atts['link'] ) {
+		// Only link when there is something to dial.
+		$link = $atts['link'] && $tel;
+
+		if ( $link ) {
 			$html .= sprintf( '<a href="tel://%s">', $tel );
 		}
 
 		$html .= $formatted;
 
-		if ( $atts['link'] ) {
+		if ( $link ) {
 			$html .= '</a>';
 		}
 

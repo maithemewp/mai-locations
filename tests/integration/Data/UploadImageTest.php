@@ -125,13 +125,16 @@ final class UploadImageTest extends TestCase {
 		$this->assertSame( [], $this->http_requests );
 	}
 
-	public function test_pins_bug_failed_download_passes_wp_error_to_wp_delete_file(): void {
+	/**
+	 * Fixed September 16, 2026. The WP_Error from download_url() was passed to wp_delete_file(),
+	 * and unlink() threw a TypeError that took the whole CLI run with it. This is the failure
+	 * Herd's self-signed certificate produces.
+	 */
+	public function test_failed_download_deletes_only_the_staged_file_and_returns_zero(): void {
 		$this->mock_http( fn() => new WP_Error( 'http_request_failed', 'cURL error 60: SSL certificate problem' ) );
 		$path     = self::FIXTURES . '/image.jpg';
 		$uploads  = wp_get_upload_dir();
 		$deleted  = [];
-		$thrown   = null;
-		$result   = null;
 
 		add_filter(
 			'wp_delete_file',
@@ -142,16 +145,11 @@ final class UploadImageTest extends TestCase {
 			}
 		);
 
-		try {
-			$result = mailocations_upload_image( self::REF, 'original_url', $path, $this->post_id );
-		} catch ( \TypeError $e ) {
-			$thrown = $e->getMessage();
-		}
+		$result = mailocations_upload_image( self::REF, 'original_url', $path, $this->post_id );
 
-		// Correct behaviour: delete only the staged file and return 0 (or the WP_Error).
-		$this->assertSame( [ $uploads['basedir'] . '/mai-locations/' . md5( $path ) . '.jpg', 'WP_Error' ], $deleted );
-		$this->assertSame( 'unlink(): Argument #1 ($filename) must be of type string, WP_Error given', $thrown );
-		$this->assertNull( $result );
+		// Only the staged file is deleted, and the run carries on to the next location.
+		$this->assertSame( [ $uploads['basedir'] . '/mai-locations/' . md5( $path ) . '.jpg' ], $deleted );
+		$this->assertSame( 0, $result );
 		$this->assertSame( [], get_posts( [ 'post_type' => 'attachment', 'post_status' => 'any', 'fields' => 'ids' ] ) );
 	}
 

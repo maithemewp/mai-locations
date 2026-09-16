@@ -439,12 +439,6 @@ parameters:
 			path: ../inc/functions-website.php
 
 		-
-			message: '#^Parameter \#1 \$file of function wp_delete_file expects string, WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: ../inc/functions-website.php
-
-		-
 			message: '#^Function mailocation_location_address_shortcode\(\) has parameter \$atts with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -507,18 +501,6 @@ parameters:
 		-
 			message: '#^Result of function mailocations_get_distance \(void\) is used\.$#'
 			identifier: function.void
-			count: 1
-			path: ../inc/shortcodes.php
-
-		-
-			message: '#^Variable \$formatted might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: ../inc/shortcodes.php
-
-		-
-			message: '#^Variable \$tel might not be defined\.$#'
-			identifier: variable.undefined
 			count: 1
 			path: ../inc/shortcodes.php
 

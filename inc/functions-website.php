@@ -195,11 +195,10 @@ function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 	// Remove the temp file.
 	wp_delete_file( $destination_file );
 
-	// Bail if error.
+	// Bail if error. The staged file is already deleted above, and $tmp is the WP_Error itself,
+	// not a path: passing it to wp_delete_file() threw a TypeError out of unlink() and killed
+	// the whole CLI run. Fixed September 16, 2026.
 	if ( is_wp_error( $tmp ) ) {
-		// Remove the original image and return the error.
-		wp_delete_file( $tmp );
-
 		return 0;
 	}
 

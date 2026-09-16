@@ -53,8 +53,8 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 
 ### Crashes
 
-- [ ] A failed image re-download crashes `update_locations_from_website`. `wp_delete_file()` gets a `WP_Error` and `unlink()` throws a `TypeError`. `classes/class-locations-cli.php:733`. This is the re-download that fails on Herd's certificate.
-- [ ] `[mai_location_phone]` throws an uncaught `NumberParseException` when a country is set and the phone text cannot be parsed, such as "Call us". `includes/shortcodes.php:62`.
+- [x] A failed image re-download crashed `update_locations_from_website`: `wp_delete_file()` got the `WP_Error` from `download_url()` and `unlink()` threw a `TypeError`. Now it deletes only the staged file and returns 0, so the run carries on. `inc/functions-website.php`. Fixed September 16, 2026. The underlying re-download through the site's own uploads URL is still there, below.
+- [x] `[mai_location_phone]` threw an uncaught `NumberParseException` when a country was set and the phone text could not be parsed, such as "Call us", taking the page with it. Now caught, and the raw text prints with no link, because there is nothing to dial. `inc/shortcodes.php`. Fixed September 16, 2026.
 - [ ] One blank line in an import CSV stops the import with a `ValueError`. `classes/class-location-import.php:303`.
 - [ ] `no_results_text()` fatals on a null `$wp_query`, because `->get()` runs before the null check, and throws a `TypeError` on an array `post_type`. `mai-locations.php:399`.
 - [ ] `add_acf_form_head()` in the WooCommerce tabs class calls `is_account_page()` without checking WooCommerce is active. Not live today, since the class is not instantiated.
@@ -62,8 +62,8 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 ### Wrong output on the front end
 
 - [x] `[mai_location_url]` stripped every leading "w", so `www.washingtonirving.org` showed as `ashingtonirving.org`. `ltrim()` takes a character list, not a prefix. Now `preg_replace( '#^www\.#i', ... )`. `includes/shortcodes.php:138`. Fixed September 15, 2026 on Mike's call, with the pinned test flipped and cases added for a host starting with "w" and for an uppercase WWW.
-- [ ] `[mai_location_phone]` with no country links to `tel://914` for `914-631-8200`, because `(int)` stops at the first dash. `includes/shortcodes.php:77`.
-- [ ] `[mai_location_phone]` leaves `$tel` and `$formatted` undefined when a country is set but the number is not valid for it, giving warnings and an empty link. `includes/shortcodes.php:82`.
+- [x] `[mai_location_phone]` with no country linked to `tel://914` for `914-631-8200`, because `(int)` stopped at the first dash. Now every digit is kept. `inc/shortcodes.php`. Fixed September 16, 2026.
+- [x] `[mai_location_phone]` left `$tel` and `$formatted` undefined when a country was set but the number was not valid for it, giving two warnings and an empty link. Both now default to the raw value before the country branch runs. `inc/shortcodes.php`. Fixed September 16, 2026.
 - [ ] `[mai_location_email link="false"]` still links, because the string "false" is truthy. `includes/shortcodes.php:190`.
 - [ ] `[mai_location_distance]` loses the spaces in `before` and `after` (`3.1mi away`), returns a float when `after` is empty, and prints nothing for a distance that rounds to 0. `includes/shortcodes.php:294`.
 - [ ] `mailocations_get_address()` with `hide="country"` on a non-US record shows the US state field, not the international one. `includes/functions-display.php:88`.

@@ -119,11 +119,11 @@ final class PhoneShortcodeTest extends TestCase {
 		$this->assertSame( '', do_shortcode( '[mai_location_phone]' ) );
 	}
 
-	public function test_pins_bug_no_country_tel_link_stops_at_first_dash(): void {
+	public function test_no_country_tel_link_keeps_every_digit(): void {
 		$this->use_location( [ 'location_phone' => '914-631-8200' ] );
 
-		// Correct would be tel://9146318200. The (int) cast of "914-631-8200" keeps only 914.
-		$this->assertSame( '<div class="mai-location-phone"><a href="tel://914">914-631-8200</a></div>', do_shortcode( '[mai_location_phone]' ) );
+		// Fixed September 16, 2026. The (int) cast used to stop at the first dash, linking tel://914.
+		$this->assertSame( '<div class="mai-location-phone"><a href="tel://9146318200">914-631-8200</a></div>', do_shortcode( '[mai_location_phone]' ) );
 	}
 
 	public function test_no_country_digits_only_number(): void {
@@ -132,31 +132,40 @@ final class PhoneShortcodeTest extends TestCase {
 		$this->assertSame( '<div class="mai-location-phone"><a href="tel://9146318200">(914) 6318200</a></div>', do_shortcode( '[mai_location_phone]' ) );
 	}
 
-	public function test_pins_bug_invalid_number_for_country_warns_and_prints_empty_link(): void {
+	/**
+	 * Fixed September 16, 2026. An invalid number used to leave $tel and $formatted undefined,
+	 * so the shortcode printed an empty link and raised two warnings.
+	 */
+	public function test_invalid_number_for_country_falls_back_to_the_raw_number(): void {
 		$this->use_location( [ 'location_phone' => '123', 'address_country' => 'US' ] );
 
 		[ $out, $warnings ] = $this->run_capturing_warnings( [] );
 
-		// Correct would be a fallback to the raw number with no warnings.
-		$this->assertSame( '<div class="mai-location-phone"><a href="tel://"></a></div>', $out );
-		$this->assertSame( [ 'Undefined variable $tel', 'Undefined variable $formatted' ], $warnings );
+		$this->assertSame( '<div class="mai-location-phone"><a href="tel://123">123</a></div>', $out );
+		$this->assertSame( [], $warnings );
 	}
 
-	public function test_pins_bug_invalid_number_with_link_false_warns_once(): void {
+	public function test_invalid_number_with_link_false_prints_the_raw_number(): void {
 		$this->use_location( [ 'location_phone' => '123', 'address_country' => 'US' ] );
 
 		[ $out, $warnings ] = $this->run_capturing_warnings( [ 'link' => 'false' ] );
 
-		$this->assertSame( '<div class="mai-location-phone"></div>', $out );
-		$this->assertSame( [ 'Undefined variable $formatted' ], $warnings );
+		$this->assertSame( '<div class="mai-location-phone">123</div>', $out );
+		$this->assertSame( [], $warnings );
 	}
 
-	public function test_pins_bug_unparseable_number_with_country_throws(): void {
+	/**
+	 * Fixed September 16, 2026. libphonenumber threw NumberParseException out of the shortcode,
+	 * which took the whole page down.
+	 */
+	public function test_unparseable_number_with_country_prints_the_raw_text(): void {
 		$this->use_location( [ 'location_phone' => 'Call us', 'address_country' => 'US' ] );
 
-		// Correct would be printing the raw text. libphonenumber throws and nothing catches it.
-		$this->expectException( \libphonenumber\NumberParseException::class );
-		mailocation_location_phone_shortcode( [] );
+		[ $out, $warnings ] = $this->run_capturing_warnings( [] );
+
+		// No digits to dial, so no link at all.
+		$this->assertSame( '<div class="mai-location-phone">Call us</div>', $out );
+		$this->assertSame( [], $warnings );
 	}
 
 	public function test_phone_meta_is_escaped(): void {
