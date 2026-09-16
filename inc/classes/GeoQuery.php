@@ -1,47 +1,53 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mai\Locations;
+
+// Prevent direct file access.
+defined( 'ABSPATH' ) || die;
+
 /**
+ * Distance searching and sorting for WP_Query, through a `geo_query` argument.
+ *
+ * Was Mai_Geo_Query in classes/class-geo-query.php. That name still works, via
+ * inc/aliases.php. The instance is started from the plugin bootstrap now, rather than by the
+ * class file loading itself.
+ *
  * Originally taken from GJSGeoQuery.
  *
  * @link https://gist.github.com/akshuvo/4c37df4bd128eb801b7739748ee3cd65
  * @link https://gschoppe.com/wordpress/geo-searches/
- */
-
-// $query = new WP_Query(
-// 	[
-// 		// Include other WP_Query args as usual.
-// 		'geo_query' => [
-// 			'lat_field' => '_latitude',  // this is the name of the meta field storing latitude
-// 			'lng_field' => '_longitude', // this is the name of the meta field storing longitude
-// 			'latitude'  => 44.485261,    // this is the latitude of the point we are getting distance from
-// 			'longitude' => -73.218952,   // this is the longitude of the point we are getting distance from
-// 			'distance'  => 20,           // this is the maximum distance to search
-// 			'units'     => 'miles'       // this supports options: miles, mi, kilometers, km
-// 		],
-// 		'orderby' => 'distance', // this tells WP Query to sort by distance
-// 		'order'   => 'ASC'
-// 	]
-// );
-
-/**
- * Set up the Geo Query class instance.
+ *
+ * Example:
+ *
+ * $query = new WP_Query(
+ *     [
+ *         'geo_query' => [
+ *             'lat_field' => 'location_lat', // meta field holding latitude
+ *             'lng_field' => 'location_lng', // meta field holding longitude
+ *             'latitude'  => 44.485261,      // latitude of the point to measure from
+ *             'longitude' => -73.218952,     // longitude of the point to measure from
+ *             'distance'  => 20,             // maximum distance to search
+ *             'units'     => 'miles',        // miles, mi, kilometers, km
+ *         ],
+ *         'orderby' => 'distance',
+ *         'order'   => 'ASC',
+ *     ]
+ * );
  *
  * @since 0.1.0
- *
- * @return Mai_Geo_Query
  */
-Mai_Geo_Query::instance();
+class GeoQuery {
 
-/**
- * Class Mai_Geo_Query
- */
-class Mai_Geo_Query {
 	/**
-	 * Instance of this class.
+	 * Gets the one instance, creating it on the first call.
 	 *
-	 * @var null
+	 * @since 0.1.0
+	 *
+	 * @return self
 	 */
-	public static function instance() {
+	public static function instance(): self {
 		static $instance = null;
 
 		if ( is_null( $instance ) ) {
@@ -64,14 +70,16 @@ class Mai_Geo_Query {
 	}
 
 	/**
-	 * Get the distance from a post object.
+	 * Gets the distance from a post object.
+	 *
+	 * TODO: documented as float, returns false when the post carries no distance. See TODO.md.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param WP_Post $post_obj The post object.
-	 * @param bool    $round    Whether to round the distance.
+	 * @param \WP_Post|null $post_obj The post object.
+	 * @param bool|int      $round    Decimal places, or false for none.
 	 *
-	 * @return float
+	 * @return float|false
 	 */
 	public static function get_distance( $post_obj = null, $round = false ) {
 		global $post;
@@ -85,25 +93,27 @@ class Mai_Geo_Query {
 		$distance = $post_obj->geo_query_distance;
 
 		if ( false !== $round ) {
-			$distance = round( $distance, (int) $round );
+			// Cast here, not above. MySQL hands the computed column back as a string, and under
+			// declare(strict_types=1) round() refuses it rather than coercing as it used to.
+			// Casting above would change the unrounded return from that string to a float, which
+			// is a behaviour change, not a move.
+			$distance = round( (float) $distance, (int) $round );
 		}
 
 		return $distance;
 	}
 
 	/**
-	 * Add a calculated "distance" parameter to the sql query, using a haversine formula
+	 * Adds a calculated distance to the SELECT clause, using a haversine formula.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string   $sql   The SELECT clause of the query.
-	 * @param WP_Query $query The WP_Query instance.
+	 * @param string    $sql   The SELECT clause of the query.
+	 * @param \WP_Query $query The WP_Query instance.
 	 *
 	 * @return string
 	 */
 	public function posts_fields( $sql, $query ) {
-		global $wpdb;
-
 		$geo_query = $query->get( 'geo_query' );
 
 		if ( ! $geo_query ) {
@@ -114,18 +124,18 @@ class Mai_Geo_Query {
 			$sql .= ', ';
 		}
 
-		$sql .= $this->haversine_term( $geo_query ) . " AS geo_query_distance";
+		$sql .= $this->haversine_term( $geo_query ) . ' AS geo_query_distance';
 
 		return $sql;
 	}
 
 	/**
-	 * Join the postmeta table twice, once for latitude and once for longitude
+	 * Joins the postmeta table twice, once for latitude and once for longitude.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string   $sql   The JOIN clause of the query.
-	 * @param WP_Query $query The WP_Query instance.
+	 * @param string    $sql   The JOIN clause of the query.
+	 * @param \WP_Query $query The WP_Query instance.
 	 *
 	 * @return string
 	 */
@@ -149,12 +159,15 @@ class Mai_Geo_Query {
 	}
 
 	/**
-	 * Add a WHERE clause to the query to filter by distance
+	 * Adds a WHERE clause filtering by distance.
+	 *
+	 * TODO: with no distance set, the haversine term itself is the condition, so a location at
+	 * exactly the search point counts as false and drops out. See TODO.md.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string   $sql   The WHERE clause of the query.
-	 * @param WP_Query $query The WP_Query instance.
+	 * @param string    $sql   The WHERE clause of the query.
+	 * @param \WP_Query $query The WP_Query instance.
 	 *
 	 * @return string
 	 */
@@ -190,7 +203,6 @@ class Mai_Geo_Query {
 		$haversine  = $this->haversine_term( $geo_query );
 		$additional = $distance ? ' <= %f' : '';
 		$new_sql    = "( geo_query_lat.meta_key = %s AND geo_query_lng.meta_key = %s AND {$haversine}{$additional} )";
-		// $new_sql   = "( geo_query_lat.meta_key = %s AND geo_query_lng.meta_key = %s AND " . $haversine . " <= %f )";
 
 		if ( $distance ) {
 			$sql .= $wpdb->prepare( $new_sql, $lat_field, $lng_field, $distance );
@@ -202,12 +214,14 @@ class Mai_Geo_Query {
 	}
 
 	/**
-	 * Order the sql query by distance.
+	 * Orders the query by distance.
+	 *
+	 * TODO: the concatenation binds before `?:`, so the ASC fallback never applies. See TODO.md.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string   $sql   The ORDER BY clause of the query.
-	 * @param WP_Query $query The WP_Query instance.
+	 * @param string    $sql   The ORDER BY clause of the query.
+	 * @param \WP_Query $query The WP_Query instance.
 	 *
 	 * @return string
 	 */
@@ -229,11 +243,11 @@ class Mai_Geo_Query {
 	}
 
 	/**
-	 * Calculate the haversine term for a given query
+	 * Builds the haversine term for a given geo query.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $geo_query The geo query array.
+	 * @param array<string, mixed> $geo_query The geo query array.
 	 *
 	 * @return string
 	 */
@@ -251,7 +265,7 @@ class Mai_Geo_Query {
 		$radius = 3959;
 
 		// Radius in kilometers.
-		if ( in_array( $units, array( 'km', 'kilometers' ) ) ) {
+		if ( in_array( $units, [ 'km', 'kilometers' ] ) ) {
 			$radius = 6371;
 		}
 
@@ -262,7 +276,7 @@ class Mai_Geo_Query {
 
 		// Maybe add latitude.
 		if ( isset( $geo_query['latitude'] ) ) {
-			$lat = $geo_query['latitude' ];
+			$lat = $geo_query['latitude'];
 		}
 
 		// Maybe add longitude.
@@ -276,7 +290,7 @@ class Mai_Geo_Query {
 		$haversine .=     "cos( radians( " . $lng_field . " ) - radians(%f) ) + ";
 		$haversine .=     "sin( radians(%f) ) * sin( radians( " . $lat_field . " ) ) ) ";
 		$haversine .= ")";
-		$haversine  = $wpdb->prepare( $haversine, array( $lat, $lng, $lat ) );
+		$haversine  = $wpdb->prepare( $haversine, [ $lat, $lng, $lat ] );
 
 		return $haversine;
 	}

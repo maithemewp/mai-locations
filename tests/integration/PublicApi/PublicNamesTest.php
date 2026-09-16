@@ -148,8 +148,10 @@ final class PublicNamesTest extends TestCase {
 	public function test_migrated_classes_keep_their_old_names_as_aliases(): void {
 		$migrated = [
 			'Mai_Locations_Block_Bindings' => \Mai\Locations\BlockBindings::class,
+			'Mai_Geo_Query'               => \Mai\Locations\GeoQuery::class,
 			'Mai_Locations_Queries'       => \Mai\Locations\Queries::class,
 			'Mai_Locations_Scripts'       => \Mai\Locations\Scripts::class,
+			'Mai_Locations_Upgrade'       => \Mai\Locations\Upgrade::class,
 		];
 
 		foreach ( $migrated as $old => $new ) {

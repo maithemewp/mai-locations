@@ -283,7 +283,7 @@ parameters:
 			path: ../blocks/location-table/block.php
 
 		-
-			message: '#^Call to function class_exists\(\) with ''Mai_Locations_Block…''\|''Mai_Locations…'' and false will always evaluate to false\.$#'
+			message: '#^Call to function class_exists\(\) with ''Mai_Geo_Query''\|''Mai_Locations_Block…''\|''Mai_Locations…'' and false will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
 			path: ../inc/aliases.php
@@ -295,40 +295,16 @@ parameters:
 			path: ../inc/classes/BlockBindings.php
 
 		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: ../inc/classes/GeoQuery.php
+
+		-
 			message: '#^Function mailocations_get_geo_query_args not found\.$#'
 			identifier: function.notFound
 			count: 1
 			path: ../inc/classes/Queries.php
-
-		-
-			message: '#^Method Mai_Geo_Query\:\:get_distance\(\) should return float but returns false\.$#'
-			identifier: return.type
-			count: 1
-			path: ../inc/classes/class-geo-query.php
-
-		-
-			message: '#^Method Mai_Geo_Query\:\:haversine_term\(\) has parameter \$geo_query with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-geo-query.php
-
-		-
-			message: '#^Method Mai_Geo_Query\:\:instance\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: ../inc/classes/class-geo-query.php
-
-		-
-			message: '#^PHPDoc tag @var above a method has no effect\.$#'
-			identifier: varTag.misplaced
-			count: 1
-			path: ../inc/classes/class-geo-query.php
-
-		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: ../inc/classes/class-geo-query.php
 
 		-
 			message: '#^Cannot access offset ''post_type'' on WP_Screen\.$#'
@@ -769,18 +745,6 @@ parameters:
 			path: ../inc/classes/class-settings.php
 
 		-
-			message: '#^Method Mai_Locations_Upgrade\:\:upgrade_0_7_0\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: ../inc/classes/class-upgrade.php
-
-		-
-			message: '#^Method Mai_Locations_Upgrade\:\:upgrade_completed\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/classes/class-upgrade.php
-
-		-
 			message: '#^Function is_account_page not found\.$#'
 			identifier: function.notFound
 			count: 1
@@ -973,7 +937,13 @@ parameters:
 			path: ../inc/functions-fields.php
 
 		-
-			message: '#^Function mailocations_get_distance\(\) with return type void returns float but should not return anything\.$#'
+			message: '#^Call to static method get_distance\(\) on an unknown class Mai_Geo_Query\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../inc/functions-filters.php
+
+		-
+			message: '#^Function mailocations_get_distance\(\) with return type void returns mixed but should not return anything\.$#'
 			identifier: return.void
 			count: 1
 			path: ../inc/functions-filters.php

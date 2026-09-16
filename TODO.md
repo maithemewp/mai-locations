@@ -139,6 +139,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
   - [x] `Mai_Locations_Block_Bindings` to `Mai\Locations\BlockBindings`. September 15, 2026.
   - [x] `Mai_Locations_Scripts` to `Mai\Locations\Scripts`, and `Mai_Locations_Queries` to `Mai\Locations\Queries`. September 15, 2026.
   - [ ] The remaining 12 classes in `inc/classes/`, then the 9 block classes.
+  - **Watch for values arriving as strings.** `declare(strict_types=1)` turns coercion that used to happen silently into a `TypeError`. `GeoQuery::get_distance()` caught it: MySQL returns the computed distance column as a string, and `round()` then refused it, breaking nine tests. Cast at the boundary as each file moves.
   - **Watch for namespaced function calls.** A missing global function called from a namespaced class reports as `Mai\Locations\the_function()`, which is what the `mai_post_grid_query()` fatal test caught. Same behaviour, different message.
   - **Dead code found on the way, not deleted yet:** `Queries::mai_post_grid_query()` is unhooked and calls a function that does not exist. Deleting it removes a public method, so it needs Mike's yes. Three tests pin it today.
 - [ ] Fix the open bugs above, each by flipping its pinned test.
