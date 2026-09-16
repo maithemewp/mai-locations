@@ -31,25 +31,15 @@ final class QueriesTest extends TestCase {
 		$this->assertSame( 10, has_action( 'pre_get_posts', [ $this->queries(), 'pre_get_posts_query' ] ) );
 	}
 
-	public function test_post_grid_query_is_unhooked_dead_code(): void {
+	/**
+	 * mai_post_grid_query() was removed on September 16, 2026, on Mike's call. It was unhooked
+	 * and called mailocations_get_geo_query_args(), which does not exist, so calling it for a
+	 * location post type could only fatal. Nothing on the fleet referenced it. Git history has
+	 * it if the idea comes back.
+	 */
+	public function test_post_grid_query_is_gone(): void {
+		$this->assertFalse( method_exists( $this->queries(), 'mai_post_grid_query' ) );
 		$this->assertFalse( has_filter( 'mai_post_grid_query_args' ) );
-		$this->assertFalse( function_exists( 'mailocations_get_geo_query_args' ) );
-	}
-
-	public function test_post_grid_query_returns_args_unchanged_for_other_post_types(): void {
-		$args = [ 'post_type' => 'post', 'posts_per_page' => 3 ];
-
-		$this->assertSame( $args, $this->queries()->mai_post_grid_query( $args, [] ) );
-	}
-
-	public function test_pins_bug_post_grid_query_fatals_for_location_post_type(): void {
-		$this->expectException( \Error::class );
-		// Namespaced since the class moved to Mai\Locations\Query\Queries: PHP names the namespaced
-		// attempt in the message. Still the same fatal, still only reachable by calling it.
-		$this->expectExceptionMessage( 'Call to undefined function Mai\Locations\Query\mailocations_get_geo_query_args()' );
-
-		// Calls a function that does not exist. Harmless only because the hook is commented out.
-		$this->queries()->mai_post_grid_query( [ 'post_type' => 'mai_location' ], [] );
 	}
 
 	public function test_unfiltered_post_type_archive_orders_by_title(): void {

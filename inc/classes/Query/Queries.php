@@ -35,7 +35,6 @@ class Queries {
 	 */
 	public function hooks(): void {
 		add_action( 'pre_get_posts', [ $this, 'pre_get_posts_query' ] );
-		// add_filter( 'mai_post_grid_query_args', [ $this, 'mai_post_grid_query' ], 10, 2 );
 	}
 
 	/**
@@ -85,33 +84,4 @@ class Queries {
 		}
 	}
 
-	/**
-	 * Modifies Mai Post Grid args with filter arguments.
-	 *
-	 * Dead code: its hook is commented out above, and it calls
-	 * mailocations_get_geo_query_args(), which does not exist, so it fatals for a location post
-	 * type. Carried over unchanged, with its tests, until deleting it is agreed.
-	 *
-	 * @since TBD
-	 *
-	 * @param array<string, mixed> $query_args WP_Query args.
-	 * @param array<string, mixed> $args       Mai Post Grid block args.
-	 *
-	 * @return array<string, mixed>
-	 */
-	public function mai_post_grid_query( $query_args, $args ) {
-		// Check if post types intersect.
-		$post_types = mailocations_get_location_post_types();
-		$post_types = array_keys( $post_types );
-		$post_types = array_intersect( $post_types, (array) $query_args['post_type'] );
-
-		// Bail if no post types.
-		if ( ! $post_types ) {
-			return $query_args;
-		}
-
-		$query_args = mailocations_get_geo_query_args( $query_args );
-
-		return $query_args;
-	}
 }
