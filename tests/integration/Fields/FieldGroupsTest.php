@@ -47,6 +47,19 @@ final class FieldGroupsTest extends TestCase {
 		);
 	}
 
+	/**
+	 * The switch text is the whole point of the field: ACF's own default reads Yes / No, which
+	 * says nothing about what saving will do.
+	 */
+	public function test_publish_switch_says_what_it_does(): void {
+		$field = acf_get_field( 'mai_location_publish' );
+
+		$this->assertSame( 'Publish', $field['ui_on_text'] );
+		$this->assertSame( 'Not yet', $field['ui_off_text'] );
+		$this->assertSame( 'Makes this visible to everyone.', $field['message'] );
+		$this->assertSame( 1, $field['ui'] );
+	}
+
 	public function test_core_group_field_settings(): void {
 		$title = acf_get_field( 'mai_location_title' );
 		$image = acf_get_field( 'mai_location_image' );

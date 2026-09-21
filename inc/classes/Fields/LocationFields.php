@@ -92,12 +92,17 @@ class LocationFields {
 						// A pseudo-field. The form listener reads it out of $_POST and promotes the
 						// post status; nothing is ever saved as meta. LocationFormEdit adds it to the
 						// form itself, so a site never picks it and never has to.
-						'label'        => __( 'Publish', 'mai-locations' ),
-						'instructions' => __( 'Make this visible to everyone. Leave unticked to keep working on it.', 'mai-locations' ),
-						'key'          => 'mai_location_publish',
-						'name'         => 'publish',
-						'type'         => 'true_false',
-						'ui'           => 1,
+						// The switch text carries the meaning, because ACF's default reads Yes / No,
+						// which says nothing about what happens on save. "Not yet" rather than
+						// "Keep as draft", since the location may be pending review instead.
+						'label'       => __( 'Publish', 'mai-locations' ),
+						'key'         => 'mai_location_publish',
+						'name'        => 'publish',
+						'type'        => 'true_false',
+						'ui'          => 1,
+						'ui_on_text'  => __( 'Publish', 'mai-locations' ),
+						'ui_off_text' => __( 'Not yet', 'mai-locations' ),
+						'message'     => __( 'Makes this visible to everyone.', 'mai-locations' ),
 					],
 				],
 				'menu_order' => 999,

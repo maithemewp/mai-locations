@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-* Added: A Publish checkbox on the front-end edit form, shown while a location is still a draft or waiting for review. Ticking it and saving makes the location live. It disappears once the location is published, so nobody can take a listing down from the front end.
+* Added: A Publish switch on the front-end edit form, shown while a location is still a draft or waiting for review. It reads Publish or Not yet, and saving with it on makes the location live. It disappears once the location is published, so nobody can take a listing down from the front end.
 * Changed: Editing a location on the front end no longer publishes it on its own. This replaces the old behaviour, where any save of an unpublished location made it live whether or not that was the intention.
 * Fixed: Saving a location in the Dashboard published it, even from the Save Draft button. The Dashboard now leaves the status exactly where you put it.
 * Fixed: A location that was private or in the trash was made live by any save. Only a draft or a pending location can be published now, and a published one is never taken back down.

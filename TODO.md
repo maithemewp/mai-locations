@@ -30,7 +30,7 @@ What was there before: `LocationFormListener::before_save_post()` read the post'
 
 What is there now:
 
-- **`mai_location_publish`**, a `true_false` field in the core field group. That group has `'location' => false`, so it never renders in the Dashboard, and it is unset from the fields chooser's choices, so no site can pick it.
+- **`mai_location_publish`**, a `true_false` field in the core field group. Its switch reads **Publish / Not yet** with the message "Makes this visible to everyone." beside it, because ACF's default reads Yes / No, which says nothing about what saving does. "Not yet" rather than "Keep as draft", since the location may be pending review. Mike's call, September 21, 2026, in preference to a button label that changes with JavaScript: the form loads no script today, and the vague Yes / No was the real weak point. That group has `'location' => false`, so it never renders in the Dashboard, and it is unset from the fields chooser's choices, so no site can pick it.
 - **A pseudo-field**, like `mai_location_title`, `mai_location_excerpt` and `mai_location_image`. The listener reads it out of `$_POST` and unsets it, so it never reaches the meta table.
 - **`LocationFormEdit` appends it itself** when the status is `draft` or `pending`, so no site has to change anything and no site silently stops publishing. Never on `publish` or `private`.
 - **The submit button always says Update.** It used to say "Publish {singular}" on an unpublished location, which now contradicts an unticked box.
