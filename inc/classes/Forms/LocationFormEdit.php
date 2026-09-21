@@ -22,12 +22,12 @@ class LocationFormEdit extends LocationForm {
 	 *
 	 * @since TBD
 	 *
-	 * @return string|null
+	 * @return string
 	 */
-	public function get_form() {
+	public function get_form(): string {
 		// Bail if no location ID.
 		if ( ! $this->args['location_id'] ) {
-			return;
+			return '';
 		}
 
 		// Get it started.

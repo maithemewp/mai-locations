@@ -99,8 +99,8 @@ final class LocationFormTest extends TestCase {
 		);
 	}
 
-	public function test_base_get_returns_null_without_fields(): void {
-		$this->assertNull( ( new \Mai_Locations_Location_Form( [] ) )->get() );
+	public function test_base_get_is_an_empty_string_without_fields(): void {
+		$this->assertSame( '', ( new \Mai_Locations_Location_Form( [] ) )->get() );
 	}
 
 	public function test_base_get_wraps_an_empty_form(): void {
@@ -151,8 +151,8 @@ final class LocationFormTest extends TestCase {
 		);
 	}
 
-	public function test_submit_form_without_fields_returns_null(): void {
-		$this->assertNull( mailocations_get_location_submission_form( [] ) );
+	public function test_submit_form_without_fields_is_an_empty_string(): void {
+		$this->assertSame( '', mailocations_get_location_submission_form( [] ) );
 	}
 
 	public function test_submit_form_builds_acf_form_args_and_markup(): void {
@@ -315,6 +315,20 @@ final class LocationFormTest extends TestCase {
 		$this->assertSame( 'Title', $form->load_location_title_value( 'x', 1, [] ) );
 		$this->assertSame( 'Excerpt', $form->load_location_excerpt_value( 'x', 1, [] ) );
 		$this->assertSame( $image, $form->load_location_image_value( 'x', 1, [] ) );
+	}
+
+	/**
+	 * LocationsTable::get() is typed string and hands the form's return value straight back, so
+	 * a null here took the whole page down. Reachable from any table block saved with no fields
+	 * ticked: the table renders, and pressing Edit fatals. The table's own edit branch reads
+	 * filter_input(), which is empty on the command line, so only the browser reaches it. Found
+	 * that way on Visit Sleepy Hollow, September 21, 2026.
+	 */
+	public function test_a_form_with_no_fields_returns_an_empty_string(): void {
+		$id = $this->create_location( [], [ 'post_author' => $this->user ] );
+
+		$this->assertSame( '', mailocations_get_location_edit_form( [ 'location_id' => $id, 'fields' => [] ] ) );
+		$this->assertSame( '', mailocations_get_location_submission_form( [ 'fields' => [] ] ) );
 	}
 
 	public function test_edit_form_back_link_points_at_the_referrer(): void {

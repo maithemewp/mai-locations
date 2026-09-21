@@ -12,12 +12,12 @@ use Mai\Locations\Tests\TestCase;
  */
 final class FormsTest extends TestCase {
 
-	public function test_submission_form_without_fields_returns_null(): void {
-		$this->assertNull( mailocations_get_location_submission_form( [] ) );
+	public function test_submission_form_without_fields_is_an_empty_string(): void {
+		$this->assertSame( '', mailocations_get_location_submission_form( [] ) );
 	}
 
-	public function test_edit_form_without_fields_returns_null(): void {
-		$this->assertNull( mailocations_get_location_edit_form( [] ) );
+	public function test_edit_form_without_fields_is_an_empty_string(): void {
+		$this->assertSame( '', mailocations_get_location_edit_form( [] ) );
 	}
 
 	public function test_submission_form_preview(): void {

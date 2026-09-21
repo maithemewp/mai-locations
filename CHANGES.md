@@ -6,6 +6,8 @@
 * Fixed: Saving a location in the Dashboard published it, even from the Save Draft button. The Dashboard now leaves the status exactly where you put it.
 * Fixed: A location that was private or in the trash was made live by any save. Only a draft or a pending location can be published now, and a published one is never taken back down.
 * Fixed: The Back link above the front-end edit form never appeared.
+* Fixed: A Locations Table block saved with no fields ticked took the whole page down with a critical error the moment anyone pressed Edit. The form now renders as nothing at all, and the rest of the page is unaffected.
+* Security: A location's owner could publish a private or trashed location of theirs, and a new submission could publish itself past the submission block's Status setting, by editing hidden form values in the browser. Both are closed.
 * Fixed: Asking for a second user's locations in the same request returned the first user's. A page serves one person, so this showed up in WP-CLI runs and anything looping over users.
 * Fixed: The example import CSV used the `address_street` heading twice, so anyone following it lost the street and imported the suite number in its place.
 * Fixed: The location fields panel in the editor was titled "{SINGULAR} Info" instead of "Location Info".

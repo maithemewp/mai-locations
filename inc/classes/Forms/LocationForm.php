@@ -84,12 +84,14 @@ class LocationForm {
 	 *
 	 * @since TBD
 	 *
-	 * @return string|null
+	 * @return string
 	 */
-	public function get() {
-		// Bail if no fields.
+	public function get(): string {
+		// Bail if no fields. An empty string, never null: LocationsTable::get() is typed string
+		// and hands this straight back, so returning null fataled the whole page the moment
+		// anyone pressed Edit on a table block with no fields ticked.
 		if ( ! $this->args['fields'] ) {
-			return;
+			return '';
 		}
 
 		// Maybe add filter to remove state field conditions.

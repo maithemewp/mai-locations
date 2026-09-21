@@ -55,6 +55,8 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 
 ### Crashes
 
+- [x] `LocationForm::get()` returned null when no fields were ticked, and `LocationsTable::get()` is typed `string` and hands that straight back, so a Locations Table block saved with no fields fataled the whole page as soon as anyone pressed Edit. Both now return `''`. `inc/classes/Forms/LocationForm.php` and `inc/classes/Forms/LocationFormEdit.php`. Found September 21, 2026 by driving the form in a real browser on Visit Sleepy Hollow, not by the suite: the table's edit branch reads `filter_input()`, which is empty on the command line. Four tests that pinned the null were flipped.
+
 - [x] A failed image re-download crashed `update_locations_from_website`: `wp_delete_file()` got the `WP_Error` from `download_url()` and `unlink()` threw a `TypeError`. Now it deletes only the staged file and returns 0, so the run carries on. `inc/functions-website.php`. Fixed September 16, 2026. The underlying re-download through the site's own uploads URL is still there, below.
 - [x] `[mai_location_phone]` threw an uncaught `NumberParseException` when a country was set and the phone text could not be parsed, such as "Call us", taking the page with it. Now caught, and the raw text prints with no link, because there is nothing to dial. `inc/shortcodes.php`. Fixed September 16, 2026.
 - [x] One blank line in an import CSV stopped the whole import with a `ValueError` out of `array_combine()`. Rows that do not line up with the header are skipped now. `inc/classes/Admin/LocationImport.php`. Fixed September 16, 2026.

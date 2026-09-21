@@ -49,12 +49,6 @@ parameters:
 			path: ../inc/classes/Display/LocationsTable.php
 
 		-
-			message: '#^Method Mai\\Locations\\Forms\\LocationForm\:\:get\(\) should return string\|null but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: ../inc/classes/Forms/LocationForm.php
-
-		-
 			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
 			identifier: argument.templateType
 			count: 1
@@ -64,12 +58,6 @@ parameters:
 			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
 			identifier: arguments.count
 			count: 3
-			path: ../inc/classes/Forms/LocationFormEdit.php
-
-		-
-			message: '#^Method Mai\\Locations\\Forms\\LocationFormEdit\:\:get_form\(\) should return string\|null but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
 			path: ../inc/classes/Forms/LocationFormEdit.php
 
 		-
