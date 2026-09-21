@@ -1,6 +1,6 @@
 # Mai Locations rework
 
-*Started September 14, 2026. Updated September 15, 2026.*
+*Started September 14, 2026. Updated September 21, 2026.*
 
 Mike's calls, September 14, 2026:
 
@@ -12,7 +12,7 @@ Mike's calls, September 14, 2026:
 
 ## Resume here
 
-A fresh session should read this file first, then `README.md`, then `CHANGES.md`. The harness and the characterisation tests are in (September 15, 2026): 578 tests, passing in default and random order. Run `composer test` and `composer stan`; setup is in the README's Tests section. The next step is the PSR-4 autoload and moving classes one at a time.
+A fresh session should read this file first, then `README.md`, then `CHANGES.md`. Run `composer test` and `composer stan`; setup is in the README's Tests section. State as of September 16, 2026, rechecked September 21: 593 tests passing in default and random order, PHPStan clean at level 6 with a baseline of 77, down from 224. All 24 classes are namespaced under `Mai\Locations\` in `inc/classes/`, with every old class name kept working through `inc/aliases.php`. Every bug on the list below is fixed except the edit form's Back link, which waits on the Publish checkbox. `develop` holds 53 commits that have never been pushed. Next: Mike reviews the Publish checkbox design above, then the remaining static caches become resettable as each class moves, then the changelog and the release.
 
 Visit Sleepy Hollow (`~/Herd/visitsleepyhollow`, symlinked to this folder) is a real site using the plugin: 141 locations, the `update_locations_from_website` CLI command, `mailocations_get_data_from_website()` from its own scripts, `mailocations_get_address()` in its theme's facts block, the `mailocations_general_fields` filter, and archive shortcodes `[mai_location_address]` and `[mai_location_phone]`. Use it as a manual check that nothing it relies on changes.
 
@@ -169,6 +169,7 @@ Mike asked, September 15, 2026, whether to convert to PHP-only core blocks. Not 
   - **Watch for namespaced function calls.** A missing global function called from a namespaced class reports as `Mai\Locations\the_function()`, which is what the `mai_post_grid_query()` fatal test caught. Same behaviour, different message.
   - **Dead code found on the way, not deleted yet:** `Queries::mai_post_grid_query()` is unhooked and calls a function that does not exist. Deleting it removes a public method, so it needs Mike's yes. Three tests pin it today.
 - [ ] Fix the open bugs above, each by flipping its pinned test.
+- [ ] Build the Publish checkbox on the front-end edit form, to the design under "Agreed design, not built yet" near the top of this file. Waiting on Mike's review, which he asked for on September 15, 2026. The `$GET['referrer']` Back link bug rides with it, since both touch `LocationFormEdit`.
 - [x] Raise the PHP floor. 8.3, Mike's call, September 16, 2026, after checking two things: PHPStan analysing the whole plugin with `phpVersion: 80200` reports no errors, so nothing in the code needs 8.3, and no bundled dependency asks for more than `^8.1`. Every fleet site measured that day ran 8.3.30 or newer, three on 8.4. So the floor is a forward-looking choice about what we may write, not a requirement. `Requires PHP` and `composer.json` moved together.
 - [ ] Write the changelog and release.
 - [ ] Release.
