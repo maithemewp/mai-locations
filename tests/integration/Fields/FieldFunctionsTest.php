@@ -320,14 +320,13 @@ final class FieldFunctionsTest extends TestCase {
 		$this->assertSame( 'mai_locations_location_field_group', $city['parent'] );
 	}
 
-	public function test_each_field_filter_ran_exactly_once_at_boot(): void {
-		// One run each proves the static cache.
-		$this->assertSame( 1, did_filter( 'mailocations_general_fields' ) );
-		$this->assertSame( 1, did_filter( 'mailocations_address_fields' ) );
-		$this->assertSame( 1, did_filter( 'mailocations_fields' ) );
-	}
-
-	public function test_general_fields_filter_added_after_boot_has_no_effect(): void {
+	/**
+	 * The field list is worked out once per request, which is what keeps it cheap, and a filter
+	 * gets its say on the first call. The cache used to be a static that lasted the whole
+	 * process, so a filter added after boot could never take effect and could not be tested
+	 * in-process at all. It is in the plugin's cache now, which a flush empties.
+	 */
+	public function test_a_general_fields_filter_takes_effect_after_a_flush(): void {
 		$add = static function ( array $fields ): array {
 			$fields['location_booking_url'] = [
 				'key'   => 'mai_location_booking_url',
@@ -340,9 +339,15 @@ final class FieldFunctionsTest extends TestCase {
 
 		add_filter( 'mailocations_general_fields', $add );
 
-		$this->assertArrayNotHasKey( 'location_booking_url', mailocations_get_general_fields() );
-		$this->assertFalse( acf_get_field( 'mai_location_booking_url' ) );
+		$this->assertArrayHasKey( 'location_booking_url', mailocations_get_general_fields() );
 
+		// Removing the filter changes nothing on its own: the list is already worked out.
 		remove_filter( 'mailocations_general_fields', $add );
+
+		$this->assertArrayHasKey( 'location_booking_url', mailocations_get_general_fields() );
+
+		\Mai\Locations\Cache::flush();
+
+		$this->assertArrayNotHasKey( 'location_booking_url', mailocations_get_general_fields() );
 	}
 }

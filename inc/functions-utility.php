@@ -1,5 +1,7 @@
 <?php
 
+use Mai\Locations\Cache;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -11,19 +13,16 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return string
  */
 function mailocations_get_plural() {
-	static $label = null;
-
-	if ( ! is_null( $label ) ) {
-		return $label;
+	if ( Cache::has( 'plural' ) ) {
+		return Cache::get( 'plural' );
 	}
 
 	// Escape before caching. Only the first call used to be escaped, because the raw value was
 	// what got stored. Fixed September 16, 2026.
 	$label = mailocations_get_option( 'label_plural' );
 	$label = apply_filters( 'mailocations_plural', $label );
-	$label = esc_html( $label );
 
-	return $label;
+	return Cache::set( 'plural', esc_html( $label ) );
 }
 
 /**
@@ -34,18 +33,15 @@ function mailocations_get_plural() {
  * @return string
  */
 function mailocations_get_singular() {
-	static $label = null;
-
-	if ( ! is_null( $label ) ) {
-		return $label;
+	if ( Cache::has( 'singular' ) ) {
+		return Cache::get( 'singular' );
 	}
 
 	// Escape before caching. Only the first call used to be escaped. Fixed September 16, 2026.
 	$label = mailocations_get_option( 'label_singular' );
 	$label = apply_filters( 'mailocations_singular', $label );
-	$label = esc_html( $label );
 
-	return $label;
+	return Cache::set( 'singular', esc_html( $label ) );
 }
 
 /**
@@ -56,10 +52,8 @@ function mailocations_get_singular() {
  * @return string
  */
 function mailocations_get_base() {
-	static $base = null;
-
-	if ( ! is_null( $base ) ) {
-		return $base;
+	if ( Cache::has( 'base' ) ) {
+		return Cache::get( 'base' );
 	}
 
 	// Clean before caching, and clean it the same way the saved setting is cleaned. Only the
@@ -67,9 +61,8 @@ function mailocations_get_base() {
 	// URL base should not have. Fixed September 16, 2026.
 	$base = mailocations_get_option( 'base' );
 	$base = apply_filters( 'mailocations_base', $base );
-	$base = sanitize_title_with_dashes( $base );
 
-	return $base;
+	return Cache::set( 'base', sanitize_title_with_dashes( $base ) );
 }
 
 /**
@@ -101,25 +94,24 @@ function mailocations_get_option( $key, $fallback = true ) {
  * @return array
  */
 function mailocations_get_options( bool $reset = false ) {
-	static $cache = null;
-
 	// The cache lasts the whole request, so a value saved during it was never seen again.
-	// mailocations_update_option() clears it now. Fixed September 16, 2026.
+	// mailocations_update_option() clears it now. Fixed September 16, 2026. The labels and the
+	// base are worked out from these options, so they go too.
 	if ( $reset ) {
-		$cache = null;
+		Cache::forget( 'options' );
+		Cache::forget( 'plural' );
+		Cache::forget( 'singular' );
+		Cache::forget( 'base' );
 	}
 
-	if ( ! is_null( $cache ) ) {
-		return $cache;
+	if ( Cache::has( 'options' ) ) {
+		return Cache::get( 'options' );
 	}
 
 	// Get all options, with defaults if option does not exist.
 	$options = (array) get_option( 'mai_locations', mailocations_get_options_defaults() );
 
-	// Sanitize.
-	$cache = mailocations_sanitize_options( $options );
-
-	return $cache;
+	return Cache::set( 'options', mailocations_sanitize_options( $options ) );
 }
 
 /**
@@ -146,14 +138,11 @@ function mailocations_get_option_default( $key ) {
  * @return array
  */
 function mailocations_get_options_defaults() {
-	static $cache = null;
-
-	if ( ! is_null( $cache ) ) {
-		return $cache;
+	if ( Cache::has( 'options_defaults' ) ) {
+		return Cache::get( 'options_defaults' );
 	}
 
-	// Set cache.
-	$cache = [
+	$defaults = [
 		'label_plural'         => __( 'Locations', 'mai-location' ),
 		'label_singular'       => __( 'Location', 'mai-location' ),
 		'base'                 => 'locations',
@@ -167,7 +156,7 @@ function mailocations_get_options_defaults() {
 		'version_db'           => '',
 	];
 
-	return $cache;
+	return Cache::set( 'options_defaults', $defaults );
 }
 
 /**
@@ -337,18 +326,18 @@ function mailocations_user_can_edit( $location_id ) {
  * @return string
  */
 function mailocations_get_stylesheet_link( $filename ) {
-	static $loaded = [];
+	$key = 'stylesheet_link_' . $filename;
 
 	// Bail if loaded.
-	if ( is_admin() || isset( $loaded[ $filename ] ) ) {
+	if ( is_admin() || Cache::has( $key ) ) {
 		return;
 	}
 
-	$asset_name          = "{$filename}-styles";
-	$asset               = mailocations_get_asset( $asset_name );
-	$loaded[ $filename ] = MAI_LOCATIONS_PLUGIN_URL . "build/{$asset_name}.css";
+	$asset_name = "{$filename}-styles";
+	$asset      = mailocations_get_asset( $asset_name );
+	$url        = Cache::set( $key, MAI_LOCATIONS_PLUGIN_URL . "build/{$asset_name}.css" );
 
-	return sprintf( '<link rel="stylesheet" href="%s?ver=%s" />', $loaded[ $filename ], $asset['version'] );
+	return sprintf( '<link rel="stylesheet" href="%s?ver=%s" />', $url, $asset['version'] );
 }
 
 /**

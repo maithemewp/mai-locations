@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mai\Locations\Integrations;
 
+use Mai\Locations\Cache;
+
 // Prevent direct file access.
 defined( 'ABSPATH' ) || die;
 
@@ -42,12 +44,9 @@ class WooCommerceAccountTabs {
 	 * @return array<string, string>
 	 */
 	public function get_tabs() {
-		// Set static tabs.
-		static $tabs = null;
-
 		// Return if cached.
-		if ( ! is_null( $tabs ) ) {
-			return $tabs;
+		if ( Cache::has( 'woocommerce_account_tabs' ) ) {
+			return Cache::get( 'woocommerce_account_tabs' );
 		}
 
 		// Default tabs.
@@ -56,7 +55,7 @@ class WooCommerceAccountTabs {
 		// Set filterable tabs.
 		$tabs = apply_filters( 'mailocations_woocommerce_account_tabs', $tabs );
 
-		return $tabs;
+		return Cache::set( 'woocommerce_account_tabs', $tabs );
 	}
 
 	/**

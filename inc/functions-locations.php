@@ -1,5 +1,7 @@
 <?php
 
+use Mai\Locations\Cache;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -15,11 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return array Array of post IDs.
  */
 function mailocation_get_user_locations( $post_type = 'mai_location', $reset = false ) {
-	// Setup cache.
-	static $all_locations = [];
-
 	if ( $reset ) {
-		$all_locations = [];
+		Cache::forget_prefixed( 'user_locations_' );
 	}
 
 	// Get current user.
@@ -28,17 +27,16 @@ function mailocation_get_user_locations( $post_type = 'mai_location', $reset = f
 	// The cache is keyed by user as well as post type. It used to be keyed by post type alone,
 	// so a second user in the same process got the first user's locations. A page serves one
 	// user, but the CLI and any loop over users do not. Fixed September 16, 2026.
-	$key = $user_id . '|' . $post_type;
+	$key = 'user_locations_' . $user_id . '|' . $post_type;
 
 	// Maybe return cache.
-	if ( isset( $all_locations[ $key ] ) ) {
-		return $all_locations[ $key ];
+	if ( Cache::has( $key ) ) {
+		return Cache::get( $key );
 	}
 
 	// Bail if no user.
 	if ( ! $user_id ) {
-		$all_locations[ $key ] = [];
-		return $all_locations[ $key ];
+		return Cache::set( $key, [] );
 	}
 
 	// Get user locations.
@@ -55,10 +53,7 @@ function mailocation_get_user_locations( $post_type = 'mai_location', $reset = f
 		]
 	);
 
-	// Add to cache.
-	$all_locations[ $key ] = $query->posts;
-
-	return $all_locations[ $key ];
+	return Cache::set( $key, $query->posts );
 }
 
 /**
@@ -591,13 +586,11 @@ function mailocations_get_plural_label( $post_type ) {
  * @return array
  */
 function mailocations_get_location_post_types() {
-	static $cache = null;
-
-	if ( ! is_null( $cache ) ) {
-		return $cache;
+	if ( Cache::has( 'location_post_types' ) ) {
+		return Cache::get( 'location_post_types' );
 	}
 
-	$cache      = [];
+	$types      = [];
 	$post_types = get_post_types(
 		[
 			'public'   => true,
@@ -624,13 +617,13 @@ function mailocations_get_location_post_types() {
 		}
 
 		// Store post type.
-		$cache[ $name ] = [
+		$types[ $name ] = [
 			'plural'   => $plural,
 			'singular' => $singular,
 		];
 	}
 
-	return $cache;
+	return Cache::set( 'location_post_types', $types );
 }
 
 /**
@@ -643,9 +636,9 @@ function mailocations_get_location_post_types() {
  * @return array
  */
 function mailocations_get_location_taxonomies( $post_type = '' ) {
-	static $taxonomies = [];
+	if ( Cache::has( 'location_taxonomies' ) ) {
+		$taxonomies = Cache::get( 'location_taxonomies' );
 
-	if ( $taxonomies ) {
 		if ( $post_type ) {
 			return isset( $taxonomies[ $post_type ] ) ? $taxonomies[ $post_type ] : [];
 		}
@@ -653,6 +646,7 @@ function mailocations_get_location_taxonomies( $post_type = '' ) {
 		return isset( $taxonomies[ '_all_' ] ) ? (array) $taxonomies[ '_all_' ] : [];
 	}
 
+	$taxonomies = [];
 	$post_types = mailocations_get_location_post_types();
 
 	foreach ( $post_types as $type => $labels ) {
@@ -679,6 +673,8 @@ function mailocations_get_location_taxonomies( $post_type = '' ) {
 		}
 	}
 
+	Cache::set( 'location_taxonomies', $taxonomies );
+
 	if ( $post_type ) {
 		return isset( $taxonomies[ $post_type ] ) ? $taxonomies[ $post_type ] : [];
 	}
@@ -694,10 +690,8 @@ function mailocations_get_location_taxonomies( $post_type = '' ) {
  * @return array
  */
 function mailocations_get_location_taxonomies_underscored() {
-	static $taxonomies = null;
-
-	if ( ! is_null( $taxonomies ) ) {
-		return $taxonomies;
+	if ( Cache::has( 'location_taxonomies_underscored' ) ) {
+		return Cache::get( 'location_taxonomies_underscored' );
 	}
 
 	$taxonomies = mailocations_get_location_taxonomies();
@@ -705,5 +699,5 @@ function mailocations_get_location_taxonomies_underscored() {
 		return "_{$key}";
 	}, array_keys( $taxonomies ) ), $taxonomies );
 
-	return $taxonomies;
+	return Cache::set( 'location_taxonomies_underscored', $taxonomies );
 }

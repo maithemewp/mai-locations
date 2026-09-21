@@ -1,5 +1,7 @@
 <?php
 
+use Mai\Locations\Cache;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -13,17 +15,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return bool
  */
 function mailocations_is_filtered_locations() {
-	static $filtered = null;
+	if ( Cache::has( 'is_filtered' ) ) {
+		return Cache::get( 'is_filtered' );
+	}
 
-	if ( ! is_null( $filtered ) ) {
-		return $filtered;
+	if ( ! $_GET ) {
+		return Cache::set( 'is_filtered', false );
 	}
 
 	$filtered = false;
-
-	if ( ! $_GET ) {
-		return $filtered;
-	}
 
 	$keys = array_keys( mailocations_get_location_taxonomies_underscored() );
 	$keys = array_merge( $keys, [ 'lat', 'lng' ] );
@@ -37,7 +37,7 @@ function mailocations_is_filtered_locations() {
 		break;
 	}
 
-	return $filtered;
+	return Cache::set( 'is_filtered', $filtered );
 }
 
 /**
@@ -75,10 +75,8 @@ function mailocations_get_query_params() {
  * @return array
  */
 function mailocations_get_query_defaults() {
-	static $defaults = null;
-
-	if ( ! is_null( $defaults ) ) {
-		return $defaults;
+	if ( Cache::has( 'query_defaults' ) ) {
+		return Cache::get( 'query_defaults' );
 	}
 
 	// Set static defaults.
@@ -105,7 +103,7 @@ function mailocations_get_query_defaults() {
 	// Add filter.
 	$defaults = apply_filters( 'mailocations_location_query_defaults', $defaults );
 
-	return $defaults;
+	return Cache::set( 'query_defaults', $defaults );
 }
 
 /**

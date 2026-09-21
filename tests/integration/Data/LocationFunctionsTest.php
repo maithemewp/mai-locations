@@ -38,10 +38,22 @@ final class LocationFunctionsTest extends TestCase {
 		return $json['results'][0]['address_components'];
 	}
 
-	public function test_api_key_is_empty_for_the_whole_run(): void {
+	/**
+	 * Writing the option row straight past mailocations_update_option() does not reach a value
+	 * already read this request, which is why the geocoding tests that need an API key boot
+	 * WordPress in a child process with the option already in place.
+	 */
+	public function test_an_option_read_already_is_not_reread_after_a_raw_update(): void {
+		$this->assertSame( '', mailocations_get_option( 'google_api_key' ) );
+
 		update_option( 'mai_locations', [ 'google_api_key' => 'SET-TOO-LATE' ] );
 
 		$this->assertSame( '', mailocations_get_option( 'google_api_key' ) );
+
+		// The plugin's own updater clears the cache, so that route does see it.
+		mailocations_update_option( 'google_api_key', 'SET-PROPERLY' );
+
+		$this->assertSame( 'SET-PROPERLY', mailocations_get_option( 'google_api_key' ) );
 	}
 
 	/*

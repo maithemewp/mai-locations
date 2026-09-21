@@ -1,5 +1,7 @@
 <?php
 
+use Mai\Locations\Cache;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -11,17 +13,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return array
  */
 function mailocations_get_fields() {
-	static $fields = null;
-
-	if ( ! is_null( $fields ) && is_array( $fields ) ) {
-		return $fields;
+	if ( Cache::has( 'fields' ) ) {
+		return Cache::get( 'fields' );
 	}
 
 	$fields = [];
 	$raw    = mailocations_get_fields_raw();
 
 	if ( ! $raw ) {
-		return $fields;
+		return Cache::set( 'fields', $fields );
 	}
 
 	foreach ( $raw as $name => $values ) {
@@ -29,7 +29,7 @@ function mailocations_get_fields() {
 		$fields[]       = $values;
 	}
 
-	return $fields;
+	return Cache::set( 'fields', $fields );
 }
 
 /**
@@ -40,17 +40,15 @@ function mailocations_get_fields() {
  * @return array
  */
 function mailocations_get_fields_tabs() {
-	static $tabs = null;
-
-	if ( ! is_null( $tabs ) && is_array( $tabs ) ) {
-		return $tabs;
+	if ( Cache::has( 'fields_tabs' ) ) {
+		return Cache::get( 'fields_tabs' );
 	}
 
 	$tabs   = [];
 	$fields = mailocations_get_fields_raw();
 
 	if ( ! $fields ) {
-		return $tabs;
+		return Cache::set( 'fields_tabs', $tabs );
 	}
 
 	foreach ( $fields as $name => $values ) {
@@ -60,7 +58,7 @@ function mailocations_get_fields_tabs() {
 		$tabs[ $name ] = $values;
 	}
 
-	return $tabs;
+	return Cache::set( 'fields_tabs', $tabs );
 }
 
 /**
@@ -71,10 +69,8 @@ function mailocations_get_fields_tabs() {
  * @return array
  */
 function mailocations_get_fields_raw() {
-	static $fields = null;
-
-	if ( ! is_null( $fields ) && is_array( $fields ) ) {
-		return $fields;
+	if ( Cache::has( 'fields_raw' ) ) {
+		return Cache::get( 'fields_raw' );
 	}
 
 	$general  = mailocations_get_general_fields();
@@ -82,7 +78,7 @@ function mailocations_get_fields_raw() {
 	$fields   = array_merge( $general, $location );
 	$fields   = apply_filters( 'mailocations_fields', $fields );
 
-	return $fields;
+	return Cache::set( 'fields_raw', $fields );
 }
 
 /**
@@ -93,16 +89,14 @@ function mailocations_get_fields_raw() {
  * @return array
  */
 function mailocations_get_fields_defaults() {
-	static $fields = null;
-
-	if ( ! is_null( $fields ) && is_array( $fields ) ) {
-		return $fields;
+	if ( Cache::has( 'fields_defaults' ) ) {
+		return Cache::get( 'fields_defaults' );
 	}
 
 	$fields = mailocations_get_fields_raw();
 
 	if ( ! $fields ) {
-		return $fields;
+		return Cache::set( 'fields_defaults', $fields );
 	}
 
 	foreach ( $fields as $name => $values ) {
@@ -120,7 +114,7 @@ function mailocations_get_fields_defaults() {
 
 	$fields = wp_list_pluck( $fields, 'default_value' );
 
-	return $fields;
+	return Cache::set( 'fields_defaults', $fields );
 }
 
 /**
@@ -131,10 +125,8 @@ function mailocations_get_fields_defaults() {
  * @return array
  */
 function mailocations_get_general_fields() {
-	static $fields = null;
-
-	if ( ! is_null( $fields ) ) {
-		return $fields;
+	if ( Cache::has( 'general_fields' ) ) {
+		return Cache::get( 'general_fields' );
 	}
 
 	$fields = [
@@ -168,7 +160,7 @@ function mailocations_get_general_fields() {
 
 	$fields = apply_filters( 'mailocations_general_fields', $fields );
 
-	return $fields;
+	return Cache::set( 'general_fields', $fields );
 }
 
 /**
@@ -179,10 +171,8 @@ function mailocations_get_general_fields() {
  * @return array
  */
 function mailocations_get_address_fields() {
-	static $fields = null;
-
-	if ( ! is_null( $fields ) ) {
-		return $fields;
+	if ( Cache::has( 'address_fields' ) ) {
+		return Cache::get( 'address_fields' );
 	}
 
 	$fields = [
@@ -310,7 +300,7 @@ function mailocations_get_address_fields() {
 
 	$fields = apply_filters( 'mailocations_address_fields', $fields );
 
-	return $fields;
+	return Cache::set( 'address_fields', $fields );
 }
 
 /**
@@ -321,10 +311,8 @@ function mailocations_get_address_fields() {
  * @return array
  */
 function mailocations_get_state_choices() {
-	static $choices = null;
-
-	if ( ! is_null( $choices ) ) {
-		return $choices;
+	if ( Cache::has( 'state_choices' ) ) {
+		return Cache::get( 'state_choices' );
 	}
 
 	$choices = [
@@ -383,7 +371,7 @@ function mailocations_get_state_choices() {
 		'WY' => __( 'Wyoming', 'mai-locations' ),
 	];
 
-	return $choices;
+	return Cache::set( 'state_choices', $choices );
 }
 
 /**
@@ -394,10 +382,8 @@ function mailocations_get_state_choices() {
  * @return array
  */
 function mailocations_get_country_choices() {
-	static $choices = null;
-
-	if ( ! is_null( $choices ) ) {
-		return $choices;
+	if ( Cache::has( 'country_choices' ) ) {
+		return Cache::get( 'country_choices' );
 	}
 
 	$choices = [
@@ -648,7 +634,7 @@ function mailocations_get_country_choices() {
 		'ZW' => __( 'Zimbabwe', 'mai-locations' ),
 	];
 
-	return $choices;
+	return Cache::set( 'country_choices', $choices );
 }
 
 /**
@@ -659,19 +645,15 @@ function mailocations_get_country_choices() {
  * @return array
  */
 function mailocations_get_field_group_fields( $post_type = '' ) {
-	static $fields = [];
+	if ( Cache::has( 'field_group_fields' ) ) {
+		$fields = Cache::get( 'field_group_fields' );
 
-	if ( $fields ) {
-		if ( $post_type ) {
-			return isset( $fields[ $post_type ] ) ? $fields[ $post_type ] : [];
-		}
-
-		return $fields['all'];
+		return $post_type ? ( isset( $fields[ $post_type ] ) ? $fields[ $post_type ] : [] ) : $fields['all'];
 	}
 
-	$core          = array_merge( acf_get_fields( 'mai_locations_core_field_group' ), acf_get_fields( 'mai_locations_location_field_group' ) );
-	$fields        = [ 'all' => $core ];
-	$post_types    = array_keys( mailocations_get_location_post_types() );
+	$core       = array_merge( acf_get_fields( 'mai_locations_core_field_group' ), acf_get_fields( 'mai_locations_location_field_group' ) );
+	$fields     = [ 'all' => $core ];
+	$post_types = array_keys( mailocations_get_location_post_types() );
 
 	foreach ( $post_types as $name ) {
 		$one             = array_filter( acf_get_fields( "mai_locations_core_{$name}_field_group" ) );
@@ -679,6 +661,8 @@ function mailocations_get_field_group_fields( $post_type = '' ) {
 		$fields[ $name ] = array_merge( $core, $one, $two );
 		$fields['all']   = array_merge( $fields['all'], $one, $two );
 	}
+
+	Cache::set( 'field_group_fields', $fields );
 
 	return $post_type ? ( isset( $fields[ $post_type ] ) ? $fields[ $post_type ] : [] ) : $fields['all'];
 }

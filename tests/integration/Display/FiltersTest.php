@@ -211,27 +211,21 @@ final class FiltersTest extends TestCase {
 		$this->assertSame( [ 'relation' => 'OR' ], mailocations_get_filtered_query_args( $existing )['tax_query'] );
 	}
 
-	public function test_is_filtered_locations_caches_first_answer_for_the_process(): void {
-		$statics = ( new ReflectionFunction( 'mailocations_is_filtered_locations' ) )->getStaticVariables();
-
-		if ( null === $statics['filtered'] ) {
-			$_GET = [ 'lat' => '41' ];
-			$this->assertTrue( mailocations_is_filtered_locations() );
-
-			$_GET = [];
-			// Pins the static cache: a later request state is never seen.
-			$this->assertTrue( mailocations_is_filtered_locations() );
-			return;
-		}
-
-		// Another test already primed the cache, so $_GET no longer matters.
-		$cached = $statics['filtered'];
-
+	/**
+	 * The answer is worked out once and reused for the rest of the request, which is what makes
+	 * it cheap to call from a template. It used to sit in a static that lasted the whole
+	 * process, so nothing could ever get a second answer; it is in the plugin's cache now, which
+	 * a flush empties.
+	 */
+	public function test_is_filtered_locations_is_worked_out_once_per_request(): void {
 		$_GET = [ 'lat' => '41' ];
-		$this->assertSame( $cached, mailocations_is_filtered_locations() );
+		$this->assertTrue( mailocations_is_filtered_locations() );
 
 		$_GET = [];
-		$this->assertSame( $cached, mailocations_is_filtered_locations() );
+		$this->assertTrue( mailocations_is_filtered_locations() );
+
+		\Mai\Locations\Cache::flush();
+		$this->assertFalse( mailocations_is_filtered_locations() );
 	}
 
 	public function test_distance_helper_returns_rounded_value_despite_void_docblock(): void {

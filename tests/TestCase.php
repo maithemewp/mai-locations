@@ -12,17 +12,16 @@ use WP_UnitTestCase;
 abstract class TestCase extends WP_UnitTestCase {
 
 	/**
-	 * Drops the plugin's cached options before each test.
+	 * Empties the plugin's per-request cache before each test.
 	 *
-	 * The cache used to last the whole process, so every test saw whatever was read during
-	 * bootstrap. Saving an option clears it now, which is the point, but it also means one
-	 * test's saved value would otherwise outlive the database rollback that follows it.
+	 * Those values used to sit in `static` variables that lasted the whole process, so every
+	 * test saw whatever was read during bootstrap, one test's saved option outlived the
+	 * database rollback that followed it, and a filter added inside a test did nothing.
 	 */
 	public function set_up(): void {
 		parent::set_up();
 
-		mailocations_get_options( true );
-		mailocation_get_user_locations( 'mai_location', true );
+		\Mai\Locations\Cache::flush();
 	}
 
 	/**
