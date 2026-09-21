@@ -41,6 +41,7 @@ final class FieldGroupsTest extends TestCase {
 				[ 'mai_location_title', 'title', 'text', 'Title' ],
 				[ 'mai_location_excerpt', 'excerpt', 'wysiwyg', 'Description' ],
 				[ 'mai_location_image', '', 'image', 'Image' ],
+				[ 'mai_location_publish', 'publish', 'true_false', 'Publish' ],
 			],
 			$this->summarise( acf_get_fields( 'mai_locations_core_field_group' ) )
 		);

@@ -106,9 +106,9 @@ class LocationFormListener {
 	 * Pulls the post fields out of the submitted ACF data, and queues the work that has to
 	 * happen after ACF saves.
 	 *
-	 * TODO: forces any status but publish to publish, on Dashboard saves as well as front-end
-	 * ones, and sweeps up private and trashed locations. The agreed replacement is a Publish
-	 * checkbox on the edit form. See TODO.md.
+	 * A draft or pending location is published only when the front-end edit form sends a ticked
+	 * Publish checkbox. Nothing else moves the status: a Dashboard save leaves it alone, and
+	 * private, trashed and already published locations are never touched.
 	 *
 	 * @since TBD
 	 *
@@ -124,14 +124,20 @@ class LocationFormListener {
 		// Setup data.
 		$data = [];
 
-		// Check post ID.
-		if ( isset( $_POST['_acf_post_id'] ) && is_numeric( $_POST['_acf_post_id'] ) ) {
-			// Get post and status.
-			$post   = get_post( $_POST['_acf_post_id'] );
+		// Publish. A pseudo-field, so it never reaches the meta table.
+		$publish = isset( $_POST['acf']['mai_location_publish'] )
+			&& is_scalar( $_POST['acf']['mai_location_publish'] )
+			&& rest_sanitize_boolean( (string) $_POST['acf']['mai_location_publish'] );
+
+		unset( $_POST['acf']['mai_location_publish'] );
+
+		// Promote to publish, but only from the front-end form, and only from a status that is
+		// waiting to go live. ACF sends _acf_form from acf_form() alone, never from wp-admin.
+		if ( $publish && isset( $_POST['_acf_form'] ) && isset( $_POST['_acf_post_id'] ) && is_numeric( $_POST['_acf_post_id'] ) ) {
+			$post   = get_post( absint( $_POST['_acf_post_id'] ) );
 			$status = $post ? get_post_status( $post ) : '';
 
-			// If status is not public, make it public.
-			if ( $status && 'publish' !== $status ) {
+			if ( in_array( $status, [ 'draft', 'pending' ], true ) ) {
 				$data['status'] = 'publish';
 			}
 		}

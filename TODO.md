@@ -12,7 +12,7 @@ Mike's calls, September 14, 2026:
 
 ## Resume here
 
-A fresh session should read this file first, then `README.md`, then `CHANGES.md`. Run `composer test` and `composer stan`; setup is in the README's Tests section. State as of September 16, 2026, rechecked September 21: 593 tests passing in default and random order, PHPStan clean at level 6 with a baseline of 77, down from 224. All 24 classes are namespaced under `Mai\Locations\` in `inc/classes/`, with every old class name kept working through `inc/aliases.php`. Every bug on the list below is fixed except the edit form's Back link, which waits on the Publish checkbox. `develop` holds 53 commits that have never been pushed. Next: Mike reviews the Publish checkbox design above, then the remaining static caches become resettable as each class moves, then the changelog and the release.
+A fresh session should read this file first, then `README.md`, then `CHANGES.md`. Run `composer test` and `composer stan`; setup is in the README's Tests section. State as of September 21, 2026: 608 tests passing in default and random order, PHPStan clean at level 6 with a baseline of 74, down from 224. All 24 classes are namespaced under `Mai\Locations\` in `inc/classes/`, with every old class name kept working through `inc/aliases.php`. Every bug on the list below is fixed, and the Publish checkbox is built. `develop` holds work that has never been pushed. Next: the remaining static caches become resettable, then the changelog and the release.
 
 Visit Sleepy Hollow (`~/Herd/visitsleepyhollow`, symlinked to this folder) is a real site using the plugin: 141 locations, the `update_locations_from_website` CLI command, `mailocations_get_data_from_website()` from its own scripts, `mailocations_get_address()` in its theme's facts block, the `mailocations_general_fields` filter, and archive shortcodes `[mai_location_address]` and `[mai_location_phone]`. Use it as a manual check that nothing it relies on changes.
 
@@ -22,22 +22,23 @@ Follow `wp-plugin-scaffold` for layout and the global modern PHP rules: `declare
 
 `docs/fleet-survey-2026-09-15.md` has the full survey. The short version: 11 fleet sites, biggest is pregnancybydesign.com with 3,655 locations. Third-party code calls `mailocations_update_google_map_from_address()` on 5 sites, `[mai_location_address]` in 4 themes, and on naturesoma.com the field filters `mailocations_general_fields` and `mailocations_address_fields`, which it uses to hide the phone and email fields and rename a tab. No site has social field data, and naturesoma's `mailocations_social_fields` callback returns an empty array too. Two sites are behind, on 0.4.0 and 1.0.0, so the upgrade path from 0.4.0 has to work.
 
-## Agreed design, not built yet
+## The Publish checkbox, built September 21, 2026
 
-**Publishing from the front-end edit form.** Mike's call, September 15, 2026. Review this again before building it.
+Mike walked the design on September 21, 2026 and approved both open questions: a front-end edit no longer publishes on its own, and a Dashboard save no longer touches the status at all.
 
-Today any ACF save of a location forces every status but publish to publish. Two pinned tests in `tests/integration/Blocks/FormListenerTest.php` show how far that reaches: it fires on Dashboard saves, not only the front-end form the 0.4.0 changelog describes, and it sweeps up private and trashed locations along with drafts and pending ones.
+What was there before: `LocationFormListener::before_save_post()` read the post's status and forced anything but `publish` to `publish`. No form check and no whitelist, so it fired on Dashboard saves too and swept up `private` and `trash`.
 
-The design:
+What is there now:
 
-- A Publish checkbox on the **edit form only**, added automatically whenever the location is not published. Not an optional field a site picks, so no site has to change anything and no site silently stops publishing.
-- Hidden once the location is published, so there is no way to unpublish from the front end. Same pattern as the existing `acf/prepare_field` filters.
-- Checked and saved promotes `draft` or `pending` to `publish`. Unchecked saves the edit and leaves the status alone.
-- A whitelist, never a blacklist: `private` and `trash` are never touched, and `publish` is never demoted.
-- Front-end form only. A Dashboard save leaves the status alone.
-- New submissions do not get the checkbox. The submission block already has its own Status setting (`location_status`), so the site decides what a new submission arrives as.
+- **`mai_location_publish`**, a `true_false` field in the core field group. That group has `'location' => false`, so it never renders in the Dashboard, and it is unset from the fields chooser's choices, so no site can pick it.
+- **A pseudo-field**, like `mai_location_title`, `mai_location_excerpt` and `mai_location_image`. The listener reads it out of `$_POST` and unsets it, so it never reaches the meta table.
+- **`LocationFormEdit` appends it itself** when the status is `draft` or `pending`, so no site has to change anything and no site silently stops publishing. Never on `publish` or `private`.
+- **The submit button always says Update.** It used to say "Publish {singular}" on an unpublished location, which now contradicts an unticked box.
+- **Front-end only**, detected by `$_POST['_acf_form']`. ACF sends that from `acf_form()` and never from wp-admin; `includes/forms/form-front.php:337` in ACF Pro is where it reads it.
+- **A whitelist, never a blacklist.** Only `draft` and `pending` are promoted.
+- **New submissions are untouched.** The submission block already has its own Status setting (`location_status`).
 
-It follows the existing pseudo-field pattern: like `mai_location_title`, `mai_location_excerpt` and `mai_location_image`, the checkbox is an ACF field the listener pulls out of `$_POST` and applies to the post rather than saving as meta.
+The `$GET['referrer']` Back link bug went with it, since both touch `LocationFormEdit`.
 
 ## How the tests work
 
@@ -71,7 +72,7 @@ Every item below was confirmed in code or by a test. Unless marked otherwise, a 
 - [x] A geo query with no distance limit drops a location sitting exactly at the search point, because the WHERE clause treats a distance of 0 as false. The unlimited clause is now `>= 0`. `inc/classes/Query/GeoQuery.php`. Fixed September 16, 2026.
 - [x] The geo query order fallback never applies, because concatenation runs before `?:`. Fixed September 16, 2026, and the direction is now limited to ASC or DESC, since the `order` query var went straight into the SQL. `inc/classes/Query/GeoQuery.php`.
 - [x] A filter latitude of `0` counts as no geo query. Now `is_numeric()`. `inc/functions-filters.php`. Fixed September 16, 2026.
-- [ ] The location edit form reads `$GET['referrer']` instead of `$_GET['referrer']`, so its Back link never shows. `classes/class-location-form-edit.php:23`.
+- [x] The location edit form read `$GET['referrer']` instead of `$_GET['referrer']`, so its Back link never showed. `inc/classes/Forms/LocationFormEdit.php`. Fixed September 21, 2026, alongside the Publish checkbox.
 - [x] A custom form class runs into the default one (`mailocations-formextra`). The `trim()` took the separating space with it. `inc/classes/Forms/LocationForm.php`. Fixed September 16, 2026.
 - [x] The locations table puts its `<h2>` inside `<table>`, never prints its `class` arg, and does not URL-encode the referrer in Edit links. All three fixed September 16, 2026. The title now prints above the table, the class is appended to `mai-locations-table`, and the referrer is `rawurlencode()`d. `inc/classes/Display/LocationsTable.php`.
 - [x] An empty locations table block passes null to `wp_kses_post()` and loses its title, header and no-results defaults. Null settings are dropped before `shortcode_atts()` now, so the defaults apply. `get()` also returns `''` rather than null when there is no user. `inc/classes/Display/LocationsTable.php`. Fixed September 16, 2026.
@@ -168,8 +169,8 @@ Mike asked, September 15, 2026, whether to convert to PHP-only core blocks. Not 
   - **Watch for values arriving as strings.** `declare(strict_types=1)` turns coercion that used to happen silently into a `TypeError`. `GeoQuery::get_distance()` caught it: MySQL returns the computed distance column as a string, and `round()` then refused it, breaking nine tests. Cast at the boundary as each file moves.
   - **Watch for namespaced function calls.** A missing global function called from a namespaced class reports as `Mai\Locations\the_function()`, which is what the `mai_post_grid_query()` fatal test caught. Same behaviour, different message.
   - **Dead code found on the way, not deleted yet:** `Queries::mai_post_grid_query()` is unhooked and calls a function that does not exist. Deleting it removes a public method, so it needs Mike's yes. Three tests pin it today.
-- [ ] Fix the open bugs above, each by flipping its pinned test.
-- [ ] Build the Publish checkbox on the front-end edit form, to the design under "Agreed design, not built yet" near the top of this file. Waiting on Mike's review, which he asked for on September 15, 2026. The `$GET['referrer']` Back link bug rides with it, since both touch `LocationFormEdit`.
+- [x] Fix the open bugs above, each by flipping its pinned test. The last one, the Back link, went in September 21, 2026.
+- [x] Build the Publish checkbox on the front-end edit form. Mike walked and approved the design September 21, 2026; built the same day. See "The Publish checkbox" near the top of this file. The `$GET['referrer']` Back link bug rode with it.
 - [x] Raise the PHP floor. 8.3, Mike's call, September 16, 2026, after checking two things: PHPStan analysing the whole plugin with `phpVersion: 80200` reports no errors, so nothing in the code needs 8.3, and no bundled dependency asks for more than `^8.1`. Every fleet site measured that day ran 8.3.30 or newer, three on 8.4. So the floor is a forward-looking choice about what we may write, not a requirement. `Requires PHP` and `composer.json` moved together.
 - [ ] Write the changelog and release.
 - [ ] Release.

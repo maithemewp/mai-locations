@@ -33,9 +33,7 @@ class LocationFormEdit extends LocationForm {
 		// Get it started.
 		$html     = '';
 		$singular = mailocations_get_singular_label( get_post_type( $this->args['location_id'] ) );
-		// TODO: reads $GET, not $_GET, so the Back link never shows. Pinned in LocationFormTest
-		// until the fix lands. See TODO.md.
-		$referrer = isset( $GET['referrer'] ) ? sanitize_text_field( $GET['referrer'] ) : '';
+		$referrer = isset( $_GET['referrer'] ) ? sanitize_text_field( wp_unslash( $_GET['referrer'] ) ) : '';
 
 		// Maybe add back link.
 		if ( $referrer ) {
@@ -60,8 +58,14 @@ class LocationFormEdit extends LocationForm {
 
 		// Get post status.
 		$post_status  = get_post_status( $this->args['location_id'] );
-		$submit_value = 'publish' !== $post_status ? __( 'Publish', 'mai-locations' ) : __( 'Update', 'mai-locations' );
-		$submit_value = sprintf( '%s %s', $submit_value, $singular );
+		$submit_value = sprintf( '%s %s', __( 'Update', 'mai-locations' ), $singular );
+
+		// A location still waiting to go live gets the Publish checkbox, whatever fields the site
+		// chose. It is never offered on a published one, so the front end cannot unpublish, and
+		// never on private or trashed ones, which the front end has no business moving.
+		if ( in_array( $post_status, [ 'draft', 'pending' ], true ) && ! in_array( 'mai_location_publish', $this->args['fields'], true ) ) {
+			$this->args['fields'][] = 'mai_location_publish';
+		}
 
 		// Form args.
 		$args = [

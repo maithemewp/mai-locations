@@ -236,13 +236,50 @@ final class LocationFormTest extends TestCase {
 		$this->assertStringContainsString( 'name="acf[mai_location_title]" value="Hollow Inn" required="required"', $html );
 	}
 
-	public function test_edit_form_offers_publish_for_a_pending_location(): void {
-		$id       = $this->create_location( [], [ 'post_author' => $this->user, 'post_status' => 'pending' ] );
+	/**
+	 * The button always says Update now. Publishing is the checkbox's job, so a button that
+	 * says Publish while the box sits unticked would be telling the owner the wrong thing.
+	 *
+	 * @dataProvider every_status
+	 */
+	public function test_edit_form_button_always_says_update( string $status ): void {
+		$id = $this->create_location( [], [ 'post_author' => $this->user, 'post_status' => $status ] );
 		$this->capture_form_args();
 
 		mailocations_get_location_edit_form( [ 'location_id' => $id, 'fields' => [ 'mai_location_title' ] ] );
 
-		$this->assertSame( 'Publish Location', $this->captured[0]['submit_value'] );
+		$this->assertSame( 'Update Location', $this->captured[0]['submit_value'] );
+	}
+
+	/**
+	 * The checkbox is added by the form itself, so a site never has to pick it. It shows only
+	 * where publishing is the right next step: draft and pending, never publish or private.
+	 *
+	 * @dataProvider every_status
+	 */
+	public function test_edit_form_adds_the_publish_checkbox_only_to_draft_and_pending( string $status ): void {
+		$id = $this->create_location( [], [ 'post_author' => $this->user, 'post_status' => $status ] );
+		$this->capture_form_args();
+
+		mailocations_get_location_edit_form( [ 'location_id' => $id, 'fields' => [ 'mai_location_title' ] ] );
+
+		$expected = in_array( $status, [ 'draft', 'pending' ], true )
+			? [ 'mai_location_title', 'mai_location_publish' ]
+			: [ 'mai_location_title' ];
+
+		$this->assertSame( $expected, array_values( $this->captured[0]['fields'] ) );
+	}
+
+	/**
+	 * @return array<string, array{string}>
+	 */
+	public static function every_status(): array {
+		return [
+			'draft'   => [ 'draft' ],
+			'pending' => [ 'pending' ],
+			'publish' => [ 'publish' ],
+			'private' => [ 'private' ],
+		];
 	}
 
 	public function test_edit_form_removes_its_load_value_filters_afterwards(): void {
@@ -280,16 +317,23 @@ final class LocationFormTest extends TestCase {
 		$this->assertSame( $image, $form->load_location_image_value( 'x', 1, [] ) );
 	}
 
-	public function test_pins_bug_edit_form_back_link_never_shows(): void {
-		// Line 23 reads $GET['referrer'], an undefined local, instead of $_GET['referrer'].
-		// Correct behaviour: a "Back" link to the referrer prints above the form.
+	public function test_edit_form_back_link_points_at_the_referrer(): void {
 		$id               = $this->create_location( [], [ 'post_author' => $this->user ] );
 		$_GET['referrer'] = 'https://example.org/account/';
 
 		$html = mailocations_get_location_edit_form( [ 'location_id' => $id, 'fields' => [ 'mai_location_title' ] ] );
 
+		$this->assertStringContainsString( '<a href="https://example.org/account/">← Back</a>', $html );
+
+		unset( $_GET['referrer'] );
+	}
+
+	public function test_edit_form_has_no_back_link_without_a_referrer(): void {
+		$id = $this->create_location( [], [ 'post_author' => $this->user ] );
+
+		$html = mailocations_get_location_edit_form( [ 'location_id' => $id, 'fields' => [ 'mai_location_title' ] ] );
+
 		$this->assertStringNotContainsString( 'Back', $html );
-		$this->assertStringNotContainsString( 'https://example.org/account/', $html );
 		$this->assertStringStartsWith( '<div class="mailocations-form">' . "\t\t\t\t<form", $html );
 	}
 }

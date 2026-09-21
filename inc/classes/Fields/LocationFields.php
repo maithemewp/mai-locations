@@ -88,6 +88,17 @@ class LocationFields {
 						'preview_size'  => 'medium',
 						'library'       => 'uploadedTo', // 'all' or 'uploadedTo'. Make sure to check acf_form() for 'uploader' as 'wp' or 'basic'.
 					],
+					[
+						// A pseudo-field. The form listener reads it out of $_POST and promotes the
+						// post status; nothing is ever saved as meta. LocationFormEdit adds it to the
+						// form itself, so a site never picks it and never has to.
+						'label'        => __( 'Publish', 'mai-locations' ),
+						'instructions' => __( 'Make this visible to everyone. Leave unticked to keep working on it.', 'mai-locations' ),
+						'key'          => 'mai_location_publish',
+						'name'         => 'publish',
+						'type'         => 'true_false',
+						'ui'           => 1,
+					],
 				],
 				'menu_order' => 999,
 				'location'   => false,
@@ -302,6 +313,7 @@ class LocationFields {
 		unset( $field['choices']['mai_location_lat'] );
 		unset( $field['choices']['mai_location_lng'] );
 		unset( $field['choices']['mai_location_place_id'] );
+		unset( $field['choices']['mai_location_publish'] );
 
 		// Remove empty choices.
 		$field['choices'] = array_filter( $field['choices'] );

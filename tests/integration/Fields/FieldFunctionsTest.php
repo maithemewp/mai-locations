@@ -283,6 +283,7 @@ final class FieldFunctionsTest extends TestCase {
 			'mai_location_title',
 			'mai_location_excerpt',
 			'mai_location_image',
+			'mai_location_publish',
 			'mai_location_general_tab',
 			'mai_location_url',
 			'mai_location_phone',
