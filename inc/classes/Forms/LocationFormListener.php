@@ -107,8 +107,9 @@ class LocationFormListener {
 	 * happen after ACF saves.
 	 *
 	 * A draft or pending location is published only when the front-end edit form sends a ticked
-	 * Publish checkbox. Nothing else moves the status: a Dashboard save leaves it alone, and
-	 * private, trashed and already published locations are never touched.
+	 * Publish checkbox. Nothing else moves the status: a Dashboard save leaves it alone, a new
+	 * submission keeps the status its block was set to, and private, trashed and already
+	 * published locations are never touched.
 	 *
 	 * @since TBD
 	 *
@@ -131,15 +132,23 @@ class LocationFormListener {
 
 		unset( $_POST['acf']['mai_location_publish'] );
 
-		// Promote to publish, but only from the front-end form, and only from a status that is
-		// waiting to go live. ACF sends _acf_form from acf_form() alone, never from wp-admin.
-		if ( $publish && isset( $_POST['_acf_form'] ) && isset( $_POST['_acf_post_id'] ) && is_numeric( $_POST['_acf_post_id'] ) ) {
-			$post   = get_post( absint( $_POST['_acf_post_id'] ) );
-			$status = $post ? get_post_status( $post ) : '';
+		// Promote to publish, but only the post ACF is really saving, and only from the front-end
+		// edit form.
+		//
+		// $GLOBALS['acf_form'] is set in ACF's own front-end submit handler and nowhere else, so
+		// a Dashboard save never has it. It holds the decrypted form, whose post_id is 'new_post'
+		// for the submission block and the location ID for an edit. Requiring a numeric post_id
+		// that matches the post being saved does two things: a new submission cannot promote
+		// itself past the block's own Status setting, and nobody can name a different post.
+		//
+		// Never read $_POST['_acf_post_id'] here. ACF writes it as a plain hidden input for the
+		// browser and never reads it back, so it is free text, and the post actually saved is the
+		// one in $post_id.
+		$form         = $GLOBALS['acf_form'] ?? null;
+		$is_edit_form = is_array( $form ) && isset( $form['post_id'] ) && is_numeric( $form['post_id'] ) && absint( $form['post_id'] ) === absint( $post_id );
 
-			if ( in_array( $status, [ 'draft', 'pending' ], true ) ) {
-				$data['status'] = 'publish';
-			}
+		if ( $publish && $is_edit_form && in_array( get_post_status( $post_id ), [ 'draft', 'pending' ], true ) ) {
+			$data['status'] = 'publish';
 		}
 
 		// Title.

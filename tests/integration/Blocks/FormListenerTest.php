@@ -34,6 +34,11 @@ final class FormListenerTest extends TestCase {
 
 		$_POST = [];
 		$_GET  = [];
+
+		// ACF's front-end submit handler sets this. Left behind, it would make the next test look
+		// like a form save.
+		unset( $GLOBALS['acf_form'] );
+
 		parent::tear_down();
 	}
 
@@ -287,6 +292,8 @@ final class FormListenerTest extends TestCase {
 		// Only this listener's closures should run, not ACF's own save or the plugin instance's copy.
 		remove_all_actions( 'acf/save_post' );
 
+		$GLOBALS['acf_form'] = [ 'post_id' => $id ];
+
 		$_POST = [
 			'_acf_form'    => 'front-end',
 			'_acf_post_id' => (string) $id,
@@ -325,14 +332,17 @@ final class FormListenerTest extends TestCase {
 	}
 
 	/**
-	 * ACF renders _acf_post_id on the Dashboard edit screen too, so the only thing separating a
-	 * wp-admin save from the front-end form is _acf_form, which only acf_form() sends. wp-admin
-	 * has its own Publish and Save Draft buttons and the plugin no longer overrides them.
+	 * ACF renders _acf_post_id on the Dashboard edit screen too. What separates a wp-admin save
+	 * from a form one is $GLOBALS['acf_form'], which ACF sets in its front-end submit handler and
+	 * nowhere else. wp-admin has its own Publish and Save Draft buttons and the plugin no longer
+	 * overrides them.
 	 */
 	public function test_a_dashboard_save_leaves_a_draft_alone(): void {
 		$id = $this->create_location( [], [ 'post_status' => 'draft' ] );
 		remove_all_actions( 'acf/save_post' );
 		set_current_screen( 'edit-post' );
+
+		unset( $GLOBALS['acf_form'] );
 
 		$_POST = [
 			'_acf_post_id' => (string) $id,
@@ -359,6 +369,8 @@ final class FormListenerTest extends TestCase {
 	public function test_a_ticked_publish_box_promotes_only_draft_and_pending( string $status, string $expected ): void {
 		$id = $this->create_location( [], [ 'post_status' => $status ] );
 		remove_all_actions( 'acf/save_post' );
+
+		$GLOBALS['acf_form'] = [ 'post_id' => $id ];
 
 		$_POST = [
 			'_acf_form'    => 'front-end',
@@ -392,6 +404,8 @@ final class FormListenerTest extends TestCase {
 		$id = $this->create_location( [], [ 'post_status' => $status ] );
 		remove_all_actions( 'acf/save_post' );
 
+		$GLOBALS['acf_form'] = [ 'post_id' => $id ];
+
 		$_POST = [
 			'_acf_form'    => 'front-end',
 			'_acf_post_id' => (string) $id,
@@ -408,6 +422,8 @@ final class FormListenerTest extends TestCase {
 		$id = $this->create_location( [], [ 'post_status' => 'draft' ] );
 		remove_all_actions( 'acf/save_post' );
 
+		$GLOBALS['acf_form'] = [ 'post_id' => $id ];
+
 		$_POST = [
 			'_acf_form'    => 'front-end',
 			'_acf_post_id' => (string) $id,
@@ -417,6 +433,76 @@ final class FormListenerTest extends TestCase {
 		$this->listener->before_save_post( $id );
 
 		$this->assertSame( [ 'other' => 'kept' ], $_POST['acf'] );
+	}
+
+	/**
+	 * ACF renders _acf_post_id as a plain hidden input and never reads it back: the post it
+	 * really saves comes from the encrypted _acf_form. So a hand-edited _acf_post_id naming some
+	 * other draft must not be what the status whitelist is measured against, or a private or
+	 * trashed location could be published by pointing at an unrelated post.
+	 */
+	public function test_a_named_post_id_cannot_stand_in_for_the_one_being_saved(): void {
+		$private = $this->create_location( [], [ 'post_status' => 'private' ] );
+		$draft   = $this->create_location( [], [ 'post_status' => 'draft' ] );
+		remove_all_actions( 'acf/save_post' );
+
+		$GLOBALS['acf_form'] = [ 'post_id' => $private ];
+
+		$_POST = [
+			'_acf_form'    => 'front-end',
+			'_acf_post_id' => (string) $draft,
+			'acf'          => [ 'mai_location_publish' => '1', 'other' => 'kept' ],
+		];
+
+		$this->listener->before_save_post( $private );
+		$this->capture_errors( static fn() => do_action( 'acf/save_post', $private ) );
+
+		$this->assertSame( 'private', get_post( $private )->post_status );
+	}
+
+	/**
+	 * The submission block has its own Status setting, which is how a site moderates what
+	 * arrives. Its form saves with post_id 'new_post', so it can never promote itself, even
+	 * though the listener reads the publish key out of $_POST whether or not the form drew it.
+	 */
+	public function test_a_new_submission_cannot_publish_itself(): void {
+		$id = $this->create_location( [], [ 'post_status' => 'pending' ] );
+		remove_all_actions( 'acf/save_post' );
+
+		$GLOBALS['acf_form'] = [ 'post_id' => 'new_post' ];
+
+		$_POST = [
+			'_acf_form'    => 'front-end',
+			'_acf_post_id' => (string) $id,
+			'acf'          => [ 'mai_location_publish' => '1', 'other' => 'kept' ],
+		];
+
+		$this->listener->before_save_post( $id );
+		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
+
+		$this->assertSame( 'pending', get_post( $id )->post_status );
+	}
+
+	/**
+	 * $GLOBALS['acf_form'] is set in ACF's front-end submit handler and nowhere else, so its
+	 * absence is what tells a Dashboard save apart from a form one.
+	 */
+	public function test_a_forged_acf_form_field_alone_publishes_nothing(): void {
+		$id = $this->create_location( [], [ 'post_status' => 'draft' ] );
+		remove_all_actions( 'acf/save_post' );
+
+		unset( $GLOBALS['acf_form'] );
+
+		$_POST = [
+			'_acf_form'    => 'anyone can post this',
+			'_acf_post_id' => (string) $id,
+			'acf'          => [ 'mai_location_publish' => '1', 'other' => 'kept' ],
+		];
+
+		$this->listener->before_save_post( $id );
+		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
+
+		$this->assertSame( 'draft', get_post( $id )->post_status );
 	}
 
 	public function test_before_save_post_on_a_published_location_adds_the_user_but_sends_nothing(): void {

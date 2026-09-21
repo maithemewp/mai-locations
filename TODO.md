@@ -34,7 +34,8 @@ What is there now:
 - **A pseudo-field**, like `mai_location_title`, `mai_location_excerpt` and `mai_location_image`. The listener reads it out of `$_POST` and unsets it, so it never reaches the meta table.
 - **`LocationFormEdit` appends it itself** when the status is `draft` or `pending`, so no site has to change anything and no site silently stops publishing. Never on `publish` or `private`.
 - **The submit button always says Update.** It used to say "Publish {singular}" on an unpublished location, which now contradicts an unticked box.
-- **Front-end only**, detected by `$_POST['_acf_form']`. ACF sends that from `acf_form()` and never from wp-admin; `includes/forms/form-front.php:337` in ACF Pro is where it reads it.
+- **Front-end edit form only**, detected by `$GLOBALS['acf_form']`. ACF sets that in its own front-end submit handler and nowhere else (`includes/forms/form-front.php:385`), before `acf_save_post()` fires `acf/save_post`. It holds the decrypted form, whose `post_id` is `'new_post'` for the submission block and the location ID for an edit, so requiring a numeric `post_id` equal to the post being saved separates an edit from a submission.
+- **Never read `$_POST['_acf_post_id']`.** ACF writes it as a plain hidden input for the browser and never reads it back, so it is free text; the post it really saves comes from the encrypted `_acf_form`. A review on September 21, 2026 found the first version of this code measuring the status whitelist against `_acf_post_id` while publishing `$post_id`. Two bypasses followed: naming an unrelated draft published a `private` or `trash` location, and a crafted submission published itself past the block's Status setting. Fixed the same day, with three tests that fail against the old code.
 - **A whitelist, never a blacklist.** Only `draft` and `pending` are promoted.
 - **New submissions are untouched.** The submission block already has its own Status setting (`location_status`).
 
