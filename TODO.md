@@ -186,6 +186,15 @@ Mike asked, September 15, 2026, whether to convert to PHP-only core blocks. Not 
 
 ## Next, after this release
 
+**The front-end save writes to a post without checking the user may edit it.** Found by the second review, September 21, 2026, and verified the same day. `LocationFormListener::should_update()` checks autosave, revision, post type and that `$_POST['acf']` is present, and nothing else. The only `mailocations_user_can_edit()` calls are on the render paths, `edit_listener()` and `LocationsTable::get()`, plus the 2.0.0 publish gate. So the title, excerpt, emails and image the listener writes are unguarded, and so is every other field, because ACF's own `acf_save_post( $post_id )` saves whatever was submitted.
+
+What stands between a logged-in user and another person's location is ACF's encrypted `_acf_form` blob, which carries the `post_id`. ACF verifies only a generic `acf_form` nonce, not bound to a post or a user, and never capability-checks. With OpenSSL the blob is AES-256-CBC under `wp_hash( 'acf_encrypt' )`, practically unforgeable. **Without OpenSSL, `acf_encrypt()` falls back to plain `base64_encode()`** (`includes/api/api-helpers.php:3737` in ACF Pro 6.8), so the `post_id` is trivially forgeable and any location's fields can be overwritten. Not published: the 2.0.0 permission still holds that line.
+
+Nobody is exposed today. Measured September 21, 2026: every fleet host with the plugin has `openssl_encrypt`, and only naturesoma.com has a front-end form at all. It predates 2.0.0.
+
+**The fix is not the obvious one-liner.** Putting the edit check at the top of `should_update()` would gate new submissions too, and `LocationFormSubmit` sets `post_author` to `get_current_user_id()`, commented "Returns zero if not logged in". `create_listener()` bails when logged out, so submissions look login-only, but that has to be proven, not assumed. The check belongs on the edit path only, telling an edit from a create the way the publish gate already does: `$GLOBALS['acf_form']['post_id']` is numeric for an edit and `'new_post'` for a submission. Needs tests for both paths.
+
+
 **Blocks for the display shortcodes.** There is no block for `[mai_location_address]`, `[mai_location_phone]`, `[mai_location_url]`, `[mai_location_email]`, `[mai_location_place]` or `[mai_location_distance]`. Only the table exists as both. Visit Sleepy Hollow puts shortcodes in a Mai Engine grid's custom content setting because that is the only route there is.
 
 The cheaper half is already started: `Mai\Locations\Display\BlockBindings` registers a `mai/locations` source whose `get_value_callback` is a `match` with two keys, `filterSubmit` and `filterClear`, both returning a permalink. Filling that `match` out gives every location field to any block that supports bindings, with no new blocks and no editor script. Kept out of 2.0.0 deliberately: that release is already a large behaviour change.
