@@ -147,7 +147,14 @@ class LocationFormListener {
 		$form         = $GLOBALS['acf_form'] ?? null;
 		$is_edit_form = is_array( $form ) && isset( $form['post_id'] ) && is_numeric( $form['post_id'] ) && absint( $form['post_id'] ) === absint( $post_id );
 
-		if ( $publish && $is_edit_form && 'draft' === get_post_status( $post_id ) && mailocations_user_can_publish( $post_id ) ) {
+		// mailocations_user_can_edit() is checked here as well as where the form is drawn, so this
+		// gate does not rest on the form having been drawn at all, nor on ACF's own trust in the
+		// encrypted blob. Publishing something you may not even edit should be impossible twice.
+		if ( $publish
+			&& $is_edit_form
+			&& 'draft' === get_post_status( $post_id )
+			&& mailocations_user_can_edit( $post_id )
+			&& mailocations_user_can_publish( $post_id ) ) {
 			$data['status'] = 'publish';
 		}
 

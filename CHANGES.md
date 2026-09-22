@@ -13,6 +13,7 @@ A large release. Every bug the rework found is fixed, the front-end edit form no
 ### Security
 
 * Security: A location's owner could publish a private or trashed location of theirs, and a new submission could publish itself past the submission block's Status setting, by editing hidden form values in the browser. Both are closed.
+* Security: Anyone able to publish locations at all, an author-role user for example, could have published a draft belonging to someone else, which they cannot even open in the Dashboard. Publishing a location from the front end now requires permission to edit that location as well.
 * Fixed: Filter values taken from the address bar were escaped and then replaced with the raw value.
 * Fixed: Settings values went into the form unescaped, so a label containing a double quote broke its field.
 * Fixed: `[mai_location_place]` now prints its `style` attribute, which it accepted and ignored, and escapes the Place ID it puts in the link.

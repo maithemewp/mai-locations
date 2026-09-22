@@ -305,14 +305,14 @@ function mailocations_delete_transients() {
  * Status alone cannot tell them apart, because "pending" means waiting for a human on one site
  * and not finished yet on another. So the plugin asks about the person instead.
  *
- * @since TBD
+ * @since 2.0.0
  *
  * @param int $location_id The location ID.
  * @param int $user_id     The user ID. Defaults to the current user.
  *
  * @return bool
  */
-function mailocations_user_can_publish( $location_id, $user_id = 0 ) {
+function mailocations_user_can_publish( $location_id, $user_id = 0 ): bool {
 	$location_id = (int) $location_id;
 	$user_id     = $user_id ? (int) $user_id : get_current_user_id();
 

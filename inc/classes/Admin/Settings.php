@@ -226,7 +226,7 @@ class Settings {
 	 */
 	public function owners_can_publish_callback(): void {
 		printf(
-			'<label><input type="checkbox" name="mai_locations[owners_can_publish]" value="1"%s> %s</label>',
+			'<label><input type="checkbox" id="owners_can_publish" name="mai_locations[owners_can_publish]" value="1"%s> %s</label>',
 			checked( (bool) $this->options['owners_can_publish'], true, false ),
 			esc_html__( 'Let location owners publish their own locations', 'mai-locations' )
 		);

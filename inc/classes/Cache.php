@@ -20,13 +20,13 @@ defined( 'ABSPATH' ) || die;
  * This class is internal. Nothing outside the plugin should call it, and it is not on the list
  * of public names other sites may depend on.
  *
- * @since TBD
+ * @since 2.0.0
  */
 final class Cache {
 	/**
 	 * The cached values, keyed by name.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @var array<string, mixed>
 	 */
@@ -38,7 +38,7 @@ final class Cache {
 	 * Checked rather than comparing against null, so a function whose answer really is null
 	 * still only works it out once.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @param string $key The cache key.
 	 *
@@ -51,7 +51,7 @@ final class Cache {
 	/**
 	 * Gets a cached value.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @param string $key The cache key.
 	 *
@@ -64,7 +64,7 @@ final class Cache {
 	/**
 	 * Caches a value and hands it straight back, so a function can end on one line.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @param string $key   The cache key.
 	 * @param mixed  $value The value to cache.
@@ -80,7 +80,7 @@ final class Cache {
 	/**
 	 * Drops one cached value.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @param string $key The cache key.
 	 *
@@ -95,7 +95,7 @@ final class Cache {
 	 *
 	 * For the keys that carry a variable in them, such as one per post type.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @param string $prefix The start of the keys to drop.
 	 *
@@ -113,7 +113,7 @@ final class Cache {
 	 * Empties the cache. The test suite calls this between tests, so one test's saved option or
 	 * added filter cannot outlive the database rollback.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @return void
 	 */

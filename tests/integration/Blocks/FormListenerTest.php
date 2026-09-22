@@ -424,6 +424,74 @@ final class FormListenerTest extends TestCase {
 		$this->assertSame( $status, get_post( $id )->post_status );
 	}
 
+	/**
+	 * The save path checks edit permission itself, rather than trusting that the form was only
+	 * ever drawn for someone who may edit.
+	 *
+	 * This is the case that needs it. `publish_post` maps to the post type's `publish_posts`,
+	 * which answers "may publish locations at all", not "may publish this one". An author-role
+	 * user has it, and without the edit check could publish a draft belonging to someone else,
+	 * which they cannot even open in the Dashboard.
+	 *
+	 * @dataProvider passer_by_roles
+	 */
+	public function test_someone_who_cannot_edit_the_location_cannot_publish_it( string $role ): void {
+		mailocations_update_option( 'owners_can_publish', true );
+		$owner     = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$passer_by = self::factory()->user->create( [ 'role' => $role ] );
+		$id        = $this->create_location( [], [ 'post_status' => 'draft', 'post_author' => $owner ] );
+		remove_all_actions( 'acf/save_post' );
+		wp_set_current_user( $passer_by );
+
+		$GLOBALS['acf_form'] = [ 'post_id' => $id ];
+
+		$_POST = [
+			'_acf_form'    => 'front-end',
+			'_acf_post_id' => (string) $id,
+			'acf'          => [ 'mai_location_publish' => '1', 'other' => 'kept' ],
+		];
+
+		$this->listener->before_save_post( $id );
+		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
+
+		$this->assertSame( 'draft', get_post( $id )->post_status );
+	}
+
+	/**
+	 * @return array<string, array{string}>
+	 */
+	public static function passer_by_roles(): array {
+		return [
+			// No publish capability at all, so the ownership check alone stops them.
+			'subscriber' => [ 'subscriber' ],
+			// Has publish_posts but not edit_others_posts. Only the edit check stops them.
+			'author'     => [ 'author' ],
+		];
+	}
+
+	/**
+	 * And a logged-out request, which has no author and no capability.
+	 */
+	public function test_a_logged_out_request_cannot_publish(): void {
+		mailocations_update_option( 'owners_can_publish', true );
+		$id = $this->create_location( [], [ 'post_status' => 'draft' ] );
+		remove_all_actions( 'acf/save_post' );
+		wp_set_current_user( 0 );
+
+		$GLOBALS['acf_form'] = [ 'post_id' => $id ];
+
+		$_POST = [
+			'_acf_form'    => 'front-end',
+			'_acf_post_id' => (string) $id,
+			'acf'          => [ 'mai_location_publish' => '1', 'other' => 'kept' ],
+		];
+
+		$this->listener->before_save_post( $id );
+		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
+
+		$this->assertSame( 'draft', get_post( $id )->post_status );
+	}
+
 	public function test_the_publish_box_never_reaches_the_meta_table(): void {
 		$id = $this->create_location( [], [ 'post_status' => 'draft' ] );
 		mailocations_update_option( 'owners_can_publish', true );

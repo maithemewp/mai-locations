@@ -181,6 +181,7 @@ Mike asked, September 15, 2026, whether to convert to PHP-only core blocks. Not 
 - [x] Write the changelog. Done September 21, 2026: the 83 entries are grouped under thirteen headings, with the two post-update jobs called out at the top. Nothing was reworded, only reordered.
 - [x] Who may publish. Mike walked it September 21, 2026: one `mailocations_user_can_publish()` permission, a Publishing setting, a filter, draft-only from the front end, drafts listed in the table, and a 2.0.0 upgrade that turns the setting on so no existing site changes. Surveyed the fleet first: one site has submission blocks and no pending location exists anywhere, so draft-only costs nobody anything.
 - [x] Version 2.0.0. Mike's call, September 21, 2026.
+- [x] Second review of the publishing work, September 21, 2026. No privilege escalation in what was built, and all five design points verified: `publish_post` resolves correctly for this post type, the upgrade cannot fire on a fresh install and is idempotent, an unticked checkbox sanitizes to false, and listing drafts leaks nothing to another user or a logged-out visitor. It did find that the save path never checked edit permission. An author-role user, who has `publish_posts` but not `edit_others_posts`, could have published someone else's draft. Fixed, with a test that fails without the check.
 - [ ] Release. **Waiting on Mike's smoke test on Visit Sleepy Hollow**, then tag and ship.
 
 ## Next, after this release

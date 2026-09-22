@@ -13,8 +13,8 @@ defined( 'ABSPATH' ) || die;
  * Was Mai_Locations_Upgrade in classes/class-upgrade.php. That name still works, via
  * inc/aliases.php.
  *
- * TODO: inc/upgrade.php holds a second, procedural copy of these routines, hooked on the same
- * two hooks, so both run. See TODO.md; deleting one copy is still to be agreed.
+ * inc/upgrade.php holds the old global function names, which now call this class rather than
+ * repeating it. Only this class is hooked, so the routines run once.
  *
  * @since TBD
  */
