@@ -179,4 +179,12 @@ Mike asked, September 15, 2026, whether to convert to PHP-only core blocks. Not 
 - [x] Build the Publish checkbox on the front-end edit form. Mike walked and approved the design September 21, 2026; built the same day. See "The Publish checkbox" near the top of this file. The `$GET['referrer']` Back link bug rode with it.
 - [x] Raise the PHP floor. 8.3, Mike's call, September 16, 2026, after checking two things: PHPStan analysing the whole plugin with `phpVersion: 80200` reports no errors, so nothing in the code needs 8.3, and no bundled dependency asks for more than `^8.1`. Every fleet site measured that day ran 8.3.30 or newer, three on 8.4. So the floor is a forward-looking choice about what we may write, not a requirement. `Requires PHP` and `composer.json` moved together.
 - [x] Write the changelog. Done September 21, 2026: the 83 entries are grouped under thirteen headings, with the two post-update jobs called out at the top. Nothing was reworded, only reordered.
-- [ ] Release. Waiting on Mike for the version number and the go-ahead. It is currently 1.1.0. The release takes the PHP floor to 8.3, drops the social fields and `Mai_Locations_Queries::mai_post_grid_query()`, and changes what a front-end and a Dashboard save do to a location's status, so 2.0.0 is arguable against 1.2.0.
+- [x] Who may publish. Mike walked it September 21, 2026: one `mailocations_user_can_publish()` permission, a Publishing setting, a filter, draft-only from the front end, drafts listed in the table, and a 2.0.0 upgrade that turns the setting on so no existing site changes. Surveyed the fleet first: one site has submission blocks and no pending location exists anywhere, so draft-only costs nobody anything.
+- [x] Version 2.0.0. Mike's call, September 21, 2026.
+- [ ] Release. **Waiting on Mike's smoke test on Visit Sleepy Hollow**, then tag and ship.
+
+## Next, after this release
+
+**Blocks for the display shortcodes.** There is no block for `[mai_location_address]`, `[mai_location_phone]`, `[mai_location_url]`, `[mai_location_email]`, `[mai_location_place]` or `[mai_location_distance]`. Only the table exists as both. Visit Sleepy Hollow puts shortcodes in a Mai Engine grid's custom content setting because that is the only route there is.
+
+The cheaper half is already started: `Mai\Locations\Display\BlockBindings` registers a `mai/locations` source whose `get_value_callback` is a `match` with two keys, `filterSubmit` and `filterClear`, both returning a permalink. Filling that `match` out gives every location field to any block that supports bindings, with no new blocks and no editor script. Kept out of 2.0.0 deliberately: that release is already a large behaviour change.
