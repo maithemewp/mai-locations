@@ -60,22 +60,25 @@ final class LocationFunctionsTest extends TestCase {
 	 * mailocation_get_user_locations()
 	 */
 
-	public function test_user_locations_are_published_and_pending_by_the_current_user_then_cached(): void {
+	public function test_user_locations_are_published_pending_and_draft_by_the_current_user_then_cached(): void {
 		$user  = self::factory()->user->create();
 		$other = self::factory()->user->create();
 		wp_set_current_user( $user );
 
 		$publish = self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'publish' ] );
 		$pending = self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'pending' ] );
-		self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'draft' ] );
+		$draft      = self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'draft' ] );
+		self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'private' ] );
 		$other_post = self::factory()->post->create( [ 'post_author' => $other, 'post_status' => 'publish' ] );
 
-		$this->assertEqualsCanonicalizing( [ $publish, $pending ], mailocation_get_user_locations( 'post' ) );
+		// Drafts are in, so an owner can reach a listing a site set to arrive as a draft. Private
+		// stays out: that is a manager's deliberate choice.
+		$this->assertEqualsCanonicalizing( [ $publish, $pending, $draft ], mailocation_get_user_locations( 'post' ) );
 
 		// The answer is cached for the rest of the request, so a location added after the first
 		// call is not seen.
 		$extra = self::factory()->post->create( [ 'post_author' => $user, 'post_status' => 'publish' ] );
-		$this->assertEqualsCanonicalizing( [ $publish, $pending ], mailocation_get_user_locations( 'post' ) );
+		$this->assertEqualsCanonicalizing( [ $publish, $pending, $draft ], mailocation_get_user_locations( 'post' ) );
 
 		// Fixed September 16, 2026. The cache was keyed by post type alone, so the next user in
 		// the same process got this user's locations.
@@ -84,7 +87,7 @@ final class LocationFunctionsTest extends TestCase {
 
 		// Back to the first user, whose cached answer is still there.
 		wp_set_current_user( $user );
-		$this->assertEqualsCanonicalizing( [ $publish, $pending ], mailocation_get_user_locations( 'post' ) );
+		$this->assertEqualsCanonicalizing( [ $publish, $pending, $draft ], mailocation_get_user_locations( 'post' ) );
 		$this->assertNotContains( $extra, mailocation_get_user_locations( 'post' ) );
 	}
 

@@ -113,6 +113,7 @@ class Settings {
 			'label_singular'       => __( 'Singular Label', 'mai-locations' ),
 			'base'                 => __( 'Permalinks', 'mai-locations' ),
 			'category_base'        => __( 'Category Permalinks', 'mai-locations' ),
+			'owners_can_publish'   => __( 'Publishing', 'mai-locations' ),
 			'distance'             => __( 'Default Distance', 'mai-locations' ),
 			'units'                => __( 'Default Units', 'mai-locations' ),
 			'google_api_key'       => __( 'Google API Key', 'mai-locations' ),
@@ -211,6 +212,49 @@ class Settings {
 	public function distance_callback(): void {
 		printf( '<input type="number" name="mai_locations[distance]" id="distance" value="%s">', esc_attr( $this->options['distance'] ) );
 		printf( '<p>%s</p>', __( 'The default distance used for proximity search.', 'mai-locations' ) );
+	}
+
+	/**
+	 * The Publishing checkbox, and the help text that explains the three ways sites run this.
+	 *
+	 * This is the only place a site manager meets the decision, so the explanation lives here
+	 * rather than in a readme nobody opens.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function owners_can_publish_callback(): void {
+		printf(
+			'<label><input type="checkbox" name="mai_locations[owners_can_publish]" value="1"%s> %s</label>',
+			checked( (bool) $this->options['owners_can_publish'], true, false ),
+			esc_html__( 'Let location owners publish their own locations', 'mai-locations' )
+		);
+
+		printf(
+			'<p>%s</p>',
+			esc_html__( 'A location owner sees a Publish switch on the front-end edit form, but only while their location is a draft. Editors and administrators can always publish, whatever this is set to.', 'mai-locations' )
+		);
+
+		printf( '<p><strong>%s</strong></p>', esc_html__( 'Three ways to run this:', 'mai-locations' ) );
+
+		echo '<ul style="list-style:disc;margin-left:20px;">';
+			printf(
+				'<li>%s<br>%s</li>',
+				esc_html__( 'A manager approves everything.', 'mai-locations' ),
+				esc_html__( 'Leave this unticked, and set the submission block to Pending. Owners edit their listing. You publish it from Locations in the Dashboard.', 'mai-locations' )
+			);
+			printf(
+				'<li>%s<br>%s</li>',
+				esc_html__( 'Owners run their own listing.', 'mai-locations' ),
+				esc_html__( 'Tick this, and set the submission block to Draft. Owners finish their listing and publish it when they are ready.', 'mai-locations' )
+			);
+			printf(
+				'<li>%s<br>%s</li>',
+				esc_html__( 'You approve, then the owner picks the moment.', 'mai-locations' ),
+				esc_html__( 'Tick this, and set the submission block to Pending. Review what arrives, and change an approved one to Draft. Its owner then publishes when they are ready.', 'mai-locations' )
+			);
+		echo '</ul>';
 	}
 
 	/**

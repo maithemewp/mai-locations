@@ -287,7 +287,9 @@ final class FormListenerTest extends TestCase {
 
 	public function test_before_save_post_publishes_updates_the_post_and_sends_both_emails(): void {
 		$user = self::factory()->user->create( [ 'display_name' => 'Ann Author', 'user_email' => 'ann@example.org' ] );
-		$id   = $this->create_location( [], [ 'post_author' => $user, 'post_status' => 'pending', 'post_title' => 'Old' ] );
+		$id   = $this->create_location( [], [ 'post_author' => $user, 'post_status' => 'draft', 'post_title' => 'Old' ] );
+		mailocations_update_option( 'owners_can_publish', true );
+		wp_set_current_user( $user );
 
 		// Only this listener's closures should run, not ACF's own save or the plugin instance's copy.
 		remove_all_actions( 'acf/save_post' );
@@ -320,11 +322,12 @@ final class FormListenerTest extends TestCase {
 		$this->assertSame( '<p>Desc</p>x', $post->post_excerpt );
 		$this->assertSame( [ $id ], get_user_meta( $user, 'user_locations', true ) );
 
-		// Publishing fires pending_to_publish first, then the submission notice goes out.
+		// Only the submission notice goes out. The "has been published" email is hooked on
+		// pending_to_publish, so it fires when a manager approves a pending location, not when
+		// an owner publishes their own draft, who hardly needs telling.
 		$this->assertSame( [], $this->errors );
 		$this->assertSame(
 			[
-				[ [ 'ann@example.org' ], 'Your http://example.org Location has been published!' ],
 				[ [ 'x@example.org' ], 'New Location submission from Ann Author' ],
 			],
 			array_map( static fn( array $mail ): array => [ $mail['to'], $mail['subject'] ], $this->sent_mail() )
@@ -360,14 +363,17 @@ final class FormListenerTest extends TestCase {
 	}
 
 	/**
-	 * A whitelist, not a blacklist. Only a location waiting to go live can be promoted, so a
-	 * private or trashed one is never dragged onto the front page by an edit, and a published
-	 * one is never demoted.
+	 * A whitelist, not a blacklist, and draft alone. A pending location is with a manager, so
+	 * publishing it from the front end would step over the approval the site asked for. Private
+	 * and trashed are never dragged onto the front page, and a published one is never demoted.
 	 *
 	 * @dataProvider promotable_statuses
 	 */
-	public function test_a_ticked_publish_box_promotes_only_draft_and_pending( string $status, string $expected ): void {
-		$id = $this->create_location( [], [ 'post_status' => $status ] );
+	public function test_a_ticked_publish_box_promotes_a_draft_and_nothing_else( string $status, string $expected ): void {
+		$user = self::factory()->user->create();
+		$id   = $this->create_location( [], [ 'post_status' => $status, 'post_author' => $user ] );
+		mailocations_update_option( 'owners_can_publish', true );
+		wp_set_current_user( $user );
 		remove_all_actions( 'acf/save_post' );
 
 		$GLOBALS['acf_form'] = [ 'post_id' => $id ];
@@ -390,7 +396,7 @@ final class FormListenerTest extends TestCase {
 	public static function promotable_statuses(): array {
 		return [
 			'draft'   => [ 'draft', 'publish' ],
-			'pending' => [ 'pending', 'publish' ],
+			'pending' => [ 'pending', 'pending' ],
 			'private' => [ 'private', 'private' ],
 			'trash'   => [ 'trash', 'trash' ],
 			'publish' => [ 'publish', 'publish' ],
@@ -420,6 +426,7 @@ final class FormListenerTest extends TestCase {
 
 	public function test_the_publish_box_never_reaches_the_meta_table(): void {
 		$id = $this->create_location( [], [ 'post_status' => 'draft' ] );
+		mailocations_update_option( 'owners_can_publish', true );
 		remove_all_actions( 'acf/save_post' );
 
 		$GLOBALS['acf_form'] = [ 'post_id' => $id ];
@@ -442,6 +449,7 @@ final class FormListenerTest extends TestCase {
 	 * trashed location could be published by pointing at an unrelated post.
 	 */
 	public function test_a_named_post_id_cannot_stand_in_for_the_one_being_saved(): void {
+		mailocations_update_option( 'owners_can_publish', true );
 		$private = $this->create_location( [], [ 'post_status' => 'private' ] );
 		$draft   = $this->create_location( [], [ 'post_status' => 'draft' ] );
 		remove_all_actions( 'acf/save_post' );
@@ -466,7 +474,8 @@ final class FormListenerTest extends TestCase {
 	 * though the listener reads the publish key out of $_POST whether or not the form drew it.
 	 */
 	public function test_a_new_submission_cannot_publish_itself(): void {
-		$id = $this->create_location( [], [ 'post_status' => 'pending' ] );
+		mailocations_update_option( 'owners_can_publish', true );
+		$id = $this->create_location( [], [ 'post_status' => 'draft' ] );
 		remove_all_actions( 'acf/save_post' );
 
 		$GLOBALS['acf_form'] = [ 'post_id' => 'new_post' ];
@@ -480,7 +489,7 @@ final class FormListenerTest extends TestCase {
 		$this->listener->before_save_post( $id );
 		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
 
-		$this->assertSame( 'pending', get_post( $id )->post_status );
+		$this->assertSame( 'draft', get_post( $id )->post_status );
 	}
 
 	/**
@@ -488,6 +497,7 @@ final class FormListenerTest extends TestCase {
 	 * absence is what tells a Dashboard save apart from a form one.
 	 */
 	public function test_a_forged_acf_form_field_alone_publishes_nothing(): void {
+		mailocations_update_option( 'owners_can_publish', true );
 		$id = $this->create_location( [], [ 'post_status' => 'draft' ] );
 		remove_all_actions( 'acf/save_post' );
 

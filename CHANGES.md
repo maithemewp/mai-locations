@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## 2.0.0
 
 A large release. Every bug the rework found is fixed, the front-end edit form no longer publishes a location behind its owner's back, and PHP 8.3 is now the minimum.
 
-**Two things to do after updating.** Visit Settings > Permalinks and press Save once, so nested location category URLs work. Check any site whose editors publish locations by saving them in the Dashboard: that no longer changes the status, and the Publish and Save Draft buttons do what they say instead.
+**Three things to do after updating.** Visit Settings > Permalinks and press Save once, so nested location category URLs work. Check any site whose editors publish locations by saving them in the Dashboard: that no longer changes the status, and the Publish and Save Draft buttons do what they say instead. And look at the new Publishing setting, described below, which the update turns **on** so nothing changes for you: untick it if a manager is meant to approve every listing.
 
 ### Requirements
 
@@ -29,10 +29,23 @@ A large release. Every bug the rework found is fixed, the front-end edit form no
 
 ### Publishing a location from the front end
 
-* Added: A Publish switch on the front-end edit form, shown while a location is still a draft or waiting for review. It reads Publish or Not yet, and saving with it on makes the location live. It disappears once the location is published, so nobody can take a listing down from the front end.
+Until now, any front-end save of an unpublished location published it, with nothing to switch it off. That is replaced by one setting and one switch, which cover the three ways sites actually use this plugin. Settings > Mai Locations explains all three where you choose between them.
+
+| How you work | Publishing setting | Submission block status |
+| --- | --- | --- |
+| A manager approves everything | off | Pending |
+| Owners run their own listing | on | Draft |
+| You approve, the owner picks the moment | on | Pending, then you change it to Draft |
+
+* Added: A **Publishing** setting, "Let location owners publish their own locations". Off on a new site, so a new site moderates by default. **Updating an existing site turns it on**, because every site published on a front-end save before this, and defaulting to off would quietly take that away. Untick it if you moderate.
+* Added: A Publish switch on the front-end edit form, shown to a location's owner while the location is a draft, and only if the setting allows it. It reads Publish or Not yet. It never appears on a published location, so nobody can take a listing down from the front end.
+* Added: `mailocations_user_can_publish( $location_id, $user_id )` and a filter of the same name, for sites that want to decide this per user or per location in code.
+* Changed: A **pending** location can no longer be published from the front end at all. Pending now means it is with a manager. An approved one can be moved to Draft, and its owner then publishes when they are ready.
 * Changed: Editing a location on the front end no longer publishes it on its own. This replaces the old behaviour, where any save of an unpublished location made it live whether or not that was the intention.
+* Changed: Editors and administrators see the Publish switch whatever the setting says, since they can already publish in the Dashboard.
+* Fixed: A location owner could not see their own drafts. The locations table lists them now, so a site can set its submission block to Draft without the listing disappearing from its owner. Private and trashed locations stay out.
 * Fixed: Saving a location in the Dashboard published it, even from the Save Draft button. The Dashboard now leaves the status exactly where you put it.
-* Fixed: A location that was private or in the trash was made live by any save. Only a draft or a pending location can be published now, and a published one is never taken back down.
+* Fixed: A location that was private or in the trash was made live by any save. Only a draft can be published now, and a published one is never taken back down.
 
 ### The front-end forms and the locations table
 

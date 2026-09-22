@@ -114,7 +114,9 @@ final class LocationsTableTest extends TestCase {
 			[ 'post_type' => $type, 'post_author' => $user_id, 'post_title' => 'Lyndhurst', 'post_date' => '2026-01-02 00:00:00' ]
 		);
 		$pending = $this->create_location( [], [ 'post_type' => $type, 'post_author' => $user_id, 'post_title' => 'Kykuit', 'post_status' => 'pending', 'post_date' => '2026-01-01 00:00:00' ] );
-		$this->create_location( [], [ 'post_type' => $type, 'post_author' => $user_id, 'post_title' => 'Draft', 'post_status' => 'draft' ] );
+		// Drafts are listed since 2.0.0, so their owner can reach one a site set to arrive as a
+		// draft. It sorts first here, having no post_date of its own.
+		$draft = $this->create_location( [], [ 'post_type' => $type, 'post_author' => $user_id, 'post_title' => 'Draft', 'post_status' => 'draft' ] );
 
 		$html = mailocations_get_locations_table( [ 'post_type' => $type ] );
 
@@ -130,6 +132,8 @@ final class LocationsTableTest extends TestCase {
 		// The template whitespace after </style> and the space after </table> are pinned as they are.
 		$this->assertSame(
 			"\n\t\t\t\t" . '<h2>My Locations</h2><table class="mai-locations-table"><thead><tr><th colspan="2">Locations</th></tr></thead><tbody>'
+			. '<tr><td><span class="mai-location-item-title">(draft) Draft</span></td>'
+			. self::ACTIONS_TD . '<a style="margin-left:6px;" class="' . self::BUTTON . '" href="' . $this->edit_url( $draft ) . '">Edit</a></td></tr>'
 			. '<tr><td><span class="mai-location-item-title"><a href="' . $link . '">Lyndhurst</a></span>'
 			. '<div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress" class="mai-address">'
 			. '<div class="mai-address-item"><span class="street-address" itemprop="streetAddress">381 N Broadway</span></div>'

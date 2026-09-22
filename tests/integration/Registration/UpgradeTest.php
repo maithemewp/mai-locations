@@ -73,7 +73,12 @@ final class UpgradeTest extends TestCase {
 		$this->assertSame( [], $result['writes'] );
 	}
 
-	public function test_do_upgrade_bumps_an_old_db_version_once_per_copy(): void {
+	/**
+	 * A site coming from before 2.0.0 gets owners_can_publish turned on, because every such site
+	 * published on a front-end save already and would otherwise quietly lose that. Then the db
+	 * version is bumped. Two writes per copy of the routine.
+	 */
+	public function test_do_upgrade_keeps_owner_publishing_and_bumps_an_old_db_version(): void {
 		$result = $this->run_scenario(
 			[
 				'probe'   => 'upgrade',
@@ -81,12 +86,28 @@ final class UpgradeTest extends TestCase {
 			]
 		);
 
-		$this->assertSame( 1, $result['writes_after_function'] );
-		$this->assertCount( 2, $result['writes'] );
+		$this->assertSame( 2, $result['writes_after_function'] );
+		$this->assertCount( 4, $result['writes'] );
 
 		// The raw saved option is merged, keeping version_first and other keys.
-		$this->assertSame( [ 'label_plural' => 'Places', 'version_first' => '1.0.0', 'version_db' => MAI_LOCATIONS_VERSION ], $result['writes'][0] );
-		$this->assertSame( $result['writes'][0], $result['writes'][1] );
+		// The first write turns owner publishing on, the second bumps the version. Each write is
+		// built from the option as it was read, so the second does not carry the first.
+		$this->assertTrue( $result['writes'][0]['owners_can_publish'] );
+		$this->assertSame( '1.0.0', $result['writes'][0]['version_db'] );
+		$this->assertSame( MAI_LOCATIONS_VERSION, $result['writes'][1]['version_db'] );
+		$this->assertSame( 'Places', $result['writes'][1]['label_plural'] );
+	}
+
+	/**
+	 * A fresh install has no version_db, so it never reaches the 2.0.0 upgrade and moderates by
+	 * default.
+	 */
+	public function test_a_fresh_install_does_not_turn_on_owner_publishing(): void {
+		$result = $this->run_scenario( [ 'probe' => 'upgrade', 'options' => [] ] );
+
+		foreach ( $result['writes'] as $write ) {
+			$this->assertArrayNotHasKey( 'owners_can_publish', $write );
+		}
 	}
 
 	public function test_upgrade_completed_migrates_old_acf_options_and_second_copy_bails(): void {

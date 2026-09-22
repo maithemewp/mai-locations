@@ -71,7 +71,8 @@ final class TableBlockTest extends TestCase {
 
 		$public  = $this->create_location( [ 'address_city' => 'Sleepy Hollow', 'address_state' => 'NY', 'address_postcode' => '10591' ], [ 'post_author' => $user, 'post_title' => 'Hollow Inn', 'post_name' => 'hollow-inn' ] );
 		$pending = $this->create_location( [], [ 'post_author' => $user, 'post_title' => 'Pending One', 'post_status' => 'pending' ] );
-		$this->create_location( [], [ 'post_author' => $user, 'post_title' => 'Draft', 'post_status' => 'draft' ] );
+		// Listed since 2.0.0, so the owner can reach a listing a site set to arrive as a draft.
+		$draft = $this->create_location( [], [ 'post_author' => $user, 'post_title' => 'Draft', 'post_status' => 'draft' ] );
 
 		// The Edit link is built from the current request URL.
 		$this->go_to( home_url( '/' ) );
@@ -88,6 +89,8 @@ final class TableBlockTest extends TestCase {
 			. '<a style="margin-left:6px;" class="button button-secondary button-small" href="http://example.org/?location_id=' . $public . '&#038;referrer=' . rawurlencode( 'http://example.org/' ) . '">Edit</a></td></tr>'
 			. '<tr><td><span class="mai-location-item-title">(pending) Pending One</span></td>'
 			. '<td style="text-align:right;white-space:nowrap;"><a style="margin-left:6px;" class="button button-secondary button-small" href="http://example.org/?location_id=' . $pending . '&#038;referrer=' . rawurlencode( 'http://example.org/' ) . '">Edit</a></td></tr>'
+			. '<tr><td><span class="mai-location-item-title">(draft) Draft</span></td>'
+			. '<td style="text-align:right;white-space:nowrap;"><a style="margin-left:6px;" class="button button-secondary button-small" href="http://example.org/?location_id=' . $draft . '&#038;referrer=' . rawurlencode( 'http://example.org/' ) . '">Edit</a></td></tr>'
 			. '</tbody></table> ';
 
 		$this->assertStringEndsWith( $table, $html );

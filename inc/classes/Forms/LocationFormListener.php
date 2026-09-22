@@ -106,10 +106,10 @@ class LocationFormListener {
 	 * Pulls the post fields out of the submitted ACF data, and queues the work that has to
 	 * happen after ACF saves.
 	 *
-	 * A draft or pending location is published only when the front-end edit form sends a ticked
-	 * Publish checkbox. Nothing else moves the status: a Dashboard save leaves it alone, a new
-	 * submission keeps the status its block was set to, and private, trashed and already
-	 * published locations are never touched.
+	 * A draft is published only when the front-end edit form sends a ticked Publish switch and
+	 * mailocations_user_can_publish() says this person may. Nothing else moves the status: a
+	 * Dashboard save leaves it alone, a new submission keeps the status its block was set to,
+	 * and pending, private, trashed and already published locations are never touched.
 	 *
 	 * @since TBD
 	 *
@@ -147,7 +147,7 @@ class LocationFormListener {
 		$form         = $GLOBALS['acf_form'] ?? null;
 		$is_edit_form = is_array( $form ) && isset( $form['post_id'] ) && is_numeric( $form['post_id'] ) && absint( $form['post_id'] ) === absint( $post_id );
 
-		if ( $publish && $is_edit_form && in_array( get_post_status( $post_id ), [ 'draft', 'pending' ], true ) ) {
+		if ( $publish && $is_edit_form && 'draft' === get_post_status( $post_id ) && mailocations_user_can_publish( $post_id ) ) {
 			$data['status'] = 'publish';
 		}
 

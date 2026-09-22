@@ -252,22 +252,58 @@ final class LocationFormTest extends TestCase {
 	}
 
 	/**
-	 * The checkbox is added by the form itself, so a site never has to pick it. It shows only
-	 * where publishing is the right next step: draft and pending, never publish or private.
+	 * The switch is added by the form itself, so a site never has to pick it. Draft only: a
+	 * pending location is with a manager, and publishing it from the front end would step over
+	 * the approval the site asked for.
 	 *
 	 * @dataProvider every_status
 	 */
-	public function test_edit_form_adds_the_publish_checkbox_only_to_draft_and_pending( string $status ): void {
+	public function test_edit_form_adds_the_publish_switch_to_a_draft_alone( string $status ): void {
+		mailocations_update_option( 'owners_can_publish', true );
 		$id = $this->create_location( [], [ 'post_author' => $this->user, 'post_status' => $status ] );
 		$this->capture_form_args();
 
 		mailocations_get_location_edit_form( [ 'location_id' => $id, 'fields' => [ 'mai_location_title' ] ] );
 
-		$expected = in_array( $status, [ 'draft', 'pending' ], true )
+		$expected = 'draft' === $status
 			? [ 'mai_location_title', 'mai_location_publish' ]
 			: [ 'mai_location_title' ];
 
 		$this->assertSame( $expected, array_values( $this->captured[0]['fields'] ) );
+	}
+
+	/**
+	 * With the setting off, a plain location owner never sees the switch. That is the moderated
+	 * site: they edit their listing, a manager publishes it in the Dashboard. A subscriber,
+	 * because that is what a location owner usually is.
+	 */
+	public function test_edit_form_hides_the_publish_switch_when_owners_may_not_publish(): void {
+		mailocations_update_option( 'owners_can_publish', false );
+		$owner = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$id    = $this->create_location( [], [ 'post_author' => $owner, 'post_status' => 'draft' ] );
+		wp_set_current_user( $owner );
+		$this->capture_form_args();
+
+		mailocations_get_location_edit_form( [ 'location_id' => $id, 'fields' => [ 'mai_location_title' ] ] );
+
+		$this->assertSame( [ 'mai_location_title' ], array_values( $this->captured[0]['fields'] ) );
+	}
+
+	/**
+	 * The setting is for people WordPress would not let publish anyway. Anyone who can already
+	 * publish this location in the Dashboard, such as an editor, sees the switch either way:
+	 * `publish_post` has been a real meta capability since WordPress 6.1.
+	 */
+	public function test_someone_who_can_already_publish_sees_the_switch_whatever_the_setting(): void {
+		mailocations_update_option( 'owners_can_publish', false );
+		$editor = self::factory()->user->create( [ 'role' => 'editor' ] );
+		$id     = $this->create_location( [], [ 'post_author' => $editor, 'post_status' => 'draft' ] );
+		wp_set_current_user( $editor );
+		$this->capture_form_args();
+
+		mailocations_get_location_edit_form( [ 'location_id' => $id, 'fields' => [ 'mai_location_title' ] ] );
+
+		$this->assertSame( [ 'mai_location_title', 'mai_location_publish' ], array_values( $this->captured[0]['fields'] ) );
 	}
 
 	/**

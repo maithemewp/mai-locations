@@ -77,13 +77,34 @@ class Upgrade {
 		// Only run upgrades if we have an existing version.
 		if ( $version_db ) {
 
-			// if ( version_compare( $version_db, '0.7.0', '<' ) ) {
-			// 	$this->upgrade_0_7_0();
-			// }
+			if ( version_compare( $version_db, '2.0.0', '<' ) ) {
+				self::upgrade_2_0_0();
+			}
 		}
 
 		// Update database version after upgrade.
 		mailocations_update_option( 'version_db', $version );
+	}
+
+	/**
+	 * Keeps an existing site publishing the way it already did.
+	 *
+	 * Before 2.0.0, any front-end save of an unpublished location published it, on every site,
+	 * with nothing to switch it off. 2.0.0 replaces that with an opt-in Publish switch and a
+	 * setting, which defaults to off so a new site moderates by default.
+	 *
+	 * Defaulting an existing site to off would quietly take something away from owners who
+	 * publish their own listings today. So an upgrade turns it on, and the site decides for
+	 * itself whether to untick it. The release notes say so.
+	 *
+	 * A fresh install never reaches this, because it has no version_db.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public static function upgrade_2_0_0(): void {
+		mailocations_update_option( 'owners_can_publish', true );
 	}
 
 	/**

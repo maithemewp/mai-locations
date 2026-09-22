@@ -1,10 +1,50 @@
 # Mai Locations
 
-A custom post type with info/address/map fields to manage locations. Map and location finder/filter blocks included. Requires ACF Pro.
+A location post type with info, address and map fields. Map, filter and search blocks included. Requires ACF Pro.
 
-Display location info with `[mai_location_phone]`, `[mai_location_url]`, `[mai_location_email]`, `[mai_location_place]` shortcodes. All have a `before` parameter to show text before the value, a `style` parameter to add inline CSS styles, and phone/email shortcodes have a `link` parameter where you can disable the link via `link="false"`.
+## Blocks
 
-Display a table of a users locations via `[mai_locations_table]`. This is automatically displayed in WooCommerce Account if WooCommerce is active. The table allows logged in users to edit their location(s).
+| Block | What it does |
+| --- | --- |
+| Mai Locations Map | A Google map of the locations on the page. |
+| Mai Locations Filter | One taxonomy filter. |
+| Mai Locations Filters | Every taxonomy filter at once. |
+| Mai Locations Address Search | A search by address, with a distance. |
+| Mai Locations Count | "Showing 12 of 40 Locations". |
+| Mai Location Submission | A front-end form for adding a location. |
+| Mai Locations Table | A person's own locations, with View and Edit buttons. |
+
+## Shortcodes
+
+These print one location's details. They have no block equivalent yet.
+
+| Shortcode | Parameters |
+| --- | --- |
+| `[mai_location_address]` | `hide` |
+| `[mai_location_phone]` | `before` `after` `link` `style` |
+| `[mai_location_url]` | `before` `after` `style` |
+| `[mai_location_email]` | `before` `after` `link` `style` |
+| `[mai_location_place]` | `before` `after` `style` |
+| `[mai_location_distance]` | `before` `after` `round` |
+| `[mai_locations_table]` | Same as the Mai Locations Table block. |
+
+`before` and `after` print text either side of the value, spaces included. `style` adds inline CSS. `link` takes `false` to print the value without a link. `round` sets how many decimal places a distance keeps.
+
+`hide` takes a comma-separated list of address parts to leave out: `street`, `street2`, `city`, `state`, `postcode`, `country`. So `[mai_location_address hide="country"]`. The address shortcode has no `before` or `after`.
+
+The locations table also appears in the WooCommerce account area when WooCommerce is active.
+
+## Who may publish
+
+Three ways sites run this, all set from Settings > Mai Locations and the submission block's own Status setting. The settings page explains them where you choose:
+
+| Model | Publishing setting | Submission status |
+| --- | --- | --- |
+| A manager approves everything | off | Pending |
+| Owners run their own listing | on | Draft |
+| You approve, the owner picks the moment | on | Pending, then you change it to Draft |
+
+An owner only ever sees the Publish switch while their location is a draft. Editors and administrators can publish whatever the setting says. `mailocations_user_can_publish` filters the answer.
 
 ## Tests
 

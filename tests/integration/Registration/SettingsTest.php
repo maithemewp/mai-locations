@@ -73,7 +73,7 @@ final class SettingsTest extends TestCase {
 		$this->assertSame( 10, has_filter( 'sanitize_option_mai_locations', [ $settings, 'sanitize_callback' ] ) );
 	}
 
-	public function test_init_adds_one_section_and_nine_fields(): void {
+	public function test_init_adds_one_section_and_ten_fields(): void {
 		$this->settings()->init();
 
 		$this->assertSame( [ 'mai_locations_settings' ], array_keys( $GLOBALS['wp_settings_sections']['mai-locations-section'] ) );
@@ -87,6 +87,7 @@ final class SettingsTest extends TestCase {
 				'label_singular'       => 'Singular Label',
 				'base'                 => 'Permalinks',
 				'category_base'        => 'Category Permalinks',
+				'owners_can_publish'   => 'Publishing',
 				'distance'             => 'Default Distance',
 				'units'                => 'Default Units',
 				'google_api_key'       => 'Google API Key',

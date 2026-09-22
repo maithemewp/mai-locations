@@ -150,6 +150,7 @@ function mailocations_get_options_defaults() {
 		'google_api_key'       => '',
 		'google_api_signature' => '',
 		'google_map_id'        => '',
+		'owners_can_publish'   => false,
 		'distance'             => 100,
 		'units'                => 'mi',
 		'version_first'        => '',
@@ -197,6 +198,7 @@ function mailocations_sanitize_options( $options ) {
 		'google_api_key'       => '',
 		'google_api_signature' => '',
 		'google_map_id'        => '',
+		'owners_can_publish'   => false,
 		'distance'             => '',
 		'units'                => '',
 		'version_first'        => '',
@@ -212,6 +214,8 @@ function mailocations_sanitize_options( $options ) {
 	$options['google_api_key']       = sanitize_text_field( $options['google_api_key'] );
 	$options['google_api_signature'] = sanitize_text_field( $options['google_api_signature'] );
 	$options['google_map_id']        = sanitize_text_field( $options['google_map_id'] );
+	// A checkbox, so an unticked box sends nothing at all and has to read as false.
+	$options['owners_can_publish']   = rest_sanitize_boolean( is_scalar( $options['owners_can_publish'] ) ? (string) $options['owners_can_publish'] : '' );
 	// A blank distance used to be stored as 0, which means no limit at all. Blank now means the
 	// default, while a 0 typed on purpose still means no limit. Fixed September 16, 2026.
 	$options['distance']             = '' === trim( (string) $options['distance'] ) ? (int) mailocations_get_option_default( 'distance' ) : absint( $options['distance'] );
@@ -286,6 +290,57 @@ function mailocations_delete_transients() {
 	foreach ( $transients as $key ) {
 		delete_transient( $key );
 	}
+}
+
+/**
+ * Whether a user may publish a location themselves, from the front-end edit form.
+ *
+ * This is the one question that separates the three ways sites use this plugin:
+ *
+ * - Moderated. Submissions arrive pending, owners edit, a manager publishes in the Dashboard.
+ * - Self-manage. Submissions arrive as drafts, owners publish their own when they are ready.
+ * - Approve to draft. Submissions arrive pending, a manager moves an approved one to draft, and
+ *   its owner publishes when they are ready.
+ *
+ * Status alone cannot tell them apart, because "pending" means waiting for a human on one site
+ * and not finished yet on another. So the plugin asks about the person instead.
+ *
+ * @since TBD
+ *
+ * @param int $location_id The location ID.
+ * @param int $user_id     The user ID. Defaults to the current user.
+ *
+ * @return bool
+ */
+function mailocations_user_can_publish( $location_id, $user_id = 0 ) {
+	$location_id = (int) $location_id;
+	$user_id     = $user_id ? (int) $user_id : get_current_user_id();
+
+	if ( ! $user_id ) {
+		$can = false;
+	}
+	// Anyone WordPress already lets publish this location, such as an editor or administrator.
+	// They can do it in the Dashboard, so the front-end form should not pretend otherwise.
+	elseif ( user_can( $user_id, 'publish_post', $location_id ) ) {
+		$can = true;
+	}
+	// Otherwise it is the site's call, and only for the owner. Owners are often subscriber
+	// level, so there is no capability that would say yes for them.
+	else {
+		$can = (bool) mailocations_get_option( 'owners_can_publish' )
+			&& $user_id === (int) get_post_field( 'post_author', $location_id );
+	}
+
+	/**
+	 * Filters whether a user may publish a location from the front-end edit form.
+	 *
+	 * @since TBD
+	 *
+	 * @param bool $can         Whether they may.
+	 * @param int  $location_id The location ID.
+	 * @param int  $user_id     The user ID.
+	 */
+	return (bool) apply_filters( 'mailocations_user_can_publish', $can, $location_id, $user_id );
 }
 
 /**

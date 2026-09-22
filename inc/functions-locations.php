@@ -44,7 +44,10 @@ function mailocation_get_user_locations( $post_type = 'mai_location', $reset = f
 		[
 			'post_type'              => $post_type,
 			'author'                 => $user_id,
-			'post_status'            => [ 'publish', 'pending' ], // Can't do 'any' because trash is included. What about draft? I think those should remain hidden.
+			// Drafts are in, because a site can set its submission block to Draft and their owner
+			// would otherwise never see them again. Not 'any', which sweeps in trash, and not
+			// private, which is a manager's deliberate choice.
+			'post_status'            => [ 'publish', 'pending', 'draft' ],
 			'fields'                 => 'ids',
 			'posts_per_page'         => 500,
 			'no_found_rows'          => true,

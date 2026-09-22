@@ -60,10 +60,15 @@ class LocationFormEdit extends LocationForm {
 		$post_status  = get_post_status( $this->args['location_id'] );
 		$submit_value = sprintf( '%s %s', __( 'Update', 'mai-locations' ), $singular );
 
-		// A location still waiting to go live gets the Publish checkbox, whatever fields the site
-		// chose. It is never offered on a published one, so the front end cannot unpublish, and
-		// never on private or trashed ones, which the front end has no business moving.
-		if ( in_array( $post_status, [ 'draft', 'pending' ], true ) && ! in_array( 'mai_location_publish', $this->args['fields'], true ) ) {
+		// A draft gets the Publish switch, whatever fields the site chose, as long as this person
+		// is allowed to publish it.
+		//
+		// Draft only. A pending location is with a manager, and publishing it from the front end
+		// would step over the approval the site asked for. Published, private and trashed are
+		// never offered either: the front end has no business moving any of them.
+		if ( 'draft' === $post_status
+			&& mailocations_user_can_publish( $this->args['location_id'] )
+			&& ! in_array( 'mai_location_publish', $this->args['fields'], true ) ) {
 			$this->args['fields'][] = 'mai_location_publish';
 		}
 
