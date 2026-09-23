@@ -77,7 +77,8 @@ class GeoQuery {
 	 * @param \WP_Post|null $post_obj The post object.
 	 * @param bool|int      $round    Decimal places, or false for none.
 	 *
-	 * @return float|false
+	 * @return float|string|false Rounded float, the raw MySQL string when $round is false, or
+	 *                            false when the post has no distance.
 	 */
 	public static function get_distance( $post_obj = null, $round = false ) {
 		global $post;

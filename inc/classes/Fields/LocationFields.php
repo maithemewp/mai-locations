@@ -93,8 +93,9 @@ class LocationFields {
 						// post status; nothing is ever saved as meta. LocationFormEdit adds it to the
 						// form itself, so a site never picks it and never has to.
 						// The switch text carries the meaning, because ACF's default reads Yes / No,
-						// which says nothing about what happens on save. "Not yet" rather than
-						// "Keep as draft", since the location may be pending review instead.
+						// which says nothing about what happens on save. The switch only ever shows
+						// on a draft, so "Not yet" and "Keep as draft" mean the same; "Not yet" is
+						// the shorter of the two.
 						'label'       => __( 'Publish', 'mai-locations' ),
 						'key'         => 'mai_location_publish',
 						'name'        => 'publish',
@@ -368,7 +369,7 @@ class LocationFields {
 	 * Sets the excerpt editor to the Visual tab only, with the basic toolbar and no media
 	 * upload.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @param array<string, mixed> $field The field array.
 	 *

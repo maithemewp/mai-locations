@@ -146,8 +146,6 @@ function mailocations_add_location_to_user( $post_id, $user_id ) {
  * @param int   $user_id The user ID.
  * @param array $args    The post args.
  *
- * @return void
- *
  * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
  */
 function mailocations_create_location_from_woocommerce_user( $user_id, $args = [] ) {

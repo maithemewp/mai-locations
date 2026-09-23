@@ -218,7 +218,7 @@ class Settings {
 	 * This is the only place a site manager meets the decision, so the explanation lives here
 	 * rather than in a readme nobody opens.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @return void
 	 */

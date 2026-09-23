@@ -176,8 +176,10 @@ class WooCommerceAccountTabs {
 	 * Loads the ACF form head where the account page needs it.
 	 *
 	 * Checks WooCommerce is there before asking it anything. Until September 16, 2026 this called
-	 * is_account_page() outright, so the class fataled on any site without WooCommerce, which is
-	 * why the plugin never instantiated it.
+	 * is_account_page() outright, so the class fataled on any site without WooCommerce.
+	 *
+	 * The class is still not loaded by the plugin: the hook in mai-locations.php is commented out
+	 * until its menu items can be added conditionally. Nothing here changes that.
 	 *
 	 * @since TBD
 	 *

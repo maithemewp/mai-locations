@@ -110,7 +110,7 @@ class Upgrade {
 	 *
 	 * A fresh install never reaches this, because it has no version_db.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @return void
 	 */

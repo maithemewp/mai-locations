@@ -32,6 +32,18 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
 	// Request. A browser user agent and a longer timeout, because many hotel and chain sites
 	// answer WordPress's default agent with nothing, or not within 5 seconds. On Visit Sleepy
 	// Hollow that was 44 of 106 sites. Filterable so a site can tune it. Changed September 16, 2026.
+
+	/**
+	 * Filters the HTTP request arguments for fetching a location's website.
+	 *
+	 * Runs for both requests the plugin makes: reading the page, with a 15 second timeout, and
+	 * downloading its image, with 30. Check $url if a change should apply to only one of them.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param array<string, mixed> $args The wp_remote_get() arguments.
+	 * @param string               $url  The page or image being fetched.
+	 */
 	$args = apply_filters(
 		'mailocations_website_request_args',
 		[

@@ -135,7 +135,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 * Added: `--skip_excerpt` and `--skip_image` for `wp mailocations update_locations_from_website`, so a run can fetch only images or only excerpts.
 * Fixed: Every fetched image was saved as `.jpg` whatever it really was.
 * Fixed: When saving a fetched image failed, the run logged "Image updated" anyway. It now says the image failed and leaves the featured image alone.
-* Changed: `wp mailocations update_locations_from_website` now asks each site with a browser user agent and a 15 second timeout, instead of WordPress's own agent and 5 seconds. Many hotel and chain sites answered the old request with nothing. The request arguments are filterable through `mailocations_website_request_args`.
+* Changed: `wp mailocations update_locations_from_website` now asks each site with a browser user agent and a 15 second timeout, instead of WordPress's own agent and 5 seconds. Many hotel and chain sites answered the old request with nothing. The request arguments are filterable through `mailocations_website_request_args`, which runs for image downloads too; check its `$url` argument to tell them apart.
 * Fixed: A site with only Twitter card tags gave the command nothing, because the fallback that reads them could never run. It now fills in whatever the Open Graph tags did not provide.
 * Fixed: `mailocations_get_data_from_website()` warned and returned null when asked for a key it does not have. It returns an empty string.
 * Fixed: Images fetched from a location's website were downloaded twice, the second time through the site's own uploads URL, which fails outright on a local site with a self-signed certificate. They are fetched once now.

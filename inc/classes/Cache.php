@@ -17,6 +17,8 @@ defined( 'ABSPATH' ) || die;
  * of the same process. Holding them here instead makes every one of them resettable through a
  * single flush, without adding a $reset argument to twenty public functions.
  *
+ * @internal
+ *
  * This class is internal. Nothing outside the plugin should call it, and it is not on the list
  * of public names other sites may depend on.
  *

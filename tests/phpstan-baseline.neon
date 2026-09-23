@@ -265,24 +265,6 @@ parameters:
 			path: ../inc/functions-locations.php
 
 		-
-			message: '#^Function mailocations_delete_transients\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/functions-utility.php
-
-		-
-			message: '#^Function mailocations_delete_transients\(\) should return array but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: ../inc/functions-utility.php
-
-		-
-			message: '#^Function mailocations_delete_transients\(\) should return array but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: ../inc/functions-utility.php
-
-		-
 			message: '#^Function mailocations_get_asset\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -321,12 +303,6 @@ parameters:
 		-
 			message: '#^Function mailocations_sanitize_options\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: ../inc/functions-utility.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$prefix$#'
-			identifier: parameter.notFound
 			count: 1
 			path: ../inc/functions-utility.php
 

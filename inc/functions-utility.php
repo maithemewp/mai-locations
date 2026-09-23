@@ -252,7 +252,7 @@ function mailocations_get_current_url_clean( $get = null ) {
 }
 
 /**
- * Deletes all transient keys in the database with `mai_locations`.
+ * Deletes every transient whose key starts with `mai_locations_`.
  *
  * Note that this doesn't work for sites that use a persistent object
  * cache, since in that case, transients are stored in memory.
@@ -261,9 +261,7 @@ function mailocations_get_current_url_clean( $get = null ) {
  *
  * @link https://gist.github.com/kellenmace/7d8f3b4c48cef3fd68ebc8606415d7dd
  *
- * @param string $prefix Prefix to search for.
- *
- * @return array Transient keys with prefix, or empty array on error.
+ * @return void
  */
 function mailocations_delete_transients() {
 	global $wpdb;
@@ -334,7 +332,7 @@ function mailocations_user_can_publish( $location_id, $user_id = 0 ): bool {
 	/**
 	 * Filters whether a user may publish a location from the front-end edit form.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @param bool $can         Whether they may.
 	 * @param int  $location_id The location ID.

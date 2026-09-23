@@ -12,9 +12,9 @@ Mike's calls, September 14, 2026:
 
 ## Resume here
 
-A fresh session should read this file first, then `README.md`, then `CHANGES.md`. Run `composer test` and `composer stan`; setup is in the README's Tests section. State as of September 21, 2026: 621 tests passing in default and random order, PHPStan clean at level 6 with a baseline of 72, down from 224. All 24 classes are namespaced under `Mai\Locations\` in `inc/classes/`, with every old class name kept working through `inc/aliases.php`. Every bug on the list below is fixed, the Publish checkbox is built and driven end to end in a real browser, all 22 static caches now live in `Mai\Locations\Cache`, and the release notes are written and grouped. `develop` holds work that has never been pushed. **The only thing left is the release itself, which needs Mike: the version number, and the yes to tag and ship.**
+A fresh session should read this file first, then `README.md`, then `CHANGES.md`. Run `composer test` and `composer stan`; setup is in the README's Tests section. State as of September 23, 2026: 681 tests passing in default and random order, PHPStan clean at level 6 with a baseline of 66, down from 224. Version 2.0.0. All 24 classes are namespaced under `Mai\Locations\` in `inc/classes/`, with every old class name kept working through `inc/aliases.php`. `develop` holds work that has never been pushed.
 
-**Open question for Mike.** `mailocation_get_user_locations()` queries `publish` and `pending` only, with a comment in the code asking whether drafts should be there. So the Publish switch's `draft` branch cannot be reached through the locations table at all: only a direct URL gets to it. Either the table should list drafts, or the switch only ever needs to handle `pending`.
+**Waiting on Mike's smoke test on Visit Sleepy Hollow, then the tag.** A third review on September 23, 2026, five specialist reviewers across all 74 commits since 1.1.0, found six release blockers. All six are fixed, each with a test that fails against the old code: the 0.4.0 upgrade losing a site's labels and base, the map set to All drawing empty on any page, submission emails never sending on ACF 6.8.2 and later, a Filter block any visitor could crash, a careless form filter fataling, and the publishing permission being almost untested. The release notes and README were corrected where they claimed things the code does not do.
 
 Visit Sleepy Hollow (`~/Herd/visitsleepyhollow`, symlinked to this folder) is a real site using the plugin: 141 locations, the `update_locations_from_website` CLI command, `mailocations_get_data_from_website()` from its own scripts, `mailocations_get_address()` in its theme's facts block, the `mailocations_general_fields` filter, and archive shortcodes `[mai_location_address]` and `[mai_location_phone]`. Use it as a manual check that nothing it relies on changes.
 
@@ -185,6 +185,18 @@ Mike asked, September 15, 2026, whether to convert to PHP-only core blocks. Not 
 - [ ] Release. **Waiting on Mike's smoke test on Visit Sleepy Hollow**, then tag and ship.
 
 ## Next, after this release
+
+**Found by the September 23 review and deliberately left for after 2.0.0.** None is a regression from 1.1.0, and each needs design or a decision rather than a quick fix.
+
+- **Geocoding fails silently for every cause.** `mailocations_get_google_maps_result()` returns `[]` for a timeout, a bad key, `OVER_QUERY_LIMIT` and `REQUEST_DENIED` alike, and both callers return void, so a wrong API key looks exactly like "no address", forever. Five fleet sites call `mailocations_update_google_map_from_address()` from their own code. Returning `true|WP_Error` is compatible, since every caller ignores the return today.
+- **The CSV importer drops rows it cannot line up with the header, uncounted.** `file()` splits on newlines before `str_getcsv()`, so a quoted field containing a line break, which spreadsheet exports produce all the time, becomes two short rows and both vanish. It needs `fgetcsv()`. The failure reasons it collects are also thrown away; only a count reaches the notice.
+- **The importer still stores text, select and radio values through `esc_html()`,** so `O'Brien & Sons` is saved as entities. URLs were fixed in 2.0.0; the other types need an audit of every place those fields are printed before changing what is stored.
+- **A refused publish reads as a successful save.** The switch is only drawn when publishing is allowed, so ordinary use cannot hit it, but a manager moving the listing to pending while the owner's form is open, or the setting being switched off, leaves the owner reading "successfully updated" on a listing that is still a draft.
+- **The 2.0.0 upgrade runs only on `admin_init`.** After a WP-CLI or background update, owners have no Publish switch until someone loads a Dashboard page. Minutes, usually.
+- **Saving a label clears three cached values but not two built from them,** `location_post_types` and `woocommerce_account_tabs`, so for the rest of that one request they show the old label. Pages are unaffected, because the settings save redirects.
+- **`--set_cats` given with no value throws a `TypeError`** in `import_places`, where 1.1.0 quietly made a category named "1".
+- **`@since TBD` is on about 150 symbols, most of which predate 1.1.0.** Only the ones new in 2.0.0 were set. The rest need their real first version from `git log -S` against the old tags; replacing them all with 2.0.0 would state false history.
+- **No block for the six display shortcodes,** below.
 
 **The front-end save writes to a post without checking the user may edit it.** Found by the second review, September 21, 2026, and verified the same day. `LocationFormListener::should_update()` checks autosave, revision, post type and that `$_POST['acf']` is present, and nothing else. The only `mailocations_user_can_edit()` calls are on the render paths, `edit_listener()` and `LocationsTable::get()`, plus the 2.0.0 publish gate. So the title, excerpt, emails and image the listener writes are unguarded, and so is every other field, because ACF's own `acf_save_post( $post_id )` saves whatever was submitted.
 
