@@ -161,4 +161,53 @@ final class AddressRepairTest extends TestCase {
 
 		$this->assertSame( 'CA', get_post_meta( $id, 'address_country', true ) );
 	}
+
+	/**
+	 * The rewrite rules are rebuilt once, so a nested category's URL works without anyone
+	 * opening Settings > Permalinks. Stale rules are left in place first to prove it.
+	 */
+	public function test_the_rewrite_rules_are_refreshed_once(): void {
+		// set_permalink_structure() resets the rewrite setup, dropping what init registered. A
+		// real site runs this on admin_init, after init, so register the content types again.
+		// Registering them under pretty permalinks changes the objects every later test reads,
+		// so the originals are put back at the end.
+		global $wp_post_types, $wp_taxonomies;
+		$saved = [ $wp_post_types['mai_location'] ?? null, $wp_taxonomies['mai_location_cat'] ?? null ];
+
+		try {
+			$this->run_rewrite_refresh_checks();
+		} finally {
+			$this->set_permalink_structure( '' );
+			[ $wp_post_types['mai_location'], $wp_taxonomies['mai_location_cat'] ] = $saved;
+		}
+	}
+
+	private function run_rewrite_refresh_checks(): void {
+		$this->set_permalink_structure( '/%postname%/' );
+		mai_locations_plugin()->register_content_types();
+		update_option( 'rewrite_rules', [ 'stale/?$' => 'index.php?stale=1' ] );
+
+		$this->assertTrue( Upgrade::refresh_rewrite_rules() );
+
+		$rules = (array) get_option( 'rewrite_rules' );
+		$this->assertArrayNotHasKey( 'stale/?$', $rules );
+		$this->assertArrayHasKey( 'location-category/(.+?)/?$', $rules, 'The hierarchical category rule is missing.' );
+
+		// Once only: a second call leaves whatever is there.
+		update_option( 'rewrite_rules', [ 'stale/?$' => 'index.php?stale=1' ] );
+		$this->assertFalse( Upgrade::refresh_rewrite_rules() );
+		$this->assertArrayHasKey( 'stale/?$', (array) get_option( 'rewrite_rules' ) );
+	}
+
+	/**
+	 * The two repairs share one record without overwriting each other's entry.
+	 */
+	public function test_both_repairs_are_recorded_side_by_side(): void {
+		Upgrade::backfill_addresses_from_map();
+		Upgrade::refresh_rewrite_rules();
+
+		$done = (array) get_option( 'mai_locations_repairs' );
+		$this->assertArrayHasKey( 'address_from_map', $done );
+		$this->assertArrayHasKey( 'rewrite_rules_2_0_0', $done );
+	}
 }

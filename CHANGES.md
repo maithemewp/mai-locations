@@ -4,7 +4,7 @@
 
 A large release. Every bug the rework found is fixed, the front-end edit form no longer publishes a location behind its owner's back, and PHP 8.3 is now the minimum.
 
-**Three things to do after updating.** Visit Settings > Permalinks and press Save once, so nested location category URLs work. Check any site whose editors publish locations by saving them in the Dashboard: that no longer changes the status, and the Publish and Save Draft buttons do what they say instead. And look at the new Publishing setting, under **Locations > Settings** in the Dashboard (your own plural label, if you renamed it), which the update turns **on** so nothing changes for you: uncheck it if a manager is meant to approve every listing.
+**Two things to check after updating.** Check any site whose editors publish locations by saving them in the Dashboard: that no longer changes the status, and the Publish and Save Draft buttons do what they say instead. And look at the new Publishing setting, under **Locations > Settings** in the Dashboard (your own plural label, if you renamed it), which the update turns **on** so nothing changes for you: uncheck it if a manager is meant to approve every listing.
 
 ### Requirements
 
@@ -96,7 +96,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 * Fixed: A site from before 2023 was taken for a brand new install, because it had no record of which version it was on, and so did not keep owner publishing. Its old settings, or any location at all, now mark it as an existing site.
 * Fixed: A new install built from the command line, activated and then filled with locations before anyone opened the Dashboard, could be taken for an old site and have owner publishing switched on. Activation now marks a new install as current.
 * Fixed: A setting saved in code during a request, such as a new label, was not seen again until the next page load.
-* Fixed: A location category nested under another had no working URL. Visit Settings > Permalinks and press Save once after updating.
+* Fixed: A location category nested under another had no working URL. The update refreshes the permalinks itself on the first Dashboard visit, so there is nothing to save by hand.
 * Fixed: The Settings link on the Plugins page was missing on any site where the plugin folder had been renamed.
 * Fixed: Upgrading from an older version carried the old settings over exactly as they were, so a URL base with spaces or punctuation in it was saved unusable.
 * Fixed: Saving the settings with the distance field empty stored a distance of 0, which searches with no limit at all. An empty field now keeps the default, and a 0 entered on purpose still means no limit.

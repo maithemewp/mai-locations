@@ -74,6 +74,7 @@ class Upgrade {
 		// One-off data repairs, each run once per site and tracked by name rather than by
 		// version, so a site already on the current version still gets them.
 		self::backfill_addresses_from_map();
+		self::refresh_rewrite_rules();
 
 		$version_db = mailocations_get_option( 'version_db' );
 
@@ -163,6 +164,34 @@ class Upgrade {
 	 */
 	public static function run_completed( $upgrader_object, $options ): void {
 		self::migrate_acf_options();
+	}
+
+	/**
+	 * Refreshes the rewrite rules once per site, for the hierarchical category rewrite in 2.0.0.
+	 *
+	 * 2.0.0 makes the location category rewrite hierarchical, so a category nested under
+	 * another gets a working URL. WordPress only rebuilds its rules when told to, and the
+	 * release notes used to ask every site owner to open Settings > Permalinks and press Save.
+	 * This does it for them. It runs on admin_init, after every plugin's init has registered its
+	 * rules, and it is a soft flush: .htaccess is left alone, since these rules never touch it.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return bool Whether the rules were refreshed on this call.
+	 */
+	public static function refresh_rewrite_rules(): bool {
+		$done = (array) get_option( 'mai_locations_repairs', [] );
+
+		if ( ! empty( $done['rewrite_rules_2_0_0'] ) ) {
+			return false;
+		}
+
+		flush_rewrite_rules( false );
+
+		$done['rewrite_rules_2_0_0'] = gmdate( 'Y-m-d H:i:s' );
+		update_option( 'mai_locations_repairs', $done, true );
+
+		return true;
 	}
 
 	/**
