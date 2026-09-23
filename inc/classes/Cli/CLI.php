@@ -322,8 +322,15 @@ class CLI {
 					// Maybe upload the image.
 					$image_id = mailocations_upload_image( $data['image'], 'original_url', $data['image'], $post_id );
 
-					// If we have an image ID.
-					if ( $image_id ) {
+					// A WP_Error is truthy, so `if ( $image_id )` logged a failed sideload as a success
+					// and handed the error to set_post_thumbnail(), which casts it to attachment 1.
+					// The same bug update_locations_from_website had until September 16, 2026, left
+					// in this command. Fixed September 23, 2026.
+					if ( is_wp_error( $image_id ) ) {
+						WP_CLI::line( sprintf( 'Website image failed: %s (%s)', $data['image'], $image_id->get_error_message() ) );
+					} elseif ( ! $image_id ) {
+						WP_CLI::line( sprintf( 'Website image failed: %s (could not download)', $data['image'] ) );
+					} else {
 						$needs_image = false;
 
 						// Set the featured image.
@@ -371,8 +378,12 @@ class CLI {
 						// Maybe upload the image.
 						$image_id = mailocations_upload_image( $ref_uri, 'original_url', $image_url, $post_id );
 
-						// If we have an image ID.
-						if ( $image_id ) {
+						// Same as above: an error is truthy, so check for it first.
+						if ( is_wp_error( $image_id ) ) {
+							WP_CLI::line( sprintf( 'Google image failed: %s', $image_id->get_error_message() ) );
+						} elseif ( ! $image_id ) {
+							WP_CLI::line( 'Google image failed: could not download' );
+						} else {
 							// Set the featured image.
 							set_post_thumbnail( $post_id, $image_id );
 						}
@@ -411,15 +422,16 @@ class CLI {
 	 * there. --skip_excerpt and --skip_image leave that half alone, so the command can fetch
 	 * only images or only excerpts.
 	 *
-	 * TODO: a failed image download crashes the run, and a failed sideload is logged as
-	 * success. See TODO.md.
-	 *
-	 * @link https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places/get
+	 * Every location gets a line saying what happened to it, and the run ends with a count. A
+	 * site that gave nothing back, or an image that could not be downloaded, is reported rather
+	 * than skipped in silence, and the run ends in a warning when any of them did.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param array<int, string>   $args       Standard command args.
-	 * @param array<string, mixed> $assoc_args Keyed args like --search and --fields.
+	 * @param array<string, mixed> $assoc_args --post_type, --post_status, --posts_per_page,
+	 *                                         --offset, --force_excerpt, --force_image,
+	 *                                         --skip_excerpt and --skip_image.
 	 *
 	 * @return void
 	 */
@@ -463,6 +475,15 @@ class CLI {
 			// Log total.
 			WP_CLI::line( count( $query->posts ) . ' found' );
 
+			// What happened, for the line at the end. A quiet run used to be no proof that every
+			// site answered: failures printed nothing and the run always ended "Done."
+			$counts = [
+				'excerpts' => 0,
+				'images'   => 0,
+				'nothing'  => 0,
+				'failed'   => 0,
+			];
+
 			while ( $query->have_posts() ) : $query->the_post();
 				// Get place ID.
 				$post_id = get_the_ID();
@@ -479,8 +500,12 @@ class CLI {
 
 				// Bail if the site gave us neither. The old check was `! array_values( $data )`,
 				// always false, so this never skipped anything. Fixed September 16, 2026.
+				//
+				// This cannot tell a site that refused us from one with no Open Graph tags, because
+				// mailocations_get_data_from_website() returns the same empty values for both.
 				if ( ! $data['desc'] && ! $data['image'] ) {
-					// WP_CLI::line( sprintf( 'No description or image: %s', get_permalink( $post_id ) ) );
+					WP_CLI::line( sprintf( 'Nothing found: %s', $url ) );
+					$counts['nothing']++;
 					continue;
 				}
 
@@ -492,23 +517,26 @@ class CLI {
 				else {
 					// If not skipping excerpts, and there is no excerpt or we're forcing the update.
 					if ( ! rest_sanitize_boolean( (string) $assoc_args['skip_excerpt'] ) && ( ! has_excerpt( $post_id ) || rest_sanitize_boolean( $assoc_args['force_excerpt'] ) ) ) {
-						// Update the post excerpt.
-						$post_id = wp_update_post(
+						// Update the post excerpt. Asking for the WP_Error, and into its own variable:
+						// without it a failed update returned 0, this logged "Excerpt updated" anyway,
+						// and the rest of the loop ran on post 0. Fixed September 23, 2026.
+						$updated = wp_update_post(
 							[
 								'ID'           => $post_id,
 								'post_excerpt' => $data['desc'],
-							]
+							],
+							true
 						);
 
 						// If error.
-						if ( is_wp_error( $post_id ) ) {
-							WP_CLI::line( sprintf( 'Error: %s', $post_id->get_error_message() ) );
+						if ( is_wp_error( $updated ) ) {
+							WP_CLI::line( sprintf( 'Excerpt failed: %s (%s)', get_permalink( $post_id ), $updated->get_error_message() ) );
+							$counts['failed']++;
 							continue;
 						}
-						// Success.
-						else {
-							WP_CLI::line( sprintf( 'Excerpt updated: %s', get_permalink( $post_id ) ) );
-						}
+
+						WP_CLI::line( sprintf( 'Excerpt updated: %s', get_permalink( $post_id ) ) );
+						$counts['excerpts']++;
 					}
 				}
 
@@ -530,15 +558,23 @@ class CLI {
 						// as success here, so the run logged "Image updated" and handed the error to
 						// set_post_thumbnail().
 						if ( is_wp_error( $image_id ) ) {
-							WP_CLI::line( sprintf( 'Image failed: %s', $image_id->get_error_message() ) );
+							WP_CLI::line( sprintf( 'Image failed: %s (%s)', $data['image'], $image_id->get_error_message() ) );
+							$counts['failed']++;
+						}
+						// 0 is how a failed download comes back: a refused request, an error code, an
+						// empty body. It used to print nothing at all.
+						elseif ( ! $image_id ) {
+							WP_CLI::line( sprintf( 'Image failed: %s (could not download)', $data['image'] ) );
+							$counts['failed']++;
 						}
 						// If we have an image ID.
-						elseif ( $image_id && $image_id !== $featured_id ) {
+						elseif ( $image_id !== $featured_id ) {
 							// Set the featured image.
 							set_post_thumbnail( $post_id, $image_id );
 
 							// Log.
 							WP_CLI::line( sprintf( 'Image updated: %s', get_permalink( $post_id ) ) );
+							$counts['images']++;
 						}
 					}
 				}
@@ -547,7 +583,20 @@ class CLI {
 			// Flush all transients.
 			mailocations_delete_transients();
 
-			WP_CLI::success( 'Done.' );
+			$summary = sprintf(
+				'%d excerpts and %d images updated. %d sites gave nothing back. %d failed.',
+				$counts['excerpts'],
+				$counts['images'],
+				$counts['nothing'],
+				$counts['failed']
+			);
+
+			// A warning rather than an error, so the exit code stays 0 for scripts that call this.
+			if ( $counts['nothing'] || $counts['failed'] ) {
+				WP_CLI::warning( $summary );
+			} else {
+				WP_CLI::success( $summary );
+			}
 		} else {
 			WP_CLI::line( 'No locations found' );
 		}

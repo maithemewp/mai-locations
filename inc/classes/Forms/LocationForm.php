@@ -79,9 +79,6 @@ class LocationForm {
 	/**
 	 * Gets the wrapped form.
 	 *
-	 * TODO: returns null, not '', when there are no fields, and a custom class runs into the
-	 * default one because trim() removes the space that was just added. See TODO.md.
-	 *
 	 * @since TBD
 	 *
 	 * @return string

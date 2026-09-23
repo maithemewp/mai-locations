@@ -132,7 +132,10 @@ function mailocations_get_data_from_website( $url, $key = '' ) {
  * @param string $image_url HTTP URL address of a remote file.
  * @param int    $post_id   The post ID the media is associated with.
  *
- * @return int|WP_Error The ID of the attachment or a WP_Error on failure.
+ * @return int|WP_Error The attachment ID. 0 when the image could not be downloaded, which is
+ *                      the usual failure: a refused request, an error code or an empty body.
+ *                      A WP_Error only when WordPress could not save a file it did download.
+ *                      Check for both, and check the WP_Error first, because it is truthy.
  */
 function mailocations_upload_image( $ref_uri, $ref_key, $image_url, $post_id ) {
 	// Make sure we have the functions we need.

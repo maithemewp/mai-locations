@@ -36,8 +36,7 @@ class WooCommerceAccountTabs {
 	/**
 	 * Gets the tabs, endpoint to label.
 	 *
-	 * TODO: cached in a static for the whole request, so the filter cannot be added later. See
-	 * TODO.md.
+	 * Worked out once per request and held in the plugin's cache.
 	 *
 	 * @since TBD
 	 *

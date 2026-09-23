@@ -143,8 +143,8 @@ function mailocations_get_options_defaults() {
 	}
 
 	$defaults = [
-		'label_plural'         => __( 'Locations', 'mai-location' ),
-		'label_singular'       => __( 'Location', 'mai-location' ),
+		'label_plural'         => __( 'Locations', 'mai-locations' ),
+		'label_singular'       => __( 'Location', 'mai-locations' ),
 		'base'                 => 'locations',
 		'category_base'        => 'location-category',
 		'google_api_key'       => '',

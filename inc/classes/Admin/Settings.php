@@ -157,8 +157,6 @@ class Settings {
 	/**
 	 * Setting callback.
 	 *
-	 * TODO: values are printed into value="" unescaped. See TODO.md.
-	 *
 	 * @since TBD
 	 *
 	 * @return void
@@ -233,7 +231,7 @@ class Settings {
 
 		printf(
 			'<p>%s</p>',
-			esc_html__( 'A location owner sees a Publish switch on the front-end edit form, but only while their location is a draft. Editors and administrators can always publish, whatever this is set to.', 'mai-locations' )
+			esc_html__( 'A location owner sees a Publish switch on the front-end edit form, but only while their location is a draft. Anyone whose role can already publish, such as an editor, can always publish, whatever this is set to.', 'mai-locations' )
 		);
 
 		printf( '<p><strong>%s</strong></p>', esc_html__( 'Three ways to run this:', 'mai-locations' ) );

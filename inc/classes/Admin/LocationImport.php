@@ -104,9 +104,6 @@ class LocationImport {
 	/**
 	 * Registers the import fields.
 	 *
-	 * TODO: the file label reads "File (.csv]" and the download link carries a stray quote.
-	 * See TODO.md.
-	 *
 	 * @since TBD
 	 *
 	 * @return void
@@ -129,7 +126,7 @@ class LocationImport {
 					[
 						'key'       => 'mailocations_import_description',
 						'label'     => '',
-						'message'   => sprintf( '<p>%s</p><p>%s.</p>', __( 'Import locations and optionally create users. Locations with an identical name (case-sensitive post title) will be skipped, all others will be imported. Add additional simple (text, number, etc.) post_meta data can be added to the CSV with the header as the meta key. Additional meta must have an ACF field registered in PHP via the filters available in Mai Locations.', 'mai-locations' ), $download_link ),
+						'message'   => sprintf( '<p>%s</p><p>%s.</p>', __( 'Import locations and optionally create users. A row whose name matches an existing location is skipped. The match ignores upper and lower case. To import other simple values, such as text or numbers, add a column headed with the meta key. Each extra column needs an ACF field registered in PHP through the Mai Locations field filters.', 'mai-locations' ), $download_link ),
 						'type'      => 'message',
 						'new_lines' => '',
 						'esc_html'  => 0,
@@ -260,8 +257,6 @@ class LocationImport {
 
 	/**
 	 * Displays the confirmation notice.
-	 *
-	 * TODO: text domain reads mai-location here. See TODO.md.
 	 *
 	 * @since TBD
 	 *

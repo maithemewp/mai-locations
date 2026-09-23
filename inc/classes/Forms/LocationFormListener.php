@@ -261,8 +261,7 @@ class LocationFormListener {
 						set_post_thumbnail( $post_id, $value );
 					break;
 					case 'author':
-						// TODO: adds a duplicate entry to the author's list on every save.
-						// See TODO.md.
+						// mailocations_add_location_to_user() de-duplicates, so a repeat save adds nothing.
 						mailocations_add_location_to_user( $post_id, $value );
 					break;
 				}

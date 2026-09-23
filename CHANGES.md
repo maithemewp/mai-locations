@@ -4,7 +4,7 @@
 
 A large release. Every bug the rework found is fixed, the front-end edit form no longer publishes a location behind its owner's back, and PHP 8.3 is now the minimum.
 
-**Three things to do after updating.** Visit Settings > Permalinks and press Save once, so nested location category URLs work. Check any site whose editors publish locations by saving them in the Dashboard: that no longer changes the status, and the Publish and Save Draft buttons do what they say instead. And look at the new Publishing setting, described below, which the update turns **on** so nothing changes for you: untick it if a manager is meant to approve every listing.
+**Three things to do after updating.** Visit Settings > Permalinks and press Save once, so nested location category URLs work. Check any site whose editors publish locations by saving them in the Dashboard: that no longer changes the status, and the Publish and Save Draft buttons do what they say instead. And look at the new Publishing setting, under **Locations > Settings** in the Dashboard (your own plural label, if you renamed it), which the update turns **on** so nothing changes for you: untick it if a manager is meant to approve every listing.
 
 ### Requirements
 
@@ -24,17 +24,17 @@ A large release. Every bug the rework found is fixed, the front-end edit form no
 
 ### Crashes
 
+* Fixed: `[mai_locations_table fields="..."]` took the page down, because the shortcode passes its fields as text and the table expected a list.
 * Fixed: Anyone could take down a page holding a Mai Locations Filter block by adding `?_mai_location_cat[]=x` to its address. A filter sent as a list now works the same as one sent comma-separated.
 * Fixed: A Locations Table block saved with no fields ticked took the whole page down with a critical error the moment anyone pressed Edit. The form now renders as nothing at all, and the rest of the page is unaffected.
 * Fixed: A blank line in an import CSV, which most editors leave at the end of a file, stopped the whole import with a fatal error. Those lines are skipped now.
 * Fixed: The "no locations found" text could fatal on an archive listing several post types, or where the page had no query of its own.
 * Fixed: `[mai_location_phone]` could take a page down when a location's phone field held text rather than a number, such as "Call us". The text now prints as entered.
 * Fixed: `wp mailocations update_locations_from_website` stopped with a fatal error when an image download failed, for example on a local site with a self-signed certificate. It now skips that location and carries on.
-* Fixed: The WooCommerce account tabs class asked WooCommerce a question without checking it was active.
 
 ### Publishing a location from the front end
 
-Until now, any front-end save of an unpublished location published it, with nothing to switch it off. That is replaced by one setting and one switch, which cover the three ways sites actually use this plugin. Settings > Mai Locations explains all three where you choose between them.
+Until now, any front-end save of an unpublished location published it, with nothing to switch it off. That is replaced by one setting and one switch, which cover the three ways sites actually use this plugin. Locations > Settings explains all three where you choose between them.
 
 | How you work | Publishing setting | Submission block status |
 | --- | --- | --- |
@@ -47,7 +47,8 @@ Until now, any front-end save of an unpublished location published it, with noth
 * Added: `mailocations_user_can_publish( $location_id, $user_id )` and a filter of the same name, for sites that want to decide this per user or per location in code.
 * Changed: A **pending** location can no longer be published from the front end at all. Pending now means it is with a manager. An approved one can be moved to Draft, and its owner then publishes when they are ready.
 * Changed: Editing a location on the front end no longer publishes it on its own. This replaces the old behaviour, where any save of an unpublished location made it live whether or not that was the intention.
-* Changed: Editors and administrators see the Publish switch whatever the setting says, since they can already publish in the Dashboard.
+* Changed: Anyone whose role can already publish in the Dashboard sees the Publish switch whatever the setting says. That is editors and administrators, and also authors, so on a site where owners have the Author role they can publish their own drafts even with the setting off. Owners are usually subscribers.
+* Note: Moderation covers publishing, not later edits. Once a listing is live, its owner's front-end edits go live straight away.
 * Fixed: A location owner could not see their own drafts. The locations table lists them now, so a site can set its submission block to Draft without the listing disappearing from its owner. Private and trashed locations stay out.
 * Fixed: Saving a location in the Dashboard published it, even from the Save Draft button. The Dashboard now leaves the status exactly where you put it.
 * Fixed: A location that was private or in the trash was made live by any save. Only a draft can be published now, and a published one is never taken back down.
@@ -59,7 +60,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 * Fixed: The locations table printed its heading inside the `<table>` element, which is not valid HTML. The heading now sits above the table.
 * Fixed: The locations table accepted a `class` and never printed it.
 * Fixed: Edit links in the locations table did not encode the page they return to, so a Back link lost anything after a question mark.
-* Changed: Administrators and editors can now use the front-end edit form and see Edit buttons on any location, matching what they can already do in the Dashboard. Location owners keep editing their own locations whatever their role.
+* Changed: Administrators and editors can now open the front-end edit form for any location, matching what they can already do in the Dashboard. Location owners keep editing their own locations whatever their role.
 * Fixed: The "your location has been published" email left the location's label out of its subject and body, and logged a warning each time.
 
 ### Blocks
@@ -71,33 +72,33 @@ Until now, any front-end save of an unpublished location published it, with noth
 * Fixed: The filter submit button kept the link address it was built from, on an element that cannot use one.
 * Fixed: Distance options written the natural way, "10, 20", searched a distance of " 20" with a leading space.
 * Fixed: A filter button inside a template with no post context logged a warning instead of doing nothing.
-* Fixed: A map set to show all locations showed none on any page that is not a locations archive, because it looked up regular posts.
+* Fixed: A map set to show all locations showed none on an ordinary page, and the empty map was cached for an hour.
 * Fixed: The Get Directions link in a map marker wrote `ref` where it meant `rel`, so it opened without the usual link protections.
 * Fixed: The map's marker grouping script was not declared as a requirement of the map script, so it only happened to load in time.
 
 ### Importing
 
 * Fixed: The example import CSV used the `address_street` heading twice, so anyone following it lost the street and imported the suite number in its place.
-* Fixed: The import page's file field was labelled "File (.csv]", its example CSV link carried a stray quote, and eight labels used the wrong text domain, so they were never translated.
+* Fixed: The import page's file field was labelled "File (.csv]", its example CSV link carried a stray quote, and six labels used the wrong text domain, so they were never translated.
 * Fixed: CSV imports logged a PHP 8.4 deprecation notice for every line of the file.
 * Changed: Checking whether a location already exists no longer uses a function WordPress deprecated. A location in the trash with the same title no longer counts as existing, so importing that row creates a new location.
 * Fixed: Users created by a CSV import were created with no password at all, which WordPress warns about. They now get a generated one and set their own through the lost password form.
-* Fixed: A CSV import that could not create a location counted it as imported. Failed rows are now counted and the reason is shown.
+* Fixed: A CSV import that could not create a location counted it as imported. Failed rows are now counted.
 * Fixed: A CSV import submitted without choosing a status saved every location as "public", which is not a real post status. It now falls back to Published.
-* Fixed: The CSV importer stored every value as escaped HTML, so imported website addresses came in with `&amp;` in them. Each value is now sanitized by its field type. Values imported before this update are unchanged.
+* Fixed: The CSV importer stored every value as escaped HTML, so imported website addresses came in with `&amp;` in them. Website addresses are now stored as they are. Values imported before this update are unchanged.
 
 ### Settings and upgrading
 
+* Fixed: The default "Locations" and "Location" labels, the photo field's help and the missing API key warning used the wrong text domain, so they were never translated.
 * Fixed: A site upgrading from 0.4.0 or earlier lost its labels and URL base, fell back to "Locations" and `/locations/`, and every one of its old location addresses stopped working. The old settings are now carried over on the first Dashboard visit after updating.
 * Fixed: Carrying those old settings over deleted them before saving the new copy, so a failed save lost them for good. They are only removed once the new copy is saved.
 * Fixed: A site from before 2023 was taken for a brand new install, because it had no record of which version it was on, and so did not keep owner publishing. Its old settings, or any location at all, now mark it as an existing site.
-* Fixed: Saving a new plural or singular label, or a new URL base, was not seen again until the next page load, so the settings page could confirm a change while still showing the old wording.
+* Fixed: A setting saved in code during a request, such as a new label, was not seen again until the next page load.
 * Fixed: A location category nested under another had no working URL. Visit Settings > Permalinks and press Save once after updating.
 * Fixed: The Settings link on the Plugins page was missing on any site where the plugin folder had been renamed.
 * Fixed: Upgrading from an older version carried the old settings over exactly as they were, so a URL base with spaces or punctuation in it was saved unusable.
 * Fixed: Saving the settings with the distance field empty stored a distance of 0, which searches with no limit at all. An empty field now keeps the default, and a 0 entered on purpose still means no limit.
 * Fixed: The Default Units setting accepted any text. It now accepts only miles or kilometres.
-* Fixed: A setting saved during a request was not seen again until the next one.
 * Fixed: Asking for a setting that does not exist logged a warning.
 * Fixed: The Default Units dropdown printed a stray `selected='selected'` before its first option.
 * Fixed: A Google API key saved in the settings replaced the key ACF already had. It now fills in only what ACF is missing.
@@ -109,7 +110,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 
 * Fixed: `[mai_location_email link="false"]` still printed a link. `[mai_location_phone]` already handled this.
 * Fixed: `[mai_location_distance]` printed "3.1mi away" instead of "3.1 mi away". Spaces in `before` and `after` are kept now.
-* Fixed: `[mai_location_distance]` printed nothing for a location under half a unit away. It now prints "0 mi away".
+* Fixed: `[mai_location_distance]` printed nothing for a location whose distance rounded to 0. It now prints "0 mi away".
 * Changed: `[mai_location_distance]` escapes HTML in `before` and `after` instead of stripping it, matching every other location shortcode.
 * Fixed: `[mai_location_phone]` linked to only the first group of digits when the location had no country set, so `914-631-8200` dialled `914`.
 * Fixed: a phone number that is not valid for its country printed an empty link and logged warnings. It now falls back to the number as entered.
@@ -128,6 +129,9 @@ Until now, any front-end save of an unpublished location published it, with noth
 
 ### Fetching descriptions and photos from a location's website
 
+* Changed: `wp mailocations update_locations_from_website` now reports every location. A site that gave nothing back and an image that would not download each get a line, the run ends with a count of what was updated and what failed, and it ends in a warning instead of "Done." when anything failed. It used to print nothing for either, so a quiet run was no proof every site answered.
+* Fixed: The same command printed "Excerpt updated" for an excerpt that failed to save, then carried on as though the location were post 0.
+* Fixed: `wp mailocations import_places` reported a photo that failed to save as "Featured image updated", and gave the location the wrong image on a site whose first attachment is a photo.
 * Added: `--skip_excerpt` and `--skip_image` for `wp mailocations update_locations_from_website`, so a run can fetch only images or only excerpts.
 * Fixed: Every fetched image was saved as `.jpg` whatever it really was.
 * Fixed: When saving a fetched image failed, the run logged "Image updated" anyway. It now says the image failed and leaves the featured image alone.
@@ -138,6 +142,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 
 ### For developers
 
+* Changed: Every class moved into the `Mai\Locations\` namespace. The old names, such as `Mai_Locations_Location_Form`, still work as aliases, but `get_class()` now reports the new name. Many methods gained return types, so a subclass that overrides one must declare the same type. No site on our fleet subclasses any of them.
 * Fixed: Asking for a second user's locations in the same request returned the first user's. A page serves one person, so this showed up in WP-CLI runs and anything looping over users.
 * Changed: `Mai_Locations_Location_Fields::prepare_location_exerpt_field()` is now spelled `prepare_location_excerpt_field()`. The old name still works.
 * Changed: A plural label, singular label or URL base set through a filter is now cleaned every time it is read, not only the first time. A filtered base is cleaned the same way a saved one is, so `Our Places!` gives `our-places` where it used to give `OurPlaces`.
@@ -147,7 +152,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 ### Removed
 
 * Removed: `Mai_Locations_Queries::mai_post_grid_query()`, which was never hooked up and called a function that does not exist.
-* Removed: Social media fields (Facebook, Twitter, YouTube, LinkedIn, Instagram, Pinterest, TikTok) and the `mailocations_social_fields` filter. They were switched off in 1.0.0 and never displayed anywhere. No site had any data saved in them.
+* Removed: Social media fields (Facebook, Twitter, YouTube, LinkedIn, Instagram, Pinterest, TikTok) `mailocations_get_social_fields()` and the `mailocations_social_fields` filter. They were switched off in 1.0.0 and never displayed anywhere. No site had any data saved in them.
 
 ## 1.1.0 (4/8/26)
 * Added: Google Map ID setting for advanced markers (required for vector maps).

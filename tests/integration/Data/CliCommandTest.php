@@ -171,7 +171,7 @@ final class CliCommandTest extends TestCase {
 		$post = self::factory()->post->create( [ 'post_type' => 'post' ] );
 		update_post_meta( $post, 'location_url', 'https://post.example/' );
 
-		$this->assertSame( [ [ 'line', '2 found' ], [ 'success', 'Done.' ] ], $this->update() );
+		$this->assertSame( [ [ 'line', '2 found' ], [ 'line', 'Nothing found: https://publish.example/' ], [ 'line', 'Nothing found: https://draft.example/' ], [ 'warning', '0 excerpts and 0 images updated. 2 sites gave nothing back. 0 failed.' ] ], $this->update() );
 		$this->assertEqualsCanonicalizing( [ 'https://publish.example/', 'https://draft.example/' ], $this->requested_urls() );
 		$this->assertNotSame( $publish, $draft );
 	}
@@ -182,13 +182,13 @@ final class CliCommandTest extends TestCase {
 		$post = self::factory()->post->create( [ 'post_type' => 'post' ] );
 		update_post_meta( $post, 'location_url', 'https://post.example/' );
 
-		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', 'Done.' ] ], $this->update( [ 'post_type' => 'post' ] ) );
+		$this->assertSame( [ [ 'line', '1 found' ], [ 'line', 'Nothing found: https://post.example/' ], [ 'warning', '0 excerpts and 0 images updated. 1 sites gave nothing back. 0 failed.' ] ], $this->update( [ 'post_type' => 'post' ] ) );
 		$this->assertSame( [ 'https://post.example/' ], $this->requested_urls() );
 
 		WP_CLI::reset();
 		$this->http_requests = [];
 
-		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', 'Done.' ] ], $this->update( [ 'post_status' => 'draft' ] ) );
+		$this->assertSame( [ [ 'line', '1 found' ], [ 'line', 'Nothing found: https://draft.example/' ], [ 'warning', '0 excerpts and 0 images updated. 1 sites gave nothing back. 0 failed.' ] ], $this->update( [ 'post_status' => 'draft' ] ) );
 		$this->assertSame( [ 'https://draft.example/' ], $this->requested_urls() );
 	}
 
@@ -197,7 +197,7 @@ final class CliCommandTest extends TestCase {
 		$this->create_location( [ 'location_url' => 'https://middle.example/' ], [ 'post_date' => '2026-02-01 00:00:00' ] );
 		$this->create_location( [ 'location_url' => 'https://newest.example/' ], [ 'post_date' => '2026-03-01 00:00:00' ] );
 
-		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', 'Done.' ] ], $this->update( [ 'posts_per_page' => '1', 'offset' => '1' ] ) );
+		$this->assertSame( [ [ 'line', '1 found' ], [ 'line', 'Nothing found: https://middle.example/' ], [ 'warning', '0 excerpts and 0 images updated. 1 sites gave nothing back. 0 failed.' ] ], $this->update( [ 'posts_per_page' => '1', 'offset' => '1' ] ) );
 		$this->assertSame( [ 'https://middle.example/' ], $this->requested_urls() );
 	}
 
@@ -205,7 +205,7 @@ final class CliCommandTest extends TestCase {
 		$id                                    = $this->create_location( [ 'location_url' => 'https://down.example/' ] );
 		$this->sites['https://down.example/'] = [ 500, self::page( 'Desc', self::FIXTURES . '/image.jpg' ) ];
 
-		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', 'Done.' ] ], $this->update() );
+		$this->assertSame( [ [ 'line', '1 found' ], [ 'line', 'Nothing found: https://down.example/' ], [ 'warning', '0 excerpts and 0 images updated. 1 sites gave nothing back. 0 failed.' ] ], $this->update() );
 		$this->assertFalse( has_excerpt( $id ) );
 		$this->assertSame( 0, get_post_thumbnail_id( $id ) );
 	}
@@ -218,7 +218,7 @@ final class CliCommandTest extends TestCase {
 			[
 				[ 'line', '1 found' ],
 				[ 'line', 'Excerpt updated: ' . get_permalink( $id ) ],
-				[ 'success', 'Done.' ],
+				[ 'success', '1 excerpts and 0 images updated. 0 sites gave nothing back. 0 failed.' ],
 			],
 			$this->update()
 		);
@@ -230,11 +230,11 @@ final class CliCommandTest extends TestCase {
 		$id                                   = $this->create_location( [ 'location_url' => 'https://inn.example/' ], [ 'post_excerpt' => 'Keep me' ] );
 		$this->sites['https://inn.example/'] = [ 200, self::page( 'From the website' ) ];
 
-		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', 'Done.' ] ], $this->update() );
+		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', '0 excerpts and 0 images updated. 0 sites gave nothing back. 0 failed.' ] ], $this->update() );
 		$this->assertSame( 'Keep me', get_post( $id )->post_excerpt );
 
 		WP_CLI::reset();
-		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', 'Done.' ] ], $this->update( [ 'force_excerpt' => 'false' ] ) );
+		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', '0 excerpts and 0 images updated. 0 sites gave nothing back. 0 failed.' ] ], $this->update( [ 'force_excerpt' => 'false' ] ) );
 		$this->assertSame( 'Keep me', get_post( $id )->post_excerpt );
 
 		WP_CLI::reset();
@@ -242,7 +242,7 @@ final class CliCommandTest extends TestCase {
 			[
 				[ 'line', '1 found' ],
 				[ 'line', 'Excerpt updated: ' . get_permalink( $id ) ],
-				[ 'success', 'Done.' ],
+				[ 'success', '1 excerpts and 0 images updated. 0 sites gave nothing back. 0 failed.' ],
 			],
 			$this->update( [ 'force_excerpt' => 'true' ] )
 		);
@@ -284,7 +284,7 @@ final class CliCommandTest extends TestCase {
 			[
 				[ 'line', '1 found' ],
 				[ 'line', 'Image updated: ' . get_permalink( $id ) ],
-				[ 'success', 'Done.' ],
+				[ 'success', '0 excerpts and 1 images updated. 0 sites gave nothing back. 0 failed.' ],
 			],
 			$this->update()
 		);
@@ -306,7 +306,7 @@ final class CliCommandTest extends TestCase {
 		set_post_thumbnail( $id, $original );
 		$this->sites['https://inn.example/'] = [ 200, self::page( '', $path ) ];
 
-		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', 'Done.' ] ], $this->update() );
+		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', '0 excerpts and 0 images updated. 0 sites gave nothing back. 0 failed.' ] ], $this->update() );
 		$this->assertSame( $original, get_post_thumbnail_id( $id ) );
 		$this->assertSame( [ 'https://inn.example/' ], $this->requested_urls() );
 
@@ -315,7 +315,7 @@ final class CliCommandTest extends TestCase {
 			[
 				[ 'line', '1 found' ],
 				[ 'line', 'Image updated: ' . get_permalink( $id ) ],
-				[ 'success', 'Done.' ],
+				[ 'success', '0 excerpts and 1 images updated. 0 sites gave nothing back. 0 failed.' ],
 			],
 			$this->update( [ 'force_image' => '1' ] )
 		);
@@ -332,7 +332,7 @@ final class CliCommandTest extends TestCase {
 		WP_CLI::reset();
 		$this->http_requests = [];
 
-		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', 'Done.' ] ], $this->update( [ 'force_image' => true ] ) );
+		$this->assertSame( [ [ 'line', '1 found' ], [ 'success', '0 excerpts and 0 images updated. 0 sites gave nothing back. 0 failed.' ] ], $this->update( [ 'force_image' => true ] ) );
 		$this->assertSame( $thumbnail, get_post_thumbnail_id( $id ) );
 		$this->assertSame( [ 'https://inn.example/' ], $this->requested_urls() );
 	}
@@ -349,12 +349,36 @@ final class CliCommandTest extends TestCase {
 				[ 'line', '2 found' ],
 				[ 'line', 'Image updated: ' . get_permalink( $first ) ],
 				[ 'line', 'Image updated: ' . get_permalink( $other ) ],
-				[ 'success', 'Done.' ],
+				[ 'success', '0 excerpts and 2 images updated. 0 sites gave nothing back. 0 failed.' ],
 			],
 			$this->update()
 		);
 		$this->assertSame( get_post_thumbnail_id( $first ), get_post_thumbnail_id( $other ) );
 		$this->assertCount( 3, $this->requested_urls() );
+	}
+
+	/**
+	 * A download that fails, a 404 here, comes back from mailocations_upload_image() as 0. That
+	 * used to print nothing at all, and the run still ended "Done." It is reported now, counted,
+	 * and turns the ending into a warning. Fixed September 23, 2026.
+	 */
+	public function test_an_image_that_will_not_download_is_reported(): void {
+		$image = 'https://inn.example/gone.jpg';
+		$id    = $this->create_location( [ 'location_url' => 'https://inn.example/' ] );
+
+		$this->sites['https://inn.example/'] = [ 200, self::page( '', $image ) ];
+		$this->sites[ $image ]                = [ 404, 'Not found' ];
+
+		$this->assertSame(
+			[
+				[ 'line', '1 found' ],
+				[ 'line', 'Image failed: ' . $image . ' (could not download)' ],
+				[ 'warning', '0 excerpts and 0 images updated. 0 sites gave nothing back. 1 failed.' ],
+			],
+			$this->update()
+		);
+
+		$this->assertSame( 0, get_post_thumbnail_id( $id ) );
 	}
 
 	public function test_update_sets_excerpt_and_image_in_one_pass(): void {
@@ -367,7 +391,7 @@ final class CliCommandTest extends TestCase {
 				[ 'line', '1 found' ],
 				[ 'line', 'Excerpt updated: ' . get_permalink( $id ) ],
 				[ 'line', 'Image updated: ' . get_permalink( $id ) ],
-				[ 'success', 'Done.' ],
+				[ 'success', '1 excerpts and 1 images updated. 0 sites gave nothing back. 0 failed.' ],
 			],
 			$this->update()
 		);
@@ -401,7 +425,7 @@ final class CliCommandTest extends TestCase {
 
 		$this->assertSame( '1 found', $calls[0][1] );
 		$this->assertStringStartsWith( 'Image failed: ', $calls[1][1] );
-		$this->assertSame( [ 'success', 'Done.' ], $calls[2] );
+		$this->assertSame( [ 'warning', '0 excerpts and 0 images updated. 0 sites gave nothing back. 1 failed.' ], $calls[2] );
 		$this->assertSame( [], $warnings );
 		$this->assertSame( 0, get_post_thumbnail_id( $id ) );
 	}

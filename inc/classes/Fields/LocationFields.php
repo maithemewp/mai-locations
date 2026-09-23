@@ -81,7 +81,7 @@ class LocationFields {
 						// TODO: no 'name', so update_field() on this key writes nothing, and the
 						// text domain reads mai-location. See TODO.md.
 						'label'         => __( 'Image', 'mai-locations' ),
-						'instructions'  => __( 'Only jpeg, jpg, png allowed. 5 MB max.', 'mai-location' ),
+						'instructions'  => __( 'Only jpeg, jpg, png allowed. 5 MB max.', 'mai-locations' ),
 						'key'           => 'mai_location_image',
 						'type'          => 'image',
 						'return_format' => 'id',

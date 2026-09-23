@@ -267,4 +267,23 @@ final class LocationsTableTest extends TestCase {
 			'another subscriber' => [ 'other', false ],
 		];
 	}
+
+	/**
+	 * The shortcode passes fields as a comma string, and array_map() on a string took the whole
+	 * page down. Fixed September 23, 2026. The string now opens the same form the block's array
+	 * does.
+	 */
+	public function test_the_shortcode_takes_fields_as_a_comma_string(): void {
+		$owner = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$id    = $this->create_location( [], [ 'post_author' => $owner, 'post_status' => 'draft' ] );
+		wp_set_current_user( $owner );
+		$_GET['location_id'] = (string) $id;
+
+		$html = do_shortcode( '[mai_locations_table fields="mai_location_title, mai_location_excerpt"]' );
+
+		unset( $_GET['location_id'] );
+
+		$this->assertStringContainsString( 'name="acf[mai_location_title]"', $html );
+		$this->assertStringContainsString( 'acf-field-mai-location-excerpt', $html );
+	}
 }

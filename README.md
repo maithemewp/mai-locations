@@ -8,35 +8,33 @@ A location post type with info, address and map fields. Map, filter and search b
 | --- | --- |
 | Mai Locations Map | A Google map of the locations on the page. |
 | Mai Locations Filter | One taxonomy filter. |
-| Mai Locations Filters | Every taxonomy filter at once. |
+| Mai Locations Filters | A search form that holds the address search, filter and button blocks. |
 | Mai Locations Address Search | A search by address, with a distance. |
 | Mai Locations Count | "Showing 12 of 40 Locations". |
-| Mai Location Submission | A front-end form for adding a location. |
+| Mai Location Submission Form | A front-end form for adding a location. |
 | Mai Locations Table | A person's own locations, with View and Edit buttons. |
 
 ## Shortcodes
 
-These print one location's details. They have no block equivalent yet.
+The first six print one location's details, and have no block equivalent yet.
 
 | Shortcode | Parameters |
 | --- | --- |
 | `[mai_location_address]` | `hide` |
-| `[mai_location_phone]` | `before` `after` `link` `style` |
-| `[mai_location_url]` | `before` `after` `style` |
+| `[mai_location_phone]` | `before` `after` `link` `style` `phone` |
+| `[mai_location_url]` | `before` `after` `style` `target` `rel` |
 | `[mai_location_email]` | `before` `after` `link` `style` |
-| `[mai_location_place]` | `before` `after` `style` |
+| `[mai_location_place]` | `before` `after` `style` `text` |
 | `[mai_location_distance]` | `before` `after` `round` |
-| `[mai_locations_table]` | Same as the Mai Locations Table block. |
+| `[mai_locations_table]` | A person's own locations. Give it `fields`, or its Edit button opens an empty form. |
 
-`before` and `after` print text either side of the value, spaces included. `style` adds inline CSS. `link` takes `false` to print the value without a link. `round` sets how many decimal places a distance keeps.
+`before` and `after` print text either side of the value, spaces included. `style` adds inline CSS. `link` takes `false` to print the value without a link. `phone` takes `2` for the second phone number. `target` and `rel` set the website link's attributes, `_blank` and `noopener nofollow` by default. `text` sets the Place link's words, "View on Google" by default. `round` sets how many decimal places a distance keeps.
 
 `hide` takes a comma-separated list of address parts to leave out: `street`, `street2`, `city`, `state`, `postcode`, `country`. So `[mai_location_address hide="country"]`. The address shortcode has no `before` or `after`.
 
-The locations table also appears in the WooCommerce account area when WooCommerce is active.
-
 ## Who may publish
 
-Three ways sites run this, all set from Settings > Mai Locations and the submission block's own Status setting. The settings page explains them where you choose:
+Three ways sites run this, all set from Locations > Settings in the Dashboard and the submission form block's own Location Status setting. The settings page explains them where you choose:
 
 | Model | Publishing setting | Submission status |
 | --- | --- | --- |
@@ -44,7 +42,7 @@ Three ways sites run this, all set from Settings > Mai Locations and the submiss
 | Owners run their own listing | on | Draft |
 | You approve, the owner picks the moment | on | Pending, then you change it to Draft |
 
-An owner only ever sees the Publish switch while their location is a draft. Editors and administrators can publish whatever the setting says. `mailocations_user_can_publish` filters the answer.
+An owner only ever sees the Publish switch while their location is a draft. Anyone whose role can already publish, such as an editor, can publish whatever the setting says. Moderation covers publishing only: once a listing is live, its owner's edits go live straight away. `mailocations_user_can_publish` filters the answer.
 
 ## Tests
 

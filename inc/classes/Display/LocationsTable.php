@@ -66,7 +66,9 @@ class LocationsTable {
 			'header'     => esc_html( $args['header'] ),
 			'no_results' => wp_kses_post( $args['no_results'] ),
 			'redirect'   => $args['redirect'] ? esc_url( $args['redirect'] ) : '',
-			'fields'     => array_map( 'sanitize_text_field', $args['fields'] ),
+			// The block passes an array, the [mai_locations_table] shortcode a comma string. The
+			// string took the page down with a TypeError from array_map(). Fixed September 23, 2026.
+			'fields'     => array_values( array_filter( array_map( 'sanitize_text_field', array_map( 'trim', is_array( $args['fields'] ) ? $args['fields'] : explode( ',', (string) $args['fields'] ) ) ) ) ),
 			'class'      => esc_attr( $args['class'] ),
 		];
 

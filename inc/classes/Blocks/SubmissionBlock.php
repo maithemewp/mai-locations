@@ -109,7 +109,9 @@ class SubmissionBlock {
 						'choices'  => get_post_statuses(),
 					],
 					[
-						// This field has to match what's in locations-table/block.php.
+						// Its name matches the table block's field, so saved values load there too. Its key
+						// must NOT match, or ACF shows this block's labels on the table block. See
+						// TableBlock::register_field_group().
 						'label'        => __( 'Submission Redirect', 'mai-locations' ),
 						'instructions' => __( 'Redirect to this URL after submission.', 'mai-locations' ),
 						'key'          => 'mai_location_redirect',
@@ -118,13 +120,15 @@ class SubmissionBlock {
 					],
 					[
 						'label'        => __( 'Submission Notifications', 'mai-locations' ),
-						'instructions' => __( 'Send notificaiton of submission the following comma-separated email addresses.', 'mai-locations' ),
+						'instructions' => __( 'Email these addresses when a location is submitted. Separate them with commas.', 'mai-locations' ),
 						'key'          => 'mai_location_emails',
 						'name'         => 'location_emails',
 						'type'         => 'text',
 					],
 					[
-						// This field has to match what's in locations-table/block.php.
+						// Its name matches the table block's field, so saved values load there too. Its key
+						// must NOT match, or ACF shows this block's labels on the table block. See
+						// TableBlock::register_field_group().
 						'label'         => __( 'Submission Form Fields', 'mai-locations' ),
 						'instructions'  => __( 'Allow editing of these fields.', 'mai-locations' ),
 						'key'           => 'mai_location_fields',
