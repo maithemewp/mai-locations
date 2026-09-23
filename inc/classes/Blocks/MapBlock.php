@@ -114,14 +114,25 @@ class MapBlock {
 			// posts and find nothing. Fixed September 16, 2026.
 			$post_types = array_keys( mailocations_get_location_post_types() );
 
-			if ( ! array_intersect( (array) ( $filtered_args['post_type'] ?? [] ), $post_types ) ) {
+			// A location query is one that names a location post type, or a location taxonomy.
+			// A category archive such as /shop/antiques-and-galleries/ carries only the term,
+			// mai_location_cat, and no post_type at all, so checking post_type alone took it for
+			// an ordinary page and dropped the term: its map showed all 141 places, not its 5.
+			$taxonomies     = array_keys( mailocations_get_location_taxonomies() );
+			$names_a_type   = (bool) array_intersect( (array) ( $filtered_args['post_type'] ?? [] ), $post_types );
+			$names_a_term   = (bool) array_intersect( array_keys( (array) $wp_query->query ), $taxonomies ) || ( $taxonomies && is_tax( $taxonomies ) );
+
+			if ( ! $names_a_type && ! $names_a_term ) {
 				// Not a location query, so nothing in it is worth keeping. On a page it holds
 				// pagename or page_id, which asked for "the location with this page's slug" and
 				// found none, so the September 16 fix above still drew an empty map on every
 				// ordinary page. Start clean, keeping only the visitor's own search and filter
 				// params, which come from the request rather than the query. Fixed September 23,
-				// 2026. A location archive keeps its own query, term and all.
+				// 2026.
 				$filtered_args              = mailocations_get_filtered_query_args( [] );
+				$filtered_args['post_type'] = $post_types;
+			} elseif ( ! $names_a_type ) {
+				// A location taxonomy archive: keep its term, and name the post types.
 				$filtered_args['post_type'] = $post_types;
 			}
 

@@ -152,6 +152,26 @@ final class MapBlockTest extends TestCase {
 		];
 	}
 
+	/**
+	 * A location category archive carries only its term, and no post_type. The September 23 fix
+	 * for ordinary pages first took it for one and dropped the term, so the map on a category
+	 * showed every location. A second location, outside the term, proves the term is kept.
+	 */
+	public function test_all_query_on_a_category_archive_keeps_the_category(): void {
+		$inside = $this->located();
+		$term   = self::factory()->term->create( [ 'taxonomy' => 'mai_location_cat', 'slug' => 'inns' ] );
+		wp_set_object_terms( $inside, $term, 'mai_location_cat' );
+
+		$outside = $this->create_location( [], [ 'post_title' => 'Elsewhere' ] );
+		update_post_meta( $outside, 'location_lat', '41.1' );
+		update_post_meta( $outside, 'location_lng', '-73.8' );
+
+		$this->go_to( get_term_link( $term ) );
+
+		$this->assertTrue( is_tax( 'mai_location_cat' ), 'The test did not reach the category archive.' );
+		$this->assertSame( 1, substr_count( $this->render( '<!-- wp:acf/mai-locations-map {"data":{"query":"all"}} /-->' ), 'class="marker"' ) );
+	}
+
 	public function test_none_query_renders_no_markers_at_the_given_size(): void {
 		$this->located();
 		$this->go_to( get_post_type_archive_link( 'mai_location' ) );
