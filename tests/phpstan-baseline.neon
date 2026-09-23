@@ -43,12 +43,6 @@ parameters:
 			path: ../inc/classes/Display/BlockBindings.php
 
 		-
-			message: '#^Parameter \#1 \$location_id of function mailocations_user_can_edit expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: ../inc/classes/Display/LocationsTable.php
-
-		-
 			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
 			identifier: argument.templateType
 			count: 1
@@ -75,12 +69,6 @@ parameters:
 		-
 			message: '#^Method Mai\\Locations\\Forms\\LocationFormListener\:\:should_update\(\) should return bool\|null but empty return statement found\.$#'
 			identifier: return.empty
-			count: 1
-			path: ../inc/classes/Forms/LocationFormListener.php
-
-		-
-			message: '#^Parameter \#1 \$location_id of function mailocations_user_can_edit expects int, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: ../inc/classes/Forms/LocationFormListener.php
 

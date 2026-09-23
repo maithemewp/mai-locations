@@ -211,6 +211,37 @@ final class SettingsTest extends TestCase {
 		$this->assertStringNotContainsString( 'value="Say "hi"">', $result['html'] );
 	}
 
+	/**
+	 * The Publishing box has to render ticked when the option is on. If it rendered unticked, an
+	 * admin who saved the page for any other reason would switch owner publishing off without
+	 * meaning to, on every site the 2.0.0 upgrade turned it on for.
+	 *
+	 * @dataProvider publishing_states
+	 */
+	public function test_the_publishing_box_renders_as_saved( bool $saved, bool $ticked ): void {
+		$result = $this->run_scenario(
+			[
+				'probe'   => 'settings_page',
+				'options' => [ 'owners_can_publish' => $saved ],
+			]
+		);
+
+		preg_match( '/<input[^>]*name="mai_locations\\[owners_can_publish\\]"[^>]*>/', $result['html'], $match );
+
+		$this->assertNotEmpty( $match, 'The Publishing box is not on the page.' );
+		$this->assertSame( $ticked, str_contains( $match[0], 'checked' ) );
+	}
+
+	/**
+	 * @return array<string, array{bool, bool}>
+	 */
+	public static function publishing_states(): array {
+		return [
+			'on'  => [ true, true ],
+			'off' => [ false, false ],
+		];
+	}
+
 	private function settings(): Mai_Locations_Settings {
 		foreach ( $GLOBALS['wp_filter']['acf/fields/google_map/api']->callbacks[99] as $callback ) {
 			if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof Mai_Locations_Settings ) {

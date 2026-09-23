@@ -145,20 +145,38 @@ final class FormListenerTest extends TestCase {
 		$this->assertSame( 0, $spy->calls );
 	}
 
-	public function test_edit_listener_reads_location_id_from_the_real_request_not_get(): void {
-		// filter_input( INPUT_GET ) ignores $_GET, so under PHPUnit the location ID is always missing.
-		$spy  = $this->spy_on_acf_form_head();
-		$user = self::factory()->user->create();
-		wp_set_current_user( $user );
-		$_GET['location_id'] = (string) $this->create_location( [], [ 'post_author' => $user ] );
+	/**
+	 * The edit gate that decides whether ACF's form head loads. location_id is read from $_GET
+	 * since September 23, 2026; filter_input() ignored $_GET, so this gate could be deleted with
+	 * every test green. go_to() rebuilds $_GET from the URL, so the ID goes in the URL.
+	 *
+	 * @dataProvider edit_gate_cases
+	 */
+	public function test_edit_listener_loads_the_form_only_for_someone_who_may_edit( string $who, int $expected ): void {
+		$spy    = $this->spy_on_acf_form_head();
+		$owner  = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$other  = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$editor = self::factory()->user->create( [ 'role' => 'editor' ] );
+		$id     = $this->create_location( [], [ 'post_author' => $owner, 'post_status' => 'draft' ] );
+		$page   = $this->page_with( '<!-- wp:acf/mai-locations-table /-->' );
 
-		$this->go_to( get_permalink( $this->page_with( '<!-- wp:acf/mai-locations-table /-->' ) ) );
+		wp_set_current_user( [ 'owner' => $owner, 'other' => $other, 'editor' => $editor, 'nobody' => 0 ][ $who ] );
+		$this->go_to( add_query_arg( 'location_id', $id, get_permalink( $page ) ) );
 		$this->listener->edit_listener();
 
-		$this->go_to( get_permalink( $this->page_with( '[mai_locations_table]' ) ) );
-		$this->listener->edit_listener();
+		$this->assertSame( $expected, $spy->calls );
+	}
 
-		$this->assertSame( 0, $spy->calls );
+	/**
+	 * @return array<string, array{string, int}>
+	 */
+	public static function edit_gate_cases(): array {
+		return [
+			'the owner'              => [ 'owner', 1 ],
+			'an editor'              => [ 'editor', 1 ],
+			'another subscriber'     => [ 'other', 0 ],
+			'nobody logged in'       => [ 'nobody', 0 ],
+		];
 	}
 
 	public function test_edit_listener_without_woocommerce_never_calls_is_account_page(): void {
@@ -274,6 +292,122 @@ final class FormListenerTest extends TestCase {
 		$this->listener->send_published_email( get_post( self::factory()->post->create() ) );
 
 		$this->assertSame( [], $this->sent_mail() );
+	}
+
+	/**
+	 * Runs one front-end save of a location and returns its status afterwards.
+	 *
+	 * The defaults describe a save that publishes: a subscriber who owns a draft, on a site that
+	 * lets owners publish, from the edit form, with the switch ticked. A negative test overrides
+	 * exactly one of those, so it fails for the reason it names. Five tests used to pass for
+	 * another reason entirely, because nobody was logged in and the edit check stopped them first.
+	 *
+	 * @param array<string, mixed> $change What to change from a save that would publish.
+	 *
+	 * @return string The status after the save.
+	 */
+	private function publish_attempt( array $change = [] ): string {
+		$args = array_merge(
+			[
+				'status'  => 'draft',
+				'setting' => true,
+				'saver'   => 'owner',
+				'form'    => 'edit',
+				'ticked'  => '1',
+				'posted'  => null,
+			],
+			$change
+		);
+
+		$owner = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$users = [
+			'owner'   => $owner,
+			'other'   => self::factory()->user->create( [ 'role' => 'subscriber' ] ),
+			'author'  => self::factory()->user->create( [ 'role' => 'author' ] ),
+			'editor'  => self::factory()->user->create( [ 'role' => 'editor' ] ),
+			'nobody'  => 0,
+		];
+
+		mailocations_update_option( 'owners_can_publish', $args['setting'] );
+		$id = $this->create_location( [], [ 'post_status' => $args['status'], 'post_author' => $owner ] );
+		remove_all_actions( 'acf/save_post' );
+		wp_set_current_user( $users[ $args['saver'] ] );
+
+		$form_post_id = [ 'edit' => $id, 'submission' => 'new_post', 'none' => null ][ $args['form'] ];
+
+		if ( null === $form_post_id ) {
+			unset( $GLOBALS['acf_form'] );
+		} else {
+			$GLOBALS['acf_form'] = [ 'post_id' => $form_post_id ];
+		}
+
+		$_POST = [
+			'_acf_form'    => 'front-end',
+			'_acf_post_id' => (string) ( $args['posted'] ?? $id ),
+			'acf'          => [ 'mai_location_publish' => $args['ticked'], 'other' => 'kept' ],
+		];
+
+		$this->listener->before_save_post( $id );
+		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
+
+		return get_post_status( $id );
+	}
+
+	public function test_the_baseline_save_publishes(): void {
+		$this->assertSame( 'publish', $this->publish_attempt() );
+	}
+
+	/**
+	 * Each row changes one thing from a save that would publish.
+	 *
+	 * @dataProvider one_thing_different
+	 *
+	 * @param array<string, mixed> $change
+	 */
+	public function test_changing_one_thing_stops_the_publish( array $change, string $expected ): void {
+		$this->assertSame( $expected, $this->publish_attempt( $change ) );
+	}
+
+	/**
+	 * @return array<string, array{array<string, mixed>, string}>
+	 */
+	public static function one_thing_different(): array {
+		return [
+			// The setting is off, and a subscriber has no publish capability of their own.
+			'owners may not publish'      => [ [ 'setting' => false ], 'draft' ],
+			// Pending is with a manager, whatever the setting says.
+			'it is pending'               => [ [ 'status' => 'pending' ], 'pending' ],
+			'it is private'               => [ [ 'status' => 'private' ], 'private' ],
+			'it is in the trash'          => [ [ 'status' => 'trash' ], 'trash' ],
+			'the box is unticked'         => [ [ 'ticked' => '0' ], 'draft' ],
+			'the box says false'          => [ [ 'ticked' => 'false' ], 'draft' ],
+			'someone else saves'          => [ [ 'saver' => 'other' ], 'draft' ],
+			// Has publish_posts but not edit_others_posts. Only the edit check stops them.
+			'an author who is not owner'  => [ [ 'saver' => 'author' ], 'draft' ],
+			'nobody is logged in'         => [ [ 'saver' => 'nobody' ], 'draft' ],
+			// A submission's form carries new_post, never this location's ID.
+			'it is a submission'          => [ [ 'form' => 'submission' ], 'draft' ],
+			// No ACF form at all: a Dashboard save, or a forged _acf_form field.
+			'it is not a front-end form'  => [ [ 'form' => 'none' ], 'draft' ],
+		];
+	}
+
+	/**
+	 * Someone WordPress already lets publish can do it from the front end too, whatever the
+	 * setting says: the setting is for owners who could not otherwise.
+	 */
+	public function test_an_editor_publishes_someone_elses_draft_whatever_the_setting(): void {
+		$this->assertSame( 'publish', $this->publish_attempt( [ 'saver' => 'editor', 'setting' => false ] ) );
+	}
+
+	/**
+	 * _acf_post_id is a plain hidden input ACF never reads back. Naming some other draft in it
+	 * must not let a private location through.
+	 */
+	public function test_a_named_draft_in_acf_post_id_does_not_stand_in_for_a_private_one(): void {
+		$other_draft = $this->create_location( [], [ 'post_status' => 'draft' ] );
+
+		$this->assertSame( 'private', $this->publish_attempt( [ 'status' => 'private', 'posted' => $other_draft ] ) );
 	}
 
 	public function test_before_save_post_does_nothing_when_it_should_not_update(): void {

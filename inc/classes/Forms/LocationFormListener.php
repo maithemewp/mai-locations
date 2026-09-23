@@ -89,9 +89,11 @@ class LocationFormListener {
 			return;
 		}
 
-		// Get location to edit. filter_input() reads the real request, so this path cannot be
-		// driven from a test by setting $_GET.
-		$location_id = filter_input( INPUT_GET, 'location_id', FILTER_SANITIZE_NUMBER_INT );
+		// Get location to edit. Read from $_GET, not filter_input(): both read the same query
+		// string, but filter_input() ignores $_GET, so this edit gate could be deleted without a
+		// single test failing. absint() also drops the minus signs FILTER_SANITIZE_NUMBER_INT kept.
+		// Changed September 23, 2026.
+		$location_id = isset( $_GET['location_id'] ) && is_scalar( $_GET['location_id'] ) ? absint( wp_unslash( $_GET['location_id'] ) ) : 0;
 
 		// Bail if no location ID or user can't edit.
 		if ( ! ( $location_id && mailocations_user_can_edit( $location_id ) ) ) {

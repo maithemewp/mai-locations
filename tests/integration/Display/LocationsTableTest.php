@@ -230,4 +230,41 @@ final class LocationsTableTest extends TestCase {
 			do_shortcode( '[mai_locations_table post_type="mlt_shortcode" title="Places"]' )
 		);
 	}
+
+	/**
+	 * The table swaps itself for the edit form only for someone who may edit that location.
+	 * location_id is read from $_GET since September 23, 2026; filter_input() ignored $_GET, so
+	 * this gate could be deleted with every test green.
+	 *
+	 * @dataProvider table_edit_gate_cases
+	 */
+	public function test_the_table_opens_the_edit_form_only_for_someone_who_may_edit( string $who, bool $form ): void {
+		$owner = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$other = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$id    = $this->create_location( [], [ 'post_author' => $owner, 'post_status' => 'draft', 'post_title' => 'Gate' ] );
+
+		// The other subscriber has a listing of their own. Without one the table stops at its
+		// "no locations" text before the gate is reached, and the test passed with the gate
+		// deleted. The real case is an owner putting someone else's ID in the address.
+		$this->create_location( [], [ 'post_author' => $other, 'post_status' => 'draft', 'post_title' => 'Theirs' ] );
+
+		wp_set_current_user( 'owner' === $who ? $owner : $other );
+		$_GET['location_id'] = (string) $id;
+
+		$html = mailocations_get_locations_table( [ 'fields' => [ 'mai_location_title' ] ] );
+
+		unset( $_GET['location_id'] );
+
+		$this->assertSame( $form, str_contains( $html, 'class="mailocations-form"' ) );
+	}
+
+	/**
+	 * @return array<string, array{string, bool}>
+	 */
+	public static function table_edit_gate_cases(): array {
+		return [
+			'the owner'          => [ 'owner', true ],
+			'another subscriber' => [ 'other', false ],
+		];
+	}
 }

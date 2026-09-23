@@ -294,6 +294,34 @@ final class LocationFormTest extends TestCase {
 	}
 
 	/**
+	 * The case the setting exists for: a subscriber owner. set_up() logs in an author, who can
+	 * publish anyway, so on its own the draft test above never showed the setting doing anything.
+	 *
+	 * @dataProvider publishing_setting
+	 */
+	public function test_a_subscriber_owner_sees_the_switch_only_when_the_setting_allows( bool $setting, array $expected ): void {
+		mailocations_update_option( 'owners_can_publish', $setting );
+		$owner = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$id    = $this->create_location( [], [ 'post_author' => $owner, 'post_status' => 'draft' ] );
+		wp_set_current_user( $owner );
+		$this->capture_form_args();
+
+		mailocations_get_location_edit_form( [ 'location_id' => $id, 'fields' => [ 'mai_location_title' ] ] );
+
+		$this->assertSame( $expected, array_values( $this->captured[0]['fields'] ) );
+	}
+
+	/**
+	 * @return array<string, array{bool, list<string>}>
+	 */
+	public static function publishing_setting(): array {
+		return [
+			'setting on'  => [ true, [ 'mai_location_title', 'mai_location_publish' ] ],
+			'setting off' => [ false, [ 'mai_location_title' ] ],
+		];
+	}
+
+	/**
 	 * The setting is for people WordPress would not let publish anyway. Anyone who can already
 	 * publish this location in the Dashboard, such as an editor, sees the switch either way:
 	 * `publish_post` has been a real meta capability since WordPress 6.1.

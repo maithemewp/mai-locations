@@ -133,7 +133,9 @@ class LocationsTable {
 
 		// Set up HTML.
 		$html        = '';
-		$location_id = filter_input( INPUT_GET, 'location_id', FILTER_SANITIZE_NUMBER_INT );
+		// Read from $_GET, not filter_input(), so the edit gate below can be tested; see
+		// LocationFormListener::edit_listener(). Changed September 23, 2026.
+		$location_id = isset( $_GET['location_id'] ) && is_scalar( $_GET['location_id'] ) ? absint( wp_unslash( $_GET['location_id'] ) ) : 0;
 
 		// If on front end and user can edit this location.
 		if ( ! $is_admin && ( $location_id && mailocations_user_can_edit( $location_id ) ) ) {

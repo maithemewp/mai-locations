@@ -84,6 +84,7 @@ final class PublicNamesTest extends TestCase {
 			'mailocations_upgrade_completed',
 			'mailocations_upload_image',
 			'mailocations_user_can_edit',
+			'mailocations_user_can_publish',
 			'mailocations_woocommerce_account_tab',
 		];
 
@@ -213,6 +214,7 @@ final class PublicNamesTest extends TestCase {
 			'mailocations_taxonomy_plural',
 			'mailocations_taxonomy_singular',
 			'mailocations_website_request_args',
+			'mailocations_user_can_publish',
 			'mailocations_woocommerce_account_tabs',
 		];
 
