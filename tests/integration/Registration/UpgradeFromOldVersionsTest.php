@@ -142,4 +142,59 @@ final class UpgradeFromOldVersionsTest extends TestCase {
 		$this->assertTrue( $saved['owners_can_publish'] );
 		$this->assertSame( MAI_LOCATIONS_VERSION, $saved['version_db'] );
 	}
+
+	/**
+	 * Activate, then import from the command line, then open the Dashboard. WP-CLI never fires
+	 * admin_init, so the locations exist before run() first looks, and it used to take the site
+	 * for an old one and switch owner publishing on. Activation marks it current first now.
+	 */
+	public function test_activating_then_importing_before_the_dashboard_stays_a_fresh_install(): void {
+		Upgrade::mark_fresh_install();
+		$this->create_location();
+		Cache::flush();
+
+		Upgrade::run();
+
+		$this->assertFalse( (bool) mailocations_get_option( 'owners_can_publish' ) );
+	}
+
+	/**
+	 * Re-activating a real old site must not stamp it as new: it has locations, so run() still
+	 * upgrades it and it keeps owner publishing.
+	 */
+	public function test_reactivating_an_old_site_with_locations_is_not_marked_new(): void {
+		$this->create_location();
+
+		Upgrade::mark_fresh_install();
+
+		$this->assertFalse( get_option( 'mai_locations' ) );
+
+		Upgrade::run();
+
+		$this->assertTrue( get_option( 'mai_locations' )['owners_can_publish'] );
+	}
+
+	/**
+	 * Nor a 0.4.0 site, which has its old ACF rows, even with no locations.
+	 */
+	public function test_reactivating_a_0_4_0_site_is_not_marked_new(): void {
+		$this->seed_0_4_0_site();
+
+		Upgrade::mark_fresh_install();
+
+		$this->assertFalse( get_option( 'mai_locations' ) );
+	}
+
+	/**
+	 * A site that already has settings is left exactly as it is.
+	 */
+	public function test_reactivating_a_current_site_changes_nothing(): void {
+		update_option( 'mai_locations', [ 'label_plural' => 'Places', 'version_first' => '1.0.0', 'version_db' => '1.1.0' ] );
+		Cache::flush();
+		$before = get_option( 'mai_locations' );
+
+		Upgrade::mark_fresh_install();
+
+		$this->assertSame( $before, get_option( 'mai_locations' ) );
+	}
 }

@@ -162,6 +162,46 @@ class Upgrade {
 	}
 
 	/**
+	 * Marks a brand-new install as current, so run() never takes it for an old site.
+	 *
+	 * run() treats a site with no version_db as an upgrade when it finds old ACF option rows or
+	 * any location, because a site from before 2023 has no version_db. But a fresh install can
+	 * have locations before any Dashboard page loads: activate and import from the command line,
+	 * and WP-CLI never fires admin_init. That site would have been upgraded, and owner publishing
+	 * switched on without anyone choosing it. Stamping it on activation settles it first.
+	 *
+	 * Only a site with no settings, no old ACF rows and no locations counts as new. Re-activating
+	 * a real old site leaves it alone, so run() still upgrades it. The location check reads the
+	 * database directly: during activation the post type list can still be cached empty.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return void
+	 */
+	public static function mark_fresh_install(): void {
+		global $wpdb;
+
+		if ( false !== get_option( 'mai_locations' ) ) {
+			return;
+		}
+
+		foreach ( [ 'options_location_label_plural', 'options_location_label_singular', 'options_location_base' ] as $old ) {
+			if ( false !== get_option( $old ) ) {
+				return;
+			}
+		}
+
+		$has_locations = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->posts} WHERE post_type = %s LIMIT 1", 'mai_location' ) );
+
+		if ( $has_locations ) {
+			return;
+		}
+
+		mailocations_update_option( 'version_first', MAI_LOCATIONS_VERSION );
+		mailocations_update_option( 'version_db', MAI_LOCATIONS_VERSION );
+	}
+
+	/**
 	 * Moves the labels and base a pre-1.0 site kept in ACF option rows into mai_locations.
 	 *
 	 * Writes first and deletes the old rows only once the write is confirmed. It used to delete

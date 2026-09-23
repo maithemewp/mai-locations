@@ -426,6 +426,10 @@ final class Mai_Locations_Plugin {
 	function activate() {
 		$this->register_content_types();
 		flush_rewrite_rules();
+
+		// A new install is marked current here, before anything can add locations to it.
+		// See Upgrade::mark_fresh_install().
+		\Mai\Locations\Admin\Upgrade::mark_fresh_install();
 	}
 }
 

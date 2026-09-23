@@ -422,9 +422,10 @@ class CLI {
 	 * there. --skip_excerpt and --skip_image leave that half alone, so the command can fetch
 	 * only images or only excerpts.
 	 *
-	 * Every location gets a line saying what happened to it, and the run ends with a count. A
-	 * site that gave nothing back, or an image that could not be downloaded, is reported rather
-	 * than skipped in silence, and the run ends in a warning when any of them did.
+	 * Every update and every failure gets a line, and the run ends with a count. A site that gave
+	 * nothing back, or an image that could not be downloaded, is reported rather than skipped in
+	 * silence, and the run ends in a warning when any of them did. A location with no website, or
+	 * one that already has what the run would set, is passed over without a line of its own.
 	 *
 	 * @since 0.1.0
 	 *

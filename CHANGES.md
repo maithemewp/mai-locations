@@ -90,9 +90,10 @@ Until now, any front-end save of an unpublished location published it, with noth
 ### Settings and upgrading
 
 * Fixed: The default "Locations" and "Location" labels, the photo field's help and the missing API key warning used the wrong text domain, so they were never translated.
-* Fixed: A site upgrading from 0.4.0 or earlier lost its labels and URL base, fell back to "Locations" and `/locations/`, and every one of its old location addresses stopped working. The old settings are now carried over on the first Dashboard visit after updating.
+* Fixed: A site updating straight from 0.4.0 or earlier lost its labels and URL base, fell back to "Locations" and `/locations/`, and every one of its old location addresses stopped working. The old settings are now carried over on the first Dashboard visit after updating. A site that already went from 0.4.0 to 1.x is not changed: it has been running on whatever it fell back to since then, and moving it now would change its live addresses.
 * Fixed: Carrying those old settings over deleted them before saving the new copy, so a failed save lost them for good. They are only removed once the new copy is saved.
 * Fixed: A site from before 2023 was taken for a brand new install, because it had no record of which version it was on, and so did not keep owner publishing. Its old settings, or any location at all, now mark it as an existing site.
+* Fixed: A new install built from the command line, activated and then filled with locations before anyone opened the Dashboard, could be taken for an old site and have owner publishing switched on. Activation now marks a new install as current.
 * Fixed: A setting saved in code during a request, such as a new label, was not seen again until the next page load.
 * Fixed: A location category nested under another had no working URL. Visit Settings > Permalinks and press Save once after updating.
 * Fixed: The Settings link on the Plugins page was missing on any site where the plugin folder had been renamed.
