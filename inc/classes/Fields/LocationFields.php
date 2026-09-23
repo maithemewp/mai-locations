@@ -81,9 +81,15 @@ class LocationFields {
 						// TODO: no 'name', so update_field() on this key writes nothing, and the
 						// text domain reads mai-location. See TODO.md.
 						'label'         => __( 'Image', 'mai-locations' ),
-						'instructions'  => __( 'Only jpeg, jpg, png allowed. 5 MB max.', 'mai-locations' ),
+						'instructions'  => __( 'Upload a .jpg, .jpeg, .png or .webp file, up to 5 MB.', 'mai-locations' ),
 						'key'           => 'mai_location_image',
 						'type'          => 'image',
+						// Enforced, not just stated. The help promised JPEG and PNG up to 5 MB, but the
+						// field had no limit of either kind and took any image of any size. ACF checks
+						// both on the server, the basic front-end uploader included. WebP added because
+						// phones and websites increasingly produce it. Mike's call, September 23, 2026.
+						'mime_types'    => 'jpg, jpeg, png, webp',
+						'max_size'      => 5,
 						'return_format' => 'id',
 						'preview_size'  => 'medium',
 						'library'       => 'uploadedTo', // 'all' or 'uploadedTo'. Make sure to check acf_form() for 'uploader' as 'wp' or 'basic'.

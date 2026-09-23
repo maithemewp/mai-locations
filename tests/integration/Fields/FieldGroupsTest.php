@@ -60,6 +60,43 @@ final class FieldGroupsTest extends TestCase {
 		$this->assertSame( 1, $field['ui'] );
 	}
 
+	/**
+	 * The image field enforces what its help says. It used to state JPEG and PNG up to 5 MB and
+	 * accept any image of any size. max_size is in MB, which acf_get_filesize() confirms.
+	 */
+	public function test_the_image_field_enforces_the_types_and_size_its_help_names(): void {
+		$field = acf_get_field( 'mai_location_image' );
+
+		$this->assertSame( 'jpg, jpeg, png, webp', $field['mime_types'] );
+		$this->assertSame( 5, $field['max_size'] );
+		$this->assertSame( 5 * 1024 * 1024, (int) acf_get_filesize( $field['max_size'] ) );
+
+		foreach ( [ '.jpg', '.jpeg', '.png', '.webp', '5 MB' ] as $named ) {
+			$this->assertStringContainsString( $named, $field['instructions'] );
+		}
+	}
+
+	/**
+	 * And ACF really rejects what the help rules out: a GIF, and a file over 5 MB.
+	 */
+	public function test_acf_rejects_a_gif_and_an_oversized_image(): void {
+		$field = acf_get_field( 'mai_location_image' );
+
+		// The 'prepare' context is how ACF checks an attachment: type from the file name, size
+		// from filesizeInBytes.
+		$check = static fn( string $name, int $bytes ): array => acf_validate_attachment( [ 'filename' => $name, 'filesizeInBytes' => $bytes, 'width' => 10, 'height' => 10 ], $field, 'prepare' );
+
+		$gif  = $check( 'photo.gif', 1000 );
+		$big  = $check( 'photo.jpg', 6 * 1024 * 1024 );
+		$ok   = $check( 'photo.jpeg', 1000 );
+		$webp = $check( 'photo.webp', 1000 );
+
+		$this->assertArrayHasKey( 'mime_types', $gif );
+		$this->assertArrayHasKey( 'max_size', $big );
+		$this->assertSame( [], $ok );
+		$this->assertSame( [], $webp );
+	}
+
 	public function test_core_group_field_settings(): void {
 		$title = acf_get_field( 'mai_location_title' );
 		$image = acf_get_field( 'mai_location_image' );
@@ -69,7 +106,7 @@ final class FieldGroupsTest extends TestCase {
 		$this->assertSame( 'id', $image['return_format'] );
 		$this->assertSame( 'medium', $image['preview_size'] );
 		$this->assertSame( 'uploadedTo', $image['library'] );
-		$this->assertSame( 'Only jpeg, jpg, png allowed. 5 MB max.', $image['instructions'] );
+		$this->assertSame( 'Upload a .jpg, .jpeg, .png or .webp file, up to 5 MB.', $image['instructions'] );
 	}
 
 	public function test_pins_image_field_has_no_name_so_update_field_writes_nothing(): void {

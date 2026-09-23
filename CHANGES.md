@@ -55,6 +55,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 
 ### The front-end forms and the locations table
 
+* Changed: The image field on the front-end forms now accepts only .jpg, .jpeg, .png and .webp files, up to 5 MB. Its help already said so, but nothing enforced it, so any image of any size went through. An upload outside those limits now gets an error.
 * Fixed: The Back link above the front-end edit form never appeared.
 * Fixed: A class added to a location form ran into the form's own class, so `class="extra"` came out as `mailocations-formextra` and never matched any styles.
 * Fixed: The locations table printed its heading inside the `<table>` element, which is not valid HTML. The heading now sits above the table.
