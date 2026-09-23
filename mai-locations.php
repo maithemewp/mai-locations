@@ -404,15 +404,14 @@ final class Mai_Locations_Plugin {
 		}
 
 		// Set text.
-		$text = sprintf( '%s %s %s',
-			__( 'Sorry, no', 'mai-locations' ),
-			strtolower( $post_types[ $post_type ]['plural'] ),
-			__( 'found.', 'mai-locations' ),
-		);
+		// One whole sentence, so it can be translated. It used to be built from "Sorry, no",
+		// the label and "found.", which no language but English could put back together.
+		/* translators: %s: the plural label, such as "places". */
+		$text = sprintf( __( 'No %s found.', 'mai-locations' ), strtolower( $post_types[ $post_type ]['plural'] ) );
 
 		// If filtering.
 		if ( mailocations_is_filtered_locations() ) {
-			$text .= ' ' . __( 'Please adjust your search criteria and try again.', 'mai-locations' );
+			$text .= ' ' . __( 'Try a different search.', 'mai-locations' );
 		}
 
 		return $text;

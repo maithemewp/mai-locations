@@ -240,17 +240,17 @@ class Settings {
 			printf(
 				'<li>%s<br>%s</li>',
 				esc_html__( 'A manager approves everything.', 'mai-locations' ),
-				esc_html__( 'Leave this unticked, and set the submission block to Pending. Owners edit their listing. You publish it from Locations in the Dashboard.', 'mai-locations' )
+				esc_html__( 'Leave this unticked, and set the Submission Form block\'s Location Status to Pending. Owners edit their listing. You publish it from Locations in the Dashboard.', 'mai-locations' )
 			);
 			printf(
 				'<li>%s<br>%s</li>',
 				esc_html__( 'Owners run their own listing.', 'mai-locations' ),
-				esc_html__( 'Tick this, and set the submission block to Draft. Owners finish their listing and publish it when they are ready.', 'mai-locations' )
+				esc_html__( 'Tick this, and set the Submission Form block\'s Location Status to Draft. Owners finish their listing and publish it when they are ready.', 'mai-locations' )
 			);
 			printf(
 				'<li>%s<br>%s</li>',
 				esc_html__( 'You approve, then the owner picks the moment.', 'mai-locations' ),
-				esc_html__( 'Tick this, and set the submission block to Pending. Review what arrives, and change an approved one to Draft. Its owner then publishes when they are ready.', 'mai-locations' )
+				esc_html__( 'Tick this, and set the Submission Form block\'s Location Status to Pending. Review what arrives, and change an approved one to Draft. Its owner then publishes when they are ready.', 'mai-locations' )
 			);
 		echo '</ul>';
 	}
@@ -291,7 +291,7 @@ class Settings {
 		printf( '<input class="regular-text" type="password" name="mai_locations[google_api_key]" id="google_api_key" value="%s">', esc_attr( $this->options['google_api_key'] ) );
 		echo '<p>';
 			printf( '%s <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">%s</a>',
-				__( 'The Google API key for maps in ACF and the Location Map block.', 'mai-locations' ),
+				__( 'Needed for maps and address search.', 'mai-locations' ),
 				__( 'Get a key.', 'mai-locations' )
 			);
 		echo '</p>';
@@ -319,7 +319,7 @@ class Settings {
 		printf( '<input class="regular-text" type="text" name="mai_locations[google_map_id]" id="google_map_id" value="%s">', esc_attr( $this->options['google_map_id'] ) );
 		echo '<p>';
 			printf( '%s <a href="https://console.cloud.google.com/google/maps-apis/studio/maps" target="_blank">%s</a>',
-				__( 'The Map ID from Google Cloud Console. Required for advanced markers.', 'mai-locations' ),
+				__( 'From Google Cloud Console. Needed for the newer map markers.', 'mai-locations' ),
 				__( 'Create a Map ID.', 'mai-locations' )
 			);
 		echo '</p>';
@@ -387,8 +387,9 @@ class Settings {
 	 * @return string
 	 */
 	private function permalink_instructions(): string {
-		$link = sprintf( '<a href="%s">%s</a>', get_admin_url( null, 'options-permalink.php' ), __( 'Permalinks', 'mai-locations' ) );
+		$link = sprintf( '<a href="%s">%s</a>', get_admin_url( null, 'options-permalink.php' ), __( 'Settings > Permalinks', 'mai-locations' ) );
 
-		return sprintf( __( 'Visit Dashboard > Settings > %s and hit "Save" if updating this setting.', 'mai-locations' ), $link );
+		/* translators: %s: a link to Settings > Permalinks. */
+		return sprintf( __( 'After changing this, go to %s and press Save.', 'mai-locations' ), $link );
 	}
 }

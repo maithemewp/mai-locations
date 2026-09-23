@@ -178,7 +178,7 @@ class AddressSearchBlock {
 					[
 						'key'           => 'mailocations_address_search_message',
 						'type'          => 'message',
-						'message'       => ! mailocations_get_option( 'google_api_key' ) ? __( 'Google Maps API key missing!', 'mai-locations' ) : '',
+						'message'       => ! mailocations_get_option( 'google_api_key' ) ? __( 'Add a Google Maps API key in Locations > Settings to use this block.', 'mai-locations' ) : '',
 						'esc_html'      => 0,
 					],
 					[
@@ -190,7 +190,7 @@ class AddressSearchBlock {
 					],
 					[
 						'label'         => __( 'Distances', 'mai-locations' ),
-						'instructions'  => __( 'Comma-separated distance options used for proximity search. Use a single value to hide field and force one distance. Use 0 to show all results.', 'mai-locations' ),
+						'instructions'  => __( 'Distances visitors can pick, separated by commas. Enter one to hide the choice. 0 means no limit.', 'mai-locations' ),
 						'key'           => 'mailocations_address_search_distances',
 						'name'          => 'distances',
 						'type'          => 'text',
@@ -211,7 +211,7 @@ class AddressSearchBlock {
 					],
 					[
 						'label'         => __( 'Countries', 'mai-locations' ),
-						'instructions'  => __( 'Limit search autocomplete to specific countries', 'mai-locations' ),
+						'instructions'  => __( 'Only suggest addresses in these countries.', 'mai-locations' ),
 						'key'           => 'mailocations_address_search_countries',
 						'name'          => 'countries',
 						'type'          => 'select',

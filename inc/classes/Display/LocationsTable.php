@@ -50,7 +50,7 @@ class LocationsTable {
 				'post_type'  => 'mai_location',
 				'title'      => sprintf( '%s %s', __( 'My', 'mai-locations' ), mailocations_get_plural() ),
 				'header'     => mailocations_get_plural(),
-				'no_results' => __( 'Sorry, no locations available.', 'mai-locations' ),
+				'no_results' => __( 'You have no locations yet.', 'mai-locations' ),
 				'redirect'   => '',
 				'fields'     => [],
 				'class'      => '',

@@ -84,7 +84,7 @@ final class LocationsTableTest extends TestCase {
 		// Someone else's location does not count.
 		$this->create_location( [], [ 'post_type' => $type, 'post_author' => self::factory()->user->create() ] );
 
-		$this->assertSame( "<h2>My Locations</h2>\n<p>Sorry, no locations available.</p>\n", mailocations_get_locations_table( [ 'post_type' => $type ] ) );
+		$this->assertSame( "<h2>My Locations</h2>\n<p>You have no locations yet.</p>\n", mailocations_get_locations_table( [ 'post_type' => $type ] ) );
 	}
 
 	public function test_front_end_without_locations_custom_text(): void {

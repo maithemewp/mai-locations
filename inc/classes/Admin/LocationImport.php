@@ -156,8 +156,8 @@ class LocationImport {
 					[
 						'key'           => 'mailocations_location_import_users',
 						'label'         => __( 'Create/Update Users', 'mai-locations' ),
-						'instructions'  => __( 'Create a user account to manage locations(s). If a user account exists with the same email, that user will be able to manage the new location, no other user data will be updated.', 'mai-locations' ),
-						'message'       => __( 'Create or update existing user accounts', 'mai-locations' ),
+						'instructions'  => __( 'Creates an account for each location\'s owner. If an account already uses that email, it gets the location and nothing else about it changes.', 'mai-locations' ),
+						'message'       => __( 'Create accounts for owners', 'mai-locations' ),
 						'name'          => 'location_users',
 						'type'          => 'true_false',
 						'default_value' => 0,

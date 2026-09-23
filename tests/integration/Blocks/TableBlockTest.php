@@ -61,7 +61,7 @@ final class TableBlockTest extends TestCase {
 
 		$this->assertSame( 'My Locations', $args['title'] );
 		$this->assertSame( 'Locations', $args['header'] );
-		$this->assertSame( 'Sorry, no locations available.', $args['no_results'] );
+		$this->assertSame( 'You have no locations yet.', $args['no_results'] );
 		$this->assertSame( [], $args['fields'] );
 	}
 

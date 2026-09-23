@@ -23,7 +23,7 @@ final class NoResultsTextTest extends TestCase {
 	public function test_location_archive_gets_lowercase_plural_text(): void {
 		$this->go_to( get_post_type_archive_link( 'mai_location' ) );
 
-		$this->assertSame( 'Sorry, no locations found.', apply_filters( 'genesis_noposts_text', 'Original' ) );
+		$this->assertSame( 'No locations found.', apply_filters( 'genesis_noposts_text', 'Original' ) );
 	}
 
 	public function test_other_queries_keep_the_original_text(): void {
@@ -75,6 +75,6 @@ final class NoResultsTextTest extends TestCase {
 			]
 		);
 
-		$this->assertSame( 'Sorry, no locations found. Please adjust your search criteria and try again.', $result['no_results_text'] );
+		$this->assertSame( 'No locations found. Try a different search.', $result['no_results_text'] );
 	}
 }
