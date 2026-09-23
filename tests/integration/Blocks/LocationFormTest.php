@@ -371,6 +371,35 @@ final class LocationFormTest extends TestCase {
 		$this->assertSame( '', mailocations_get_location_submission_form( [ 'fields' => [] ] ) );
 	}
 
+	/**
+	 * get() is typed string in a strict file, and a mailocations_location_form callback that
+	 * forgets to return gives null. That was a fatal error; in 1.1.0 it printed nothing, which is
+	 * what it does again.
+	 *
+	 * @dataProvider careless_filter_returns
+	 */
+	public function test_a_careless_form_filter_does_not_fatal( $returned, string $expected ): void {
+		$filter = static fn() => $returned;
+		add_filter( 'mailocations_location_form', $filter );
+
+		$html = ( new \Mai_Locations_Location_Form( [ 'fields' => [ 'mai_location_title' ] ] ) )->get();
+
+		remove_filter( 'mailocations_location_form', $filter );
+
+		$this->assertSame( $expected, $html );
+	}
+
+	/**
+	 * @return array<string, array{mixed, string}>
+	 */
+	public static function careless_filter_returns(): array {
+		return [
+			'forgot to return' => [ null, '' ],
+			'an int'           => [ 7, '7' ],
+			'an array'         => [ [ 'x' ], '' ],
+		];
+	}
+
 	public function test_edit_form_back_link_points_at_the_referrer(): void {
 		$id               = $this->create_location( [], [ 'post_author' => $this->user ] );
 		$_GET['referrer'] = 'https://example.org/account/';

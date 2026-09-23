@@ -158,10 +158,12 @@ class LocationForm {
 			remove_filter( 'acf/prepare_field/key=mai_address_state_int', [ $this, 'remove_conditions' ] );
 		}
 
-		// Apply filters.
+		// Apply filters. Cast, because this method is typed string in a strict file: a callback
+		// that forgot to return gave null, and that was a fatal error where 1.1.0 printed
+		// nothing. (string) keeps exactly what 1.1.0 printed for null, int and string.
 		$html = apply_filters( 'mailocations_location_form', $html, $this->args );
 
-		return $html;
+		return is_scalar( $html ) || null === $html ? (string) $html : '';
 	}
 
 	/**
