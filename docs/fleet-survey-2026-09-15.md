@@ -4,8 +4,8 @@ Read-only survey of the whole hosting fleet with `mai-sites run all`. 235 sites 
 
 ## The 11 sites that have the plugin
 
-| Site | Version | Locations |
-| --- | --- | --- |
+| Site | Version | Locations | Note |
+| --- | --- | --- | --- |
 | pregnancybydesign.com | 1.1.0 | 3,655 |
 | pregnancybydesign.heritagewebsites.com | 1.0.0 | 3,655 |
 | naturesoma.com | 1.1.0 | 86 |
@@ -15,7 +15,7 @@ Read-only survey of the whole hosting fleet with `mai-sites run all`. 235 sites 
 | agiindustries.com | 1.1.0 | 16 |
 | staging.agiindustries.com | 1.1.0 | 16 |
 | pbd.heritagewebsites.com | 0.4.0 | 4 |
-| sugarmakers.org | 1.1.0 | 1 |
+| sugarmakers.org | 1.1.0 | 1 | David's own test site, not a client. |
 | notanews.springwire.ai | 1.0.0 | 0 |
 
 All active. Visit Sleepy Hollow is not on this fleet; it is on SiteGround and holds 141 locations.
@@ -68,3 +68,12 @@ mai-sites run all --safe-to-rerun --yes --parallel --on-failure=continue -- sh -
 ```
 
 The probe checks for `wp-content/plugins/mai-locations`, reads the version from the plugin header, asks wp-cli for status and location count, and greps `wp-content/themes` and `wp-content/mu-plugins` for plugin identifiers. Keep it read-only, and run wp-cli with `--skip-plugins --skip-themes --skip-packages`.
+
+
+## Later findings, September 23, 2026
+
+**sugarmakers.org went from 0.4.0 to 1.0.0 without its settings being carried over.** Its old ACF rows say Sugarmakers, Sugarmaker and `sugarmakers`, but its `mai_locations` option has empty labels and base, so it falls back to Locations at `/locations/` and has done since. 2.0.0 leaves it as it is, Mike's call: it is David's own test site. The command to restore it, if David wants it, is in the plugin's `TODO.md`.
+
+**The two Pregnancy By Design sites also still carry their 0.4.0 ACF rows**, Providers, Provider and `providers`, but their `mai_locations` option holds the same values, so nothing is lost there.
+
+**pbd.heritagewebsites.com is still on 0.4.0 with no `mai_locations` option at all.** It is the one site the 2.0.0 migration was fixed for.

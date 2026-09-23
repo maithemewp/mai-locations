@@ -186,6 +186,12 @@ Mike asked, September 15, 2026, whether to convert to PHP-only core blocks. Not 
 
 ## Next, after this release
 
+**sugarmakers.org shows Locations at `/locations/`, not its old Sugarmakers.** It went 0.4.0 to 1.0.0 without its ACF-era settings being carried over. 2.0.0 deliberately does not move it: that would change its live URLs. Mike's call, September 23, 2026; it is David's own test site. To restore it, if David wants:
+
+```
+mai-sites run sugarmakers.org -- wp eval 'mailocations_update_option("label_plural","Sugarmakers"); mailocations_update_option("label_singular","Sugarmaker"); mailocations_update_option("base","sugarmakers"); flush_rewrite_rules();'
+```
+
 **Found by the September 23 review and deliberately left for after 2.0.0.** None is a regression from 1.1.0, and each needs design or a decision rather than a quick fix.
 
 - **Geocoding fails silently for every cause.** `mailocations_get_google_maps_result()` returns `[]` for a timeout, a bad key, `OVER_QUERY_LIMIT` and `REQUEST_DENIED` alike, and both callers return void, so a wrong API key looks exactly like "no address", forever. Five fleet sites call `mailocations_update_google_map_from_address()` from their own code. Returning `true|WP_Error` is compatible, since every caller ignores the return today.
