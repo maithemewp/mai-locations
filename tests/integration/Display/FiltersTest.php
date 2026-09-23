@@ -81,6 +81,23 @@ final class FiltersTest extends TestCase {
 		$this->assertSame( [ 'address' => '&lt;script&gt;alert(1)&lt;/script&gt;' ], mailocations_get_query_params() );
 	}
 
+	/**
+	 * A list param can arrive as an array. It used to go through esc_html() whole and come out
+	 * as the string "Array" with a warning. Each value is escaped on its own now, and an array
+	 * where a single value belongs is ignored. Fixed September 23, 2026.
+	 */
+	public function test_query_params_accept_an_array_for_a_list_and_ignore_one_for_a_value(): void {
+		$_GET = [
+			'_mai_location_cat' => [ 'hotels', '<b>dining</b>', [ 'nested' ] ],
+			'address'           => [ 'not', 'a', 'string' ],
+		];
+
+		$this->assertSame(
+			[ '_mai_location_cat' => [ 'hotels', '&lt;b&gt;dining&lt;/b&gt;' ] ],
+			mailocations_get_query_params()
+		);
+	}
+
 	public function test_filtered_args_empty_without_get(): void {
 		$this->assertSame( [], mailocations_get_filtered_query_args() );
 		$this->assertSame( [ 'post_type' => 'mai_location' ], mailocations_get_filtered_query_args( [ 'post_type' => 'mai_location' ] ) );

@@ -110,8 +110,13 @@ class FilterBlock {
 
 		// Get any selected items.
 		$prefixed = "_{$taxonomy}";
-		$selected = isset( $_GET[ $prefixed ] ) && ! empty( $_GET[ $prefixed ] ) ? $_GET[ $prefixed ] : [];
-		$selected = $selected ? array_flip( array_filter( explode( ',', $selected ) ) ) : $selected;
+		// The value is normally a comma list, but anyone can send it as an array instead
+		// (?_mai_location_cat[]=x), and explode() on an array took the whole page down.
+		// Accept either, and keep only plain values. Fixed September 23, 2026.
+		$raw      = isset( $_GET[ $prefixed ] ) ? wp_unslash( $_GET[ $prefixed ] ) : [];
+		$list     = is_array( $raw ) ? $raw : explode( ',', (string) $raw );
+		$list     = array_map( 'sanitize_text_field', array_map( 'strval', array_filter( $list, 'is_scalar' ) ) );
+		$selected = array_flip( array_filter( $list ) );
 
 		switch ( $type ) {
 			case 'checkbox':

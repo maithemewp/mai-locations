@@ -60,8 +60,19 @@ function mailocations_get_query_params() {
 
 		// Escape once, then use the escaped value. Until September 16, 2026 the second line read
 		// $_GET again and threw the escaped value away.
-		$get            = esc_html( $_GET[ $key ] );
-		$params[ $key ] = is_array( $defaults[ $key ] ) ? explode( ',', $get ) : $get;
+		//
+		// A list param arrives as a comma string, or as an array when someone sends
+		// ?_mai_location_cat[]=x. esc_html() on an array gave the string "Array" and a
+		// warning, so each value is escaped on its own now. An array where one value is
+		// expected is ignored. Fixed September 23, 2026.
+		$raw = $_GET[ $key ];
+
+		if ( is_array( $defaults[ $key ] ) ) {
+			$list           = is_array( $raw ) ? $raw : explode( ',', (string) $raw );
+			$params[ $key ] = array_map( 'esc_html', array_map( 'strval', array_filter( $list, 'is_scalar' ) ) );
+		} elseif ( is_scalar( $raw ) ) {
+			$params[ $key ] = esc_html( (string) $raw );
+		}
 	}
 
 	return $params;

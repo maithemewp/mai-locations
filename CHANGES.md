@@ -24,6 +24,7 @@ A large release. Every bug the rework found is fixed, the front-end edit form no
 
 ### Crashes
 
+* Fixed: Anyone could take down a page holding a Mai Locations Filter block by adding `?_mai_location_cat[]=x` to its address. A filter sent as a list now works the same as one sent comma-separated.
 * Fixed: A Locations Table block saved with no fields ticked took the whole page down with a critical error the moment anyone pressed Edit. The form now renders as nothing at all, and the rest of the page is unaffected.
 * Fixed: A blank line in an import CSV, which most editors leave at the end of a file, stopped the whole import with a fatal error. Those lines are skipped now.
 * Fixed: The "no locations found" text could fatal on an archive listing several post types, or where the page had no query of its own.

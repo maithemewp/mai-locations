@@ -88,6 +88,21 @@ final class FilterBlockTest extends TestCase {
 		);
 	}
 
+	/**
+	 * Anyone can send the value as an array instead of a comma list. explode() on an array
+	 * threw, and the whole page went down. Fixed September 23, 2026. The array form now marks
+	 * the same terms the comma form does, and junk inside it is ignored.
+	 */
+	public function test_an_array_in_the_query_string_marks_terms_instead_of_crashing(): void {
+		$this->add_hotels_term();
+		$_GET['_mai_location_cat'] = [ 'hotels', [ 'nested' ], 'other' ];
+
+		$this->assertStringContainsString(
+			'<option value="hotels" selected>Hotels</option>',
+			$this->render( '<!-- wp:acf/mai-locations-filter {"data":{"filter":"mai_location_cat","type":"select"}} /-->' )
+		);
+	}
+
 	public function test_unknown_type_renders_only_the_stylesheet(): void {
 		$this->add_hotels_term();
 
