@@ -1,54 +1,22 @@
-# Logs
 *.log
-
-# OS generated files
 .DS_Store
+.AppleDouble
+.LSOverride
+.idea/
+.vscode/
 
-# Node modules and build artifacts
-node_modules/
+# Local mai-sites environment config, never shipped or tracked.
+mai-sites.json
 
-# Compiled source
-*.com
-*.class
-*.dll
-*.exe
-*.o
-*.so
-
-# Laravel Mix files
-npm-debug.log
-yarn-error.log
-yarn.lock
-package-lock.json
+# Node build tooling (dev-only). build/ output is committed (raw-tree deploy),
+# and package-lock.json is committed so every build uses the same packages.
+/node_modules/
+*.map
 
 # Test-only dependencies and caches. See tests/composer.json.
 /tests/vendor/
 /.phpunit.cache/
 
-# Production files (already included in dist/)
-*.map
-
-# Backup & deployment files
-*.bak
-*.swp
-*.tmp
-*.temp
-*.orig
-
-# IDE files
-.idea/
-*.sublime-project
-*.sublime-workspace
-.vscode/
-*.code-workspace
-
-# Sensitive files (update this list based on your actual use case)
-.env
-.env.*.local
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 # vendor/ is committed (prod-only, --no-dev) so plugin updates apply without a
 # composer build on the server. Allowlist: ignore everything under vendor/ except
 # the autoloader, composer's own files, and each committed production package.
