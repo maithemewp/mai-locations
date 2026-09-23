@@ -121,6 +121,8 @@ Until now, any front-end save of an unpublished location published it, with noth
 ### Addresses, distance and searching
 
 * Fixed: Placing a location by searching its map filled none of the address fields, so the country stayed on its default, United States, even when the pin was in Canada. The address now comes from the place that was picked on the map, which also means it no longer needs a server-side Google API key or a second lookup. [#6](https://github.com/maithemewp/mai-locations/issues/6)
+* Fixed: Choosing a place on a location's map now fills in its country, street, city, state or province and postal code straight away, before saving. They used to fill in only after saving, and the editor does not reload its fields, so the Country field went on saying United States until the page was refreshed.
+* Fixed: Saving a location a second time without reloading the page wiped the address the first save had filled, and could move the pin to the middle of the United States. An empty address is now always refilled from its pin, and a country on its own is never used to place a pin.
 * Fixed: Locations already saved that way are repaired automatically on the first Dashboard visit after updating. Only a location whose street, city and post code are all empty is filled, from its own map, so an address someone typed is never changed and no request goes to Google.
 * Fixed: Geocoding left the country and state out of the address it sent to Google, so an address could be matched in the wrong country.
 * Fixed: A geocoding result with no country logged a warning.

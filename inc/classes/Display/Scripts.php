@@ -34,6 +34,7 @@ class Scripts {
 	public function hooks(): void {
 		add_action( 'wp_enqueue_scripts',          [ $this, 'register_scripts' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_sortable' ] );
+		add_action( 'acf/input/admin_enqueue_scripts', [ $this, 'enqueue_address_from_map' ] );
 	}
 
 	/**
@@ -77,6 +78,29 @@ class Scripts {
 
 		// Localize.
 		wp_localize_script( 'mai-locations', 'maiLocationsVars', $localize );
+	}
+
+	/**
+	 * Loads the script that fills the address fields when a location's map pin is chosen.
+	 *
+	 * ACF fires this hook wherever it draws a form, in the Dashboard and in a front-end
+	 * acf_form() alike. The script is tiny and does nothing on a form without the location map,
+	 * so it is not worth narrowing to particular screens. GitHub issue #6.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return void
+	 */
+	public function enqueue_address_from_map(): void {
+		$path = MAI_LOCATIONS_PLUGIN_DIR . 'assets/js/address-from-map.js';
+
+		wp_enqueue_script(
+			'mai-locations-address-from-map',
+			MAI_LOCATIONS_PLUGIN_URL . 'assets/js/address-from-map.js',
+			[ 'acf-input' ],
+			(string) ( file_exists( $path ) ? filemtime( $path ) : MAI_LOCATIONS_VERSION ),
+			[ 'in_footer' => true ]
+		);
 	}
 
 	/**
