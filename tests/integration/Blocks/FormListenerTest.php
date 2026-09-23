@@ -294,7 +294,7 @@ final class FormListenerTest extends TestCase {
 		// Only this listener's closures should run, not ACF's own save or the plugin instance's copy.
 		remove_all_actions( 'acf/save_post' );
 
-		$GLOBALS['acf_form'] = [ 'post_id' => $id ];
+		$GLOBALS['acf_form'] = [ 'post_id' => $id, 'mailocations_emails' => 'x@example.org' ];
 
 		$_POST = [
 			'_acf_form'    => 'front-end',
@@ -302,7 +302,6 @@ final class FormListenerTest extends TestCase {
 			'acf'          => [
 				'mai_location_title'   => '<b>New Title</b>',
 				'mai_location_excerpt' => '<p>Desc</p><script>x</script>',
-				'mai_location_emails'  => 'x@example.org',
 				'mai_location_publish' => '1',
 				'other'                => 'kept',
 			],
@@ -490,6 +489,58 @@ final class FormListenerTest extends TestCase {
 		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
 
 		$this->assertSame( 'draft', get_post( $id )->post_status );
+	}
+
+	/**
+	 * The emails come from the decrypted form, so a submitter who adds or edits a posted value
+	 * cannot choose who the site emails. The posted key is still dropped so it never reaches
+	 * meta.
+	 */
+	public function test_notification_emails_come_from_the_form_never_from_post(): void {
+		$id = $this->create_location( [], [ 'post_status' => 'pending', 'post_title' => 'Old' ] );
+		remove_all_actions( 'acf/save_post' );
+
+		$GLOBALS['acf_form'] = [ 'post_id' => 'new_post', 'mailocations_emails' => 'manager@example.org' ];
+
+		$_POST = [
+			'_acf_form' => 'front-end',
+			'acf'       => [
+				'mai_location_title'  => 'New',
+				'mai_location_emails' => 'attacker@example.org',
+				'other'               => 'kept',
+			],
+		];
+
+		$this->listener->before_save_post( $id );
+
+		$this->assertArrayNotHasKey( 'mai_location_emails', $_POST['acf'] );
+
+		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
+
+		$to = array_merge( ...array_map( static fn( array $mail ): array => (array) $mail['to'], $this->sent_mail() ) );
+
+		$this->assertContains( 'manager@example.org', $to );
+		$this->assertNotContains( 'attacker@example.org', $to );
+	}
+
+	/**
+	 * With no emails in the form, a posted value sends nothing at all.
+	 */
+	public function test_a_posted_email_alone_sends_nothing(): void {
+		$id = $this->create_location( [], [ 'post_status' => 'pending', 'post_title' => 'Old' ] );
+		remove_all_actions( 'acf/save_post' );
+
+		$GLOBALS['acf_form'] = [ 'post_id' => 'new_post' ];
+
+		$_POST = [
+			'_acf_form' => 'front-end',
+			'acf'       => [ 'mai_location_title' => 'New', 'mai_location_emails' => 'attacker@example.org' ],
+		];
+
+		$this->listener->before_save_post( $id );
+		$this->capture_errors( static fn() => do_action( 'acf/save_post', $id ) );
+
+		$this->assertSame( [], $this->sent_mail() );
 	}
 
 	public function test_the_publish_box_never_reaches_the_meta_table(): void {

@@ -79,9 +79,13 @@ class LocationFormSubmit extends LocationForm {
 			$args['return'] = $this->args['redirect'];
 		}
 
-		// If emails. Add hidden field.
+		// Who to notify rides inside the form args, which ACF encrypts into _acf_form and hands
+		// back as $GLOBALS['acf_form'] on submit. It used to be a hidden acf[] input. ACF 6.8.2
+		// and later strip any acf[] key the form did not declare as a field, so the emails never
+		// arrived and no notification was ever sent. A hidden input also let a submitter rewrite
+		// who the site emailed. Fixed September 23, 2026.
 		if ( $this->args['emails'] ) {
-			$args['html_after_fields'] .= sprintf( '<input type="hidden" name="acf[mai_location_emails]" value="%s">', esc_attr( $this->args['emails'] ) );
+			$args['mailocations_emails'] = (string) $this->args['emails'];
 		}
 
 		// Add filter.

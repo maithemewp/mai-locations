@@ -19,6 +19,9 @@ A large release. Every bug the rework found is fixed, the front-end edit form no
 * Fixed: `[mai_location_place]` now prints its `style` attribute, which it accepted and ignored, and escapes the Place ID it puts in the link.
 * Fixed: `[mai_location_phone]` escapes its `style` attribute, as the other shortcodes already did.
 
+* Fixed: Submission notification emails were never sent on ACF Pro 6.8.2 or newer. The list of addresses now travels inside ACF's own encrypted form data instead of a hidden field, which ACF had started stripping.
+* Security: A submitter could change who the site sent submission notifications to, by editing a hidden field in the browser. The addresses can no longer be changed from the browser at all.
+
 ### Crashes
 
 * Fixed: A Locations Table block saved with no fields ticked took the whole page down with a critical error the moment anyone pressed Edit. The form now renders as nothing at all, and the rest of the page is unaffected.

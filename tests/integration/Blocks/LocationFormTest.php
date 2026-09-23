@@ -174,8 +174,9 @@ final class LocationFormTest extends TestCase {
 					'submit_value'      => 'Submit Location',
 					'updated_message'   => 'Location successfully submitted.',
 					'uploader'          => 'basic',
-					'html_after_fields' => '<input type="hidden" name="acf[mai_location_emails]" value="a@b.com">',
+					'html_after_fields' => '',
 					'return'            => 'https://example.org/thanks',
+					'mailocations_emails' => 'a@b.com',
 				],
 			],
 			$this->captured
@@ -185,7 +186,10 @@ final class LocationFormTest extends TestCase {
 		$this->assertStringContainsString( '<form id="mailocations-form" class="acf-form" action="" method="post">', $html );
 		$this->assertStringContainsString( 'name="_acf_post_id" value="new_post"', $html );
 		$this->assertStringContainsString( '<input type="text" id="acf-mai_location_title" name="acf[mai_location_title]" required="required"/>', $html );
-		$this->assertStringContainsString( '<input type="hidden" name="acf[mai_location_emails]" value="a@b.com">', $html );
+		// The emails ride inside ACF's encrypted _acf_form, never as a field a submitter can edit
+		// or that ACF 6.8.2 and later would strip.
+		$this->assertStringNotContainsString( 'acf[mai_location_emails]', $html );
+		$this->assertStringNotContainsString( 'a@b.com', $html );
 		// Mai_Engine is not loaded, so the ACF button classes are left as they are.
 		$this->assertStringContainsString( '<input type="submit" class="acf-button button button-primary button-large" value="Submit Location" />', $html );
 		$this->assertStringEndsWith( '</div>', $html );

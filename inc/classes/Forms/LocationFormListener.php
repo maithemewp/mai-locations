@@ -194,14 +194,18 @@ class LocationFormListener {
 			$data['author'] = absint( $author_id );
 		}
 
-		// Emails.
-		if ( isset( $_POST['acf']['mai_location_emails'] ) && $_POST['acf']['mai_location_emails'] ) {
-			// Add to data array.
-			$data['emails'] = sanitize_text_field( $_POST['acf']['mai_location_emails'] );
+		// Emails. Read from the decrypted form, never from $_POST: a submitter could rewrite a
+		// posted value, and ACF 6.8.2 and later strip it before it gets here anyway. See
+		// LocationFormSubmit::get_form(). A posted key is still dropped so it never reaches meta.
+		$form_emails = is_array( $form ) && isset( $form['mailocations_emails'] ) && is_scalar( $form['mailocations_emails'] )
+			? sanitize_text_field( (string) $form['mailocations_emails'] )
+			: '';
 
-			// Remove this field from saving to the db.
-			unset( $_POST['acf']['mai_location_emails'] );
+		if ( $form_emails ) {
+			$data['emails'] = $form_emails;
 		}
+
+		unset( $_POST['acf']['mai_location_emails'] );
 
 		/**
 		 * Runs after ACF saves the post, to update the post title, excerpt and featured image.
@@ -270,8 +274,9 @@ class LocationFormListener {
 			// Add post ID.
 			$postarr['ID'] = $post_id;
 
-			// Update the post.
-			$post_id = wp_update_post( $postarr );
+			// Update the post. Asking for the WP_Error, because without it a failed update returns
+			// 0 and the emails below were simply skipped with nothing said.
+			$post_id = wp_update_post( $postarr, true );
 
 			// If post was updated.
 			if ( $post_id && ! is_wp_error( $post_id ) ) {
