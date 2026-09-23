@@ -106,7 +106,7 @@ class Upgrade {
 	 *
 	 * Defaulting an existing site to off would quietly take something away from owners who
 	 * publish their own listings today. So an upgrade turns it on, and the site decides for
-	 * itself whether to untick it. The release notes say so.
+	 * itself whether to uncheck it. The release notes say so.
 	 *
 	 * A fresh install never reaches this, because it has no version_db.
 	 *

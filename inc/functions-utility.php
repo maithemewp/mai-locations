@@ -214,7 +214,7 @@ function mailocations_sanitize_options( $options ) {
 	$options['google_api_key']       = sanitize_text_field( $options['google_api_key'] );
 	$options['google_api_signature'] = sanitize_text_field( $options['google_api_signature'] );
 	$options['google_map_id']        = sanitize_text_field( $options['google_map_id'] );
-	// A checkbox, so an unticked box sends nothing at all and has to read as false.
+	// A checkbox, so an unchecked box sends nothing at all and has to read as false.
 	$options['owners_can_publish']   = rest_sanitize_boolean( is_scalar( $options['owners_can_publish'] ) ? (string) $options['owners_can_publish'] : '' );
 	// A blank distance used to be stored as 0, which means no limit at all. Blank now means the
 	// default, while a 0 typed on purpose still means no limit. Fixed September 16, 2026.

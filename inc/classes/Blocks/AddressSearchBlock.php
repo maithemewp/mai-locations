@@ -199,7 +199,9 @@ class AddressSearchBlock {
 					],
 					[
 						'label'         => __( 'Units', 'mai-locations' ),
-						'instructions'  => sprintf( __( 'The distance unit options to use. If none are selected, the field will be hidden and "%s" will be used.', 'mai-locations' ), mailocations_get_option_default( 'units' ) ),
+						// With none checked the block uses the site's Default Units setting, not the plugin's own
+						// default. The old help printed the plugin default's code, "mi", even on a km site.
+						'instructions'  => __( 'Check both to let visitors choose. Check one to always use it. Check none to use Default Units from Locations > Settings.', 'mai-locations' ),
 						'key'           => 'mailocations_address_search_units',
 						'name'          => 'units',
 						'type'          => 'checkbox',

@@ -108,7 +108,7 @@ class LocationFormListener {
 	 * Pulls the post fields out of the submitted ACF data, and queues the work that has to
 	 * happen after ACF saves.
 	 *
-	 * A draft is published only when the front-end edit form sends a ticked Publish switch and
+	 * A draft is published only when the front-end edit form sends a checked Publish switch and
 	 * mailocations_user_can_publish() says this person may. Nothing else moves the status: a
 	 * Dashboard save leaves it alone, a new submission keeps the status its block was set to,
 	 * and pending, private, trashed and already published locations are never touched.

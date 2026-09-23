@@ -4,7 +4,7 @@
 
 A large release. Every bug the rework found is fixed, the front-end edit form no longer publishes a location behind its owner's back, and PHP 8.3 is now the minimum.
 
-**Three things to do after updating.** Visit Settings > Permalinks and press Save once, so nested location category URLs work. Check any site whose editors publish locations by saving them in the Dashboard: that no longer changes the status, and the Publish and Save Draft buttons do what they say instead. And look at the new Publishing setting, under **Locations > Settings** in the Dashboard (your own plural label, if you renamed it), which the update turns **on** so nothing changes for you: untick it if a manager is meant to approve every listing.
+**Three things to do after updating.** Visit Settings > Permalinks and press Save once, so nested location category URLs work. Check any site whose editors publish locations by saving them in the Dashboard: that no longer changes the status, and the Publish and Save Draft buttons do what they say instead. And look at the new Publishing setting, under **Locations > Settings** in the Dashboard (your own plural label, if you renamed it), which the update turns **on** so nothing changes for you: uncheck it if a manager is meant to approve every listing.
 
 ### Requirements
 
@@ -26,7 +26,7 @@ A large release. Every bug the rework found is fixed, the front-end edit form no
 
 * Fixed: `[mai_locations_table fields="..."]` took the page down, because the shortcode passes its fields as text and the table expected a list.
 * Fixed: Anyone could take down a page holding a Mai Locations Filter block by adding `?_mai_location_cat[]=x` to its address. A filter sent as a list now works the same as one sent comma-separated.
-* Fixed: A Locations Table block saved with no fields ticked took the whole page down with a critical error the moment anyone pressed Edit. The form now renders as nothing at all, and the rest of the page is unaffected.
+* Fixed: A Locations Table block saved with no fields checked took the whole page down with a critical error the moment anyone pressed Edit. The form now renders as nothing at all, and the rest of the page is unaffected.
 * Fixed: A blank line in an import CSV, which most editors leave at the end of a file, stopped the whole import with a fatal error. Those lines are skipped now.
 * Fixed: The "no locations found" text could fatal on an archive listing several post types, or where the page had no query of its own.
 * Fixed: `[mai_location_phone]` could take a page down when a location's phone field held text rather than a number, such as "Call us". The text now prints as entered.
@@ -42,7 +42,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 | Owners run their own listing | on | Draft |
 | You approve, the owner picks the moment | on | Pending, then you change it to Draft |
 
-* Added: A **Publishing** setting, "Let location owners publish their own locations". Off on a new site, so a new site moderates by default. **Updating an existing site turns it on**, because every site published on a front-end save before this, and defaulting to off would quietly take that away. Untick it if you moderate.
+* Added: A **Publishing** setting, "Let location owners publish their own locations". Off on a new site, so a new site moderates by default. **Updating an existing site turns it on**, because every site published on a front-end save before this, and defaulting to off would quietly take that away. Uncheck it if you moderate.
 * Added: A Publish switch on the front-end edit form, shown to a location's owner while the location is a draft, and only if the setting allows it. It reads Publish or Not yet. It never appears on a published location, so nobody can take a listing down from the front end.
 * Added: `mailocations_user_can_publish( $location_id, $user_id )` and a filter of the same name, for sites that want to decide this per user or per location in code.
 * Changed: A **pending** location can no longer be published from the front end at all. Pending now means it is with a manager. An approved one can be moved to Draft, and its owner then publishes when they are ready.

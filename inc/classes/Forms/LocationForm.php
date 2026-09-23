@@ -86,7 +86,7 @@ class LocationForm {
 	public function get(): string {
 		// Bail if no fields. An empty string, never null: LocationsTable::get() is typed string
 		// and hands this straight back, so returning null fataled the whole page the moment
-		// anyone pressed Edit on a table block with no fields ticked.
+		// anyone pressed Edit on a table block with no fields checked.
 		if ( ! $this->args['fields'] ) {
 			return '';
 		}

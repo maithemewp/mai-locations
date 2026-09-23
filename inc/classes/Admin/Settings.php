@@ -240,17 +240,17 @@ class Settings {
 			printf(
 				'<li>%s<br>%s</li>',
 				esc_html__( 'A manager approves everything.', 'mai-locations' ),
-				esc_html__( 'Leave this unticked, and set the Submission Form block\'s Location Status to Pending. Owners edit their listing. You publish it from Locations in the Dashboard.', 'mai-locations' )
+				esc_html__( 'Leave this unchecked, and set the Submission Form block\'s Location Status to Pending. Owners edit their listing. You publish it from Locations in the Dashboard.', 'mai-locations' )
 			);
 			printf(
 				'<li>%s<br>%s</li>',
 				esc_html__( 'Owners run their own listing.', 'mai-locations' ),
-				esc_html__( 'Tick this, and set the Submission Form block\'s Location Status to Draft. Owners finish their listing and publish it when they are ready.', 'mai-locations' )
+				esc_html__( 'Check this, and set the Submission Form block\'s Location Status to Draft. Owners finish their listing and publish it when they are ready.', 'mai-locations' )
 			);
 			printf(
 				'<li>%s<br>%s</li>',
 				esc_html__( 'You approve, then the owner picks the moment.', 'mai-locations' ),
-				esc_html__( 'Tick this, and set the Submission Form block\'s Location Status to Pending. Review what arrives, and change an approved one to Draft. Its owner then publishes when they are ready.', 'mai-locations' )
+				esc_html__( 'Check this, and set the Submission Form block\'s Location Status to Pending. Review what arrives, and change an approved one to Draft. Its owner then publishes when they are ready.', 'mai-locations' )
 			);
 		echo '</ul>';
 	}
