@@ -61,7 +61,16 @@ class Upgrade {
 	 * @return void
 	 */
 	public static function run(): void {
-		$version    = MAI_LOCATIONS_VERSION;
+		$version = MAI_LOCATIONS_VERSION;
+
+		// A site that started on 0.4.0 or earlier kept its labels and base in ACF option rows and
+		// has no mai_locations option. The migration used to live only in run_completed(), which
+		// fires during the update request while the old code is still loaded, so it never ran. The
+		// version_first write below then created the option and the migration bailed forever:
+		// the site quietly fell back to "Locations" and /locations/. It runs here first now.
+		// Found September 23, 2026, on pbd.heritagewebsites.com, still on 0.4.0 with "Providers".
+		$migrated = self::migrate_acf_options();
+
 		$version_db = mailocations_get_option( 'version_db' );
 
 		// Set first version.
@@ -74,10 +83,12 @@ class Upgrade {
 			return;
 		}
 
-		// Only run upgrades if we have an existing version.
-		if ( $version_db ) {
+		// Only run upgrades on a site that already had the plugin. version_db has only existed
+		// since 2023, so a site from before then has none, and would otherwise be taken for a
+		// fresh install. Its ACF option rows, or any location at all, give it away.
+		if ( $version_db || $migrated || self::has_locations() ) {
 
-			if ( version_compare( $version_db, '2.0.0', '<' ) ) {
+			if ( ! $version_db || version_compare( $version_db, '2.0.0', '<' ) ) {
 				self::upgrade_2_0_0();
 			}
 		}
@@ -147,9 +158,23 @@ class Upgrade {
 	 * @return void
 	 */
 	public static function run_completed( $upgrader_object, $options ): void {
+		self::migrate_acf_options();
+	}
+
+	/**
+	 * Moves the labels and base a pre-1.0 site kept in ACF option rows into mai_locations.
+	 *
+	 * Writes first and deletes the old rows only once the write is confirmed. It used to delete
+	 * them before writing, so a failed write lost the site's settings for good.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return bool Whether anything was migrated.
+	 */
+	public static function migrate_acf_options(): bool {
 		// Bail if we already have an option value.
 		if ( get_option( 'mai_locations' ) ) {
-			return;
+			return false;
 		}
 
 		$values  = [];
@@ -167,15 +192,14 @@ class Upgrade {
 			}
 
 			$values[ $new ] = $value;
-			delete_option( $old );
-			delete_option( '_' . $old );
 		}
 
 		if ( ! $values ) {
-			return;
+			return false;
 		}
 
-		$options = mailocations_get_options();
+		// Fresh, not cached: nothing has been saved yet and a cached copy could be stale.
+		$options = mailocations_get_options( true );
 
 		foreach ( $values as $key => $value ) {
 			$options[ $key ] = $value;
@@ -183,6 +207,53 @@ class Upgrade {
 
 		// Clean the migrated values, which came from ACF option rows and were saved exactly as
 		// they were, so a base of "Our Places!" went in as-is. Fixed September 16, 2026.
-		update_option( 'mai_locations', mailocations_sanitize_options( $options ) );
+		$written = update_option( 'mai_locations', mailocations_sanitize_options( $options ) );
+		mailocations_get_options( true );
+
+		// Only once the new values are really there. The option did not exist, so a write that
+		// landed always reports true.
+		if ( ! $written ) {
+			return false;
+		}
+
+		foreach ( $migrate as $old => $new ) {
+			if ( isset( $values[ $new ] ) ) {
+				delete_option( $old );
+				delete_option( '_' . $old );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether any location exists, in any status, which only a site that already used the
+	 * plugin can have.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return bool
+	 */
+	private static function has_locations(): bool {
+		foreach ( array_keys( mailocations_get_location_post_types() ) as $post_type ) {
+			$ids = get_posts(
+				[
+					'post_type'              => $post_type,
+					'post_status'            => 'any',
+					'numberposts'            => 1,
+					'fields'                 => 'ids',
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+					'suppress_filters'       => true,
+				]
+			);
+
+			if ( $ids ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

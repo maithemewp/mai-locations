@@ -278,10 +278,10 @@ class LocationFormListener {
 			// 0 and the emails below were simply skipped with nothing said.
 			$post_id = wp_update_post( $postarr, true );
 
-			// If post was updated.
-			if ( $post_id && ! is_wp_error( $post_id ) ) {
-				// Send emails.
-				if ( isset( $data['emails'] ) && $data['emails'] ) {
+			// If post was updated. Success is a positive ID; failure is a WP_Error.
+			if ( is_int( $post_id ) && $post_id > 0 ) {
+				// Send emails. Only ever set to a non-empty list, from the decrypted form.
+				if ( isset( $data['emails'] ) ) {
 					$this->send_emails( $post_id, $data );
 				}
 			}

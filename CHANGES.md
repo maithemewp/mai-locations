@@ -88,6 +88,9 @@ Until now, any front-end save of an unpublished location published it, with noth
 
 ### Settings and upgrading
 
+* Fixed: A site upgrading from 0.4.0 or earlier lost its labels and URL base, fell back to "Locations" and `/locations/`, and every one of its old location addresses stopped working. The old settings are now carried over on the first Dashboard visit after updating.
+* Fixed: Carrying those old settings over deleted them before saving the new copy, so a failed save lost them for good. They are only removed once the new copy is saved.
+* Fixed: A site from before 2023 was taken for a brand new install, because it had no record of which version it was on, and so did not keep owner publishing. Its old settings, or any location at all, now mark it as an existing site.
 * Fixed: Saving a new plural or singular label, or a new URL base, was not seen again until the next page load, so the settings page could confirm a change while still showing the old wording.
 * Fixed: A location category nested under another had no working URL. Visit Settings > Permalinks and press Save once after updating.
 * Fixed: The Settings link on the Plugins page was missing on any site where the plugin folder had been renamed.
