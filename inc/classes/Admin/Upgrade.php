@@ -71,6 +71,10 @@ class Upgrade {
 		// Found September 23, 2026, on pbd.heritagewebsites.com, still on 0.4.0 with "Providers".
 		$migrated = self::migrate_acf_options();
 
+		// One-off data repairs, each run once per site and tracked by name rather than by
+		// version, so a site already on the current version still gets them.
+		self::backfill_addresses_from_map();
+
 		$version_db = mailocations_get_option( 'version_db' );
 
 		// Set first version.
@@ -159,6 +163,87 @@ class Upgrade {
 	 */
 	public static function run_completed( $upgrader_object, $options ): void {
 		self::migrate_acf_options();
+	}
+
+	/**
+	 * Fills empty addresses from each location's saved map, once per site. GitHub issue #6.
+	 *
+	 * Until 2.0.0, placing a location by searching its map filled none of its address fields,
+	 * so its city, state and post code stayed empty and its country kept the default, US. The
+	 * fix fills them from then on, but only when the map changes, so locations saved before it
+	 * stay empty until someone moves their pin. This repairs them. Measured September 23, 2026:
+	 * at most 32 on any fleet site.
+	 *
+	 * Only a location whose street, city and post code are all empty is touched, so an address
+	 * someone typed is never overwritten, and only from a map value that carries its parts, so
+	 * no request goes to Google. At most $limit are filled per call; the repair is marked done
+	 * only once a call finds nothing left, so a large site finishes over a few page loads.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int $limit The most locations to fill in one call.
+	 *
+	 * @return int How many were filled.
+	 */
+	public static function backfill_addresses_from_map( int $limit = 200 ): int {
+		$done = (array) get_option( 'mai_locations_repairs', [] );
+
+		if ( ! empty( $done['address_from_map'] ) ) {
+			return 0;
+		}
+
+		$ids = get_posts(
+			[
+				'post_type'        => array_keys( mailocations_get_location_post_types() ),
+				'post_status'      => [ 'publish', 'draft', 'pending', 'private' ],
+				'numberposts'      => -1,
+				'fields'           => 'ids',
+				'suppress_filters' => true,
+				'meta_query'       => [
+					[
+						'key'     => 'location',
+						'compare' => 'EXISTS',
+					],
+				],
+			]
+		);
+
+		$filled = 0;
+
+		foreach ( array_chunk( $ids, 200 ) as $chunk ) {
+			update_meta_cache( 'post', $chunk );
+
+			foreach ( $chunk as $id ) {
+				foreach ( [ 'address_street', 'address_city', 'address_postcode' ] as $key ) {
+					if ( '' !== trim( (string) get_post_meta( $id, $key, true ) ) ) {
+						continue 2;
+					}
+				}
+
+				$map = get_field( 'mai_location_location', $id );
+
+				if ( ! is_array( $map ) || ! mailocations_get_address_meta_from_map_value( $map ) ) {
+					continue;
+				}
+
+				// Still work to do: stop here and pick up on the next call.
+				if ( $filled >= $limit ) {
+					return $filled;
+				}
+
+				mailocations_update_address_from_google_map( $id );
+				$filled++;
+			}
+		}
+
+		$done['address_from_map'] = gmdate( 'Y-m-d H:i:s' );
+		update_option( 'mai_locations_repairs', $done, true );
+
+		if ( $filled ) {
+			mailocations_delete_transients();
+		}
+
+		return $filled;
 	}
 
 	/**
