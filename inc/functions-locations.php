@@ -204,6 +204,24 @@ function mailocations_create_location_from_woocommerce_user( $user_id, $args = [
  * @return void
  */
 function mailocations_update_address_from_google_map( $post_id ) {
+	// Use the place that was picked. ACF saves it with its parts: city, state, post code,
+	// country. This used to ignore them and ask Google again from the pin's coordinates, which
+	// needs a server-side API key and returns the nearest address rather than the one picked.
+	// On naturebasedtherapytraining.com that second lookup filled nothing, so a therapist in
+	// Victoria, British Columbia kept the default country, United States. GitHub issue #6,
+	// fixed September 23, 2026.
+	$map  = get_field( 'mai_location_location', $post_id );
+	$meta = is_array( $map ) ? mailocations_get_address_meta_from_map_value( $map ) : [];
+
+	if ( $meta ) {
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post_id, $key, trim( sanitize_text_field( $value ) ) );
+		}
+
+		return;
+	}
+
+	// An older map value carries no parts, only an address and a pin, so ask Google as before.
 	$api_key = mailocations_get_option( 'google_api_key' );
 
 	// Bail if no API key.
@@ -421,6 +439,52 @@ function mailocations_update_google_map_from_address( $post_id ) {
 	if ( function_exists( 'FWP' ) ) {
 		FWP()->indexer->index( $post_id );
 	}
+}
+
+/**
+ * Gets address meta from the value an ACF Google Map field saves.
+ *
+ * ACF stores the parts of the place that was picked alongside the pin. They are turned into
+ * the same component list Google returns, so both paths share one set of rules, including
+ * which of the two state fields a country fills.
+ *
+ * @since 2.0.0
+ *
+ * @param array<string, mixed> $map The ACF Google Map value.
+ *
+ * @return array<string, string> Address meta, or empty when the value has no country to go on.
+ */
+function mailocations_get_address_meta_from_map_value( array $map ): array {
+	$get = static fn( string $key ): string => isset( $map[ $key ] ) && is_scalar( $map[ $key ] ) ? trim( (string) $map[ $key ] ) : '';
+
+	// Without a country the parts are not worth trusting over a real lookup.
+	if ( ! $get( 'country_short' ) ) {
+		return [];
+	}
+
+	$parts = [
+		'street_number'               => $get( 'street_number' ),
+		'route'                       => $get( 'street_name_short' ) ?: $get( 'street_name' ),
+		'locality'                    => $get( 'city' ),
+		'administrative_area_level_1' => $get( 'state_short' ) ?: $get( 'state' ),
+		'country'                     => $get( 'country_short' ),
+		'postal_code'                 => $get( 'post_code' ),
+	];
+
+	$components = [];
+
+	foreach ( $parts as $type => $value ) {
+		if ( '' !== $value ) {
+			$components[] = [ 'types' => [ $type ], 'short_name' => $value ];
+		}
+	}
+
+	// A place with no street, such as a postal code, still needs its street cleared rather than
+	// left as a stray space.
+	$meta                   = mailocations_get_address_meta_from_components( $components );
+	$meta['address_street'] = trim( $meta['address_street'] ?? '' );
+
+	return $meta;
 }
 
 /**

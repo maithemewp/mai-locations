@@ -42,6 +42,7 @@ final class PublicNamesTest extends TestCase {
 			'mailocations_get_address',
 			'mailocations_get_address_fields',
 			'mailocations_get_address_meta_from_components',
+			'mailocations_get_address_meta_from_map_value',
 			'mailocations_get_asset',
 			'mailocations_get_base',
 			'mailocations_get_country_choices',
