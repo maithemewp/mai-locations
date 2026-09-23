@@ -125,6 +125,33 @@ final class MapBlockTest extends TestCase {
 		);
 	}
 
+	/**
+	 * The home URL has no query vars, which is why the test above passed while every real page
+	 * drew an empty map. A page carries pagename or page_id, and the "all" query used to keep
+	 * them. Fixed September 23, 2026. Both ways a page can be addressed are covered.
+	 *
+	 * @dataProvider page_addresses
+	 */
+	public function test_all_query_finds_locations_on_an_ordinary_page( string $how ): void {
+		$this->located();
+		$page = self::factory()->post->create( [ 'post_type' => 'page', 'post_name' => 'find-a-location', 'post_status' => 'publish' ] );
+
+		$this->go_to( 'page_id' === $how ? add_query_arg( 'page_id', $page, home_url( '/' ) ) : get_permalink( $page ) );
+
+		$this->assertTrue( is_page( $page ), 'The test did not reach the page it meant to.' );
+		$this->assertSame( 1, substr_count( $this->render( '<!-- wp:acf/mai-locations-map {"data":{"query":"all"}} /-->' ), 'class="marker"' ) );
+	}
+
+	/**
+	 * @return array<string, array{string}>
+	 */
+	public static function page_addresses(): array {
+		return [
+			'pretty permalink' => [ 'pagename' ],
+			'page_id'          => [ 'page_id' ],
+		];
+	}
+
 	public function test_none_query_renders_no_markers_at_the_given_size(): void {
 		$this->located();
 		$this->go_to( get_post_type_archive_link( 'mai_location' ) );

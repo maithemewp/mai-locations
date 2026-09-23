@@ -115,6 +115,13 @@ class MapBlock {
 			$post_types = array_keys( mailocations_get_location_post_types() );
 
 			if ( ! array_intersect( (array) ( $filtered_args['post_type'] ?? [] ), $post_types ) ) {
+				// Not a location query, so nothing in it is worth keeping. On a page it holds
+				// pagename or page_id, which asked for "the location with this page's slug" and
+				// found none, so the September 16 fix above still drew an empty map on every
+				// ordinary page. Start clean, keeping only the visitor's own search and filter
+				// params, which come from the request rather than the query. Fixed September 23,
+				// 2026. A location archive keeps its own query, term and all.
+				$filtered_args              = mailocations_get_filtered_query_args( [] );
 				$filtered_args['post_type'] = $post_types;
 			}
 
