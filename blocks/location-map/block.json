@@ -1,5 +1,4 @@
 {
-	"apiVersion": 3,
 	"name": "acf/mai-locations-map",
 	"title": "Mai Locations Map",
 	"description": "Show a Google Map of Locations.",
@@ -8,7 +7,7 @@
 	"icon": "location",
 	"textdomain": "mai-locations",
 	"acf": {
-		"mode": "preview"
+		"blockVersion": 3
 	},
 	"supports": {
 		"align": false

@@ -1,5 +1,4 @@
 {
-	"apiVersion": 3,
 	"name": "acf/mai-locations-count",
 	"title": "Mai Locations Count",
 	"description": "Show Location Archive/Results Count.",
@@ -8,6 +7,6 @@
 	"icon": "location",
 	"textdomain": "mai-locations",
 	"acf": {
-		"mode": "preview"
+		"blockVersion": 3
 	}
 }

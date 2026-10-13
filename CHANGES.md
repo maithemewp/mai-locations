@@ -66,6 +66,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 
 ### Blocks
 
+* Changed: Every block now uses ACF's block version 3 on any WordPress from 6.3. Before this they used it only from WordPress 7.1, where ACF switched its default, and version 2 below that.
 * Fixed: A locations count block added without changing its settings printed "0  0" instead of "Showing 0 of 0 Locations". Clearing a setting on purpose still leaves it out, without the double space it used to print.
 * Fixed: The locations table block's settings were labelled "Submission Redirect" and "Submission Form Fields", because both blocks registered two fields under the same ACF keys. Saved settings are unaffected.
 * Fixed: A locations table block with no settings saved printed nothing and logged a deprecation notice. It now falls back to its default heading, header and no-results text.
