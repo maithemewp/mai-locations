@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 (9/23/26)
+## 2.0.0 (10/22/26)
 
 A large release. Every bug the rework found is fixed, the front-end edit form no longer publishes a location behind its owner's back, and PHP 8.3 is now the minimum.
 
@@ -155,6 +155,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 * Changed: A plural label, singular label or URL base set through a filter is now cleaned every time it is read, not only the first time. A filtered base is cleaned the same way a saved one is, so `Our Places!` gives `our-places` where it used to give `OurPlaces`.
 * Fixed: A location created in code with a country of its own was saved as US, because the field defaults overwrote what the caller passed.
 * Fixed: A user's list of locations gained a duplicate entry every time the same location was added again.
+* Changed: Updated libphonenumber-for-php to 9.0.41.
 
 ### Removed
 
