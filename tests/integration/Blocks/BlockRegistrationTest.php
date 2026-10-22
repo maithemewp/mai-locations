@@ -28,6 +28,23 @@ final class BlockRegistrationTest extends TestCase {
 	}
 
 	/**
+	 * Every block asks for ACF block version 3 itself, so it gets it before WordPress 7.1 too,
+	 * and leaves apiVersion for ACF to set from it.
+	 */
+	public function test_every_block_json_asks_for_acf_block_version_3(): void {
+		$files = glob( MAI_LOCATIONS_PLUGIN_DIR . 'blocks/*/block.json' );
+
+		$this->assertCount( 7, $files );
+
+		foreach ( $files as $file ) {
+			$metadata = json_decode( (string) file_get_contents( $file ), true );
+
+			$this->assertSame( 3, $metadata['acf']['blockVersion'] ?? null, $file );
+			$this->assertArrayNotHasKey( 'apiVersion', $metadata, $file );
+		}
+	}
+
+	/**
 	 * @dataProvider blocks
 	 *
 	 * @param array<int, string>|null $parent
@@ -44,9 +61,10 @@ final class BlockRegistrationTest extends TestCase {
 		$this->assertSame( $keywords, $block_type->keywords );
 		$this->assertSame( 3, $block_type->api_version );
 
-		// ACF swaps the class callback for its own and defaults block.json blocks to ACF block version 2.
+		// ACF swaps the class callback for its own. Every block asks for ACF block version 3 in block.json,
+		// so it does not depend on ACF's default, which is 2 before WordPress 7.1 and 3 from it.
 		$this->assertSame( 'acf_render_block_callback', $block_type->render_callback );
-		$this->assertSame( 2, $block_type->acf_block_version );
+		$this->assertSame( 3, $block_type->acf_block_version );
 
 		// The count block.json has no supports key, so ACF's default align support stays on.
 		$this->assertSame( [ 'align' => $align, 'html' => false, 'mode' => true, 'jsx' => true, 'multiple' => true ], $block_type->supports );

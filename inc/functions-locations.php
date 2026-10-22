@@ -331,6 +331,23 @@ function mailocations_update_google_map_from_address( $post_id ) {
 		}
 	}
 
+	// Never geocode a country alone. It locates nothing but the middle of the country, and a
+	// form saved again without reloading posts its default country with every other field
+	// empty: geocoding that moved a Victoria, BC pin to the middle of the United States.
+	// A street, city or post code has to be there. September 23, 2026.
+	$has_place = false;
+
+	foreach ( [ 'address_street', 'address_city', 'address_postcode' ] as $key ) {
+		if ( '' !== trim( (string) get_post_meta( $post_id, $key, true ) ) ) {
+			$has_place = true;
+			break;
+		}
+	}
+
+	if ( ! $has_place ) {
+		return;
+	}
+
 	// Build address string.
 	$address = array_filter( $address );
 	$address = array_values( $address );

@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 (9/23/26)
+## 2.0.0 (10/22/26)
 
 A large release. Every bug the rework found is fixed, the front-end edit form no longer publishes a location behind its owner's back, and PHP 8.3 is now the minimum.
 
@@ -66,6 +66,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 
 ### Blocks
 
+* Changed: Every block now uses ACF's block version 3 on any WordPress from 6.3. Before this they used it only from WordPress 7.1, where ACF switched its default, and version 2 below that.
 * Fixed: A locations count block added without changing its settings printed "0  0" instead of "Showing 0 of 0 Locations". Clearing a setting on purpose still leaves it out, without the double space it used to print.
 * Fixed: The locations table block's settings were labelled "Submission Redirect" and "Submission Form Fields", because both blocks registered two fields under the same ACF keys. Saved settings are unaffected.
 * Fixed: A locations table block with no settings saved printed nothing and logged a deprecation notice. It now falls back to its default heading, header and no-results text.
@@ -121,6 +122,8 @@ Until now, any front-end save of an unpublished location published it, with noth
 ### Addresses, distance and searching
 
 * Fixed: Placing a location by searching its map filled none of the address fields, so the country stayed on its default, United States, even when the pin was in Canada. The address now comes from the place that was picked on the map, which also means it no longer needs a server-side Google API key or a second lookup. [#6](https://github.com/maithemewp/mai-locations/issues/6)
+* Fixed: Choosing a place on a location's map now fills in its country, street, city, state or province and postal code straight away, before saving. They used to fill in only after saving, and the editor does not reload its fields, so the Country field went on saying United States until the page was refreshed.
+* Fixed: Saving a location a second time without reloading the page wiped the address the first save had filled, and could move the pin to the middle of the United States. An empty address is now always refilled from its pin, and a country on its own is never used to place a pin.
 * Fixed: Locations already saved that way are repaired automatically on the first Dashboard visit after updating. Only a location whose street, city and post code are all empty is filled, from its own map, so an address someone typed is never changed and no request goes to Google.
 * Fixed: Geocoding left the country and state out of the address it sent to Google, so an address could be matched in the wrong country.
 * Fixed: A geocoding result with no country logged a warning.
@@ -152,6 +155,7 @@ Until now, any front-end save of an unpublished location published it, with noth
 * Changed: A plural label, singular label or URL base set through a filter is now cleaned every time it is read, not only the first time. A filtered base is cleaned the same way a saved one is, so `Our Places!` gives `our-places` where it used to give `OurPlaces`.
 * Fixed: A location created in code with a country of its own was saved as US, because the field defaults overwrote what the caller passed.
 * Fixed: A user's list of locations gained a duplicate entry every time the same location was added again.
+* Changed: Updated libphonenumber-for-php to 9.0.41.
 
 ### Removed
 

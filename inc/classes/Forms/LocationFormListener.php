@@ -344,6 +344,27 @@ class LocationFormListener {
 				// Update the address fields.
 				mailocations_update_address_from_google_map( $post_id );
 			}
+
+			// An empty address with a mapped pin is always filled from the pin, whatever changed.
+			// The block editor saves meta boxes without reloading them, so a second save posts the
+			// form as it was first drawn: the default country and empty fields. That used to wipe
+			// an address the first save had just filled. Only a street, city and post code that
+			// are all empty count, so a typed address is never touched. September 23, 2026.
+			$empty = true;
+
+			foreach ( [ 'address_street', 'address_city', 'address_postcode' ] as $key ) {
+				if ( '' !== trim( (string) get_post_meta( $post_id, $key, true ) ) ) {
+					$empty = false;
+					break;
+				}
+			}
+
+			// Only from a map value that carries its parts, so this never calls Google.
+			$map = $empty ? get_field( 'mai_location_location', $post_id ) : false;
+
+			if ( is_array( $map ) && mailocations_get_address_meta_from_map_value( $map ) ) {
+				mailocations_update_address_from_google_map( $post_id );
+			}
 		}, 20 );
 	}
 

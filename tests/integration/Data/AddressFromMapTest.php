@@ -199,4 +199,87 @@ final class AddressFromMapTest extends TestCase {
 		$this->assertSame( 'Victoria', get_post_meta( $id, 'address_city', true ) );
 		$this->assertSame( [], $this->requests );
 	}
+
+	/**
+	 * Sam's flow, September 23, 2026: search the map, save, then save again without
+	 * reloading. The editor saves meta boxes over AJAX and never reloads them, so the second
+	 * save posts the form as it was drawn: country US, city and post code empty, same map.
+	 */
+	public function test_a_second_save_without_reloading_keeps_the_filled_address(): void {
+		mailocations_update_option( 'google_api_key', '' );
+		$id = $this->create_location( [ 'address_country' => 'US' ] );
+
+		$stale_form = [
+			'mai_location_address_country'  => 'US',
+			'mai_location_address_street'   => '',
+			'mai_location_address_city'     => '',
+			'mai_location_address_postcode' => '',
+			'mai_location_location'         => wp_slash( wp_json_encode( self::victoria() ) ),
+		];
+
+		$save = function () use ( $id, $stale_form ): void {
+			// Each save is its own page request, so ACF's value cache starts empty.
+			acf_get_store( 'values' )->reset();
+			remove_all_actions( 'acf/save_post' );
+			$_POST = [ '_acf_post_id' => (string) $id, 'acf' => $stale_form ];
+
+			$listener = ( new ReflectionClass( \Mai_Locations_Location_Form_Listener::class ) )->newInstanceWithoutConstructor();
+			$listener->before_save_post( $id );
+
+			// ACF itself: save every posted field, then the map and its coordinates.
+			add_action(
+				'acf/save_post',
+				static function ( $post_id ) use ( $stale_form ): void {
+					update_post_meta( $post_id, 'address_country', $stale_form['mai_location_address_country'] );
+					update_post_meta( $post_id, 'address_street', $stale_form['mai_location_address_street'] );
+					update_post_meta( $post_id, 'address_city', $stale_form['mai_location_address_city'] );
+					update_post_meta( $post_id, 'address_postcode', $stale_form['mai_location_address_postcode'] );
+					update_field( 'mai_location_location', self::victoria(), $post_id );
+					update_post_meta( $post_id, 'location_lat', '48.4649434' );
+					update_post_meta( $post_id, 'location_lng', '-123.3731096' );
+				},
+				10
+			);
+
+			do_action( 'acf/save_post', $id );
+		};
+
+		$save();
+		$this->assertSame( 'CA', get_post_meta( $id, 'address_country', true ), 'First save' );
+
+		// The second save, with a Google key set as on the nature site: the stale form must
+		// neither wipe the address nor send a country-only geocode that moves the pin.
+		mailocations_update_option( 'google_api_key', 'a-key' );
+		$save();
+		$this->assertSame( 'CA', get_post_meta( $id, 'address_country', true ), 'Second save, form not reloaded' );
+		$this->assertSame( 'Victoria', get_post_meta( $id, 'address_city', true ), 'Second save, form not reloaded' );
+		$this->assertSame( 48.4649434, (float) get_post_meta( $id, 'location_lat', true ), 'The pin moved' );
+		$this->assertSame( [], $this->requests, 'Google was asked to geocode the stale form' );
+	}
+
+	/**
+	 * A country alone is never sent to Google, by any caller. Five fleet sites call this
+	 * function from their own code.
+	 */
+	public function test_a_country_alone_is_never_geocoded(): void {
+		mailocations_update_option( 'google_api_key', 'a-key' );
+		$id = $this->create_location( [ 'address_country' => 'US' ] );
+
+		mailocations_update_google_map_from_address( $id );
+
+		$this->assertSame( [], $this->requests );
+	}
+
+	/**
+	 * With a city, it still geocodes, as before.
+	 */
+	public function test_an_address_with_a_city_is_still_geocoded(): void {
+		mailocations_update_option( 'google_api_key', 'a-key' );
+		$id = $this->create_location( [ 'address_country' => 'US', 'address_city' => 'Tarrytown' ] );
+
+		mailocations_update_google_map_from_address( $id );
+
+		$this->assertCount( 1, $this->requests );
+		$this->assertStringContainsString( 'Tarrytown', urldecode( $this->requests[0] ) );
+	}
 }
